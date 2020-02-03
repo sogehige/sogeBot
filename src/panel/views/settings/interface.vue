@@ -19,26 +19,27 @@
               <template v-for="(currentValue, defaultValue) of value">
                 <div v-if="typeof value === 'object' && !defaultValue.startsWith('_')" class="p-0 pl-2 pr-2 " :key="$route.params.type + '.' + $route.params.id + '.settings.' + defaultValue">
                   <template v-if="typeof ui[category] !== 'undefined' && typeof ui[category][defaultValue] !== 'undefined'">
-                    <sortable-list
-                      v-if="ui[category][defaultValue].type === 'sortable-list'"
-                      :values="value[ui[category][defaultValue].values]"
-                      :toggle="value[ui[category][defaultValue].toggle]"
-                      :toggleonicon="ui[category][defaultValue].toggleOnIcon"
-                      :toggleofficon="ui[category][defaultValue].toggleOffIcon"
-                      :title="$route.params.type + '.' + $route.params.id + '.settings.' + defaultValue"
-                      @update="value[ui[category][defaultValue].toggle] = $event.toggle; value[defaultValue] = $event.value; triggerDataChange()"
-                      class="pt-1 pb-1"></sortable-list>
-                    <highlights-url-generator
-                      v-else-if="ui[category][defaultValue].type === 'highlights-url-generator'"
-                      :values="currentValue"
-                      :title="$route.params.type + '.' + $route.params.id + '.settings.' + defaultValue"
-                      v-on:update="value[defaultValue] = $event; triggerDataChange()"
-                    />
-                    <a v-else-if="ui[category][defaultValue].type === 'link'" :href="ui[category][defaultValue].href" class="mt-1 mb-1" :class="ui[category][defaultValue].class" :target="ui[category][defaultValue].target">
-                      <template v-if="ui[category][defaultValue].rawText">{{ ui[category][defaultValue].rawText }}</template>
-                      <template v-else>{{ translate(ui[category][defaultValue].text) }}</template>
-                    </a>
-                    <component
+                    <template v-if="ui[category][defaultValue].showIf ? showIfCheck(ui[category][defaultValue].showIf) : true">
+                      <sortable-list
+                        v-if="ui[category][defaultValue].type === 'sortable-list'"
+                        :values="value[ui[category][defaultValue].values]"
+                        :toggle="value[ui[category][defaultValue].toggle]"
+                        :toggleonicon="ui[category][defaultValue].toggleOnIcon"
+                        :toggleofficon="ui[category][defaultValue].toggleOffIcon"
+                        :title="$route.params.type + '.' + $route.params.id + '.settings.' + defaultValue"
+                        @update="value[ui[category][defaultValue].toggle] = $event.toggle; settings[category][defaultValue] = $event.value; triggerDataChange()"
+                        class="pt-1 pb-1"></sortable-list>
+                      <highlights-url-generator
+                        v-else-if="ui[category][defaultValue].type === 'highlights-url-generator'"
+                        :values="currentValue"
+                        :title="$route.params.type + '.' + $route.params.id + '.settings.' + defaultValue"
+                        v-on:update="settings[category][defaultValue] = $event; triggerDataChange()"
+                      />
+                      <a v-else-if="ui[category][defaultValue].type === 'link'" :href="ui[category][defaultValue].href" class="mt-1 mb-1" :class="ui[category][defaultValue].class" :target="ui[category][defaultValue].target">
+                        <template v-if="ui[category][defaultValue].rawText">{{ ui[category][defaultValue].rawText }}</template>
+                        <template v-else>{{ translate(ui[category][defaultValue].text) }}</template>
+                      </a>
+                      <component
                       v-else
                       :is="ui[category][defaultValue].type"
                       :readonly="ui[category][defaultValue].readOnly"
@@ -50,10 +51,11 @@
                       :emit="ui[category][defaultValue].emit"
                       :value="currentValue"
                       :values="ui[category][defaultValue].values"
-                      @update="value[defaultValue] = $event.value; triggerDataChange()"
+                      @update="settings[category][defaultValue] = $event.value; triggerDataChange()"
                       :title="$route.params.type + '.' + $route.params.id + '.settings.' + defaultValue"
                       :current="value[ui[category][defaultValue].current]"
                       class="pt-1 pb-1"></component>
+                    </template>
                   </template>
                   <template v-else>
                     <command-input-with-permission
@@ -63,21 +65,21 @@
                       v-bind:value="currentValue"
                       v-bind:command="defaultValue"
                       :permissions="settings._permissions[defaultValue]"
-                      v-on:update="value[defaultValue] = $event.value; settings._permissions[defaultValue] = $event.permissions; triggerDataChange()"
+                      v-on:update="settings[category][defaultValue] = $event.value; settings._permissions[defaultValue] = $event.permissions; triggerDataChange()"
                     ></command-input-with-permission>
                     <toggle-enable
                       class="pt-1 pb-1"
                       v-bind:title="translate($route.params.type + '.' + $route.params.id + '.settings.' + defaultValue)"
                       v-else-if="typeof currentValue === 'boolean'"
                       v-bind:value="currentValue"
-                      v-on:update="value[defaultValue] = !value[defaultValue]; triggerDataChange()"
+                      v-on:update="settings[category][defaultValue] = !settings[category][defaultValue]; triggerDataChange()"
                     ></toggle-enable>
                     <textarea-from-array
                       class="pt-1 pb-1"
                       v-else-if="currentValue.constructor === Array"
                       v-bind:value="currentValue"
                       v-bind:title="translate($route.params.type + '.' + $route.params.id + '.settings.' + defaultValue)"
-                      v-on:update="value[defaultValue] = $event; triggerDataChange()"
+                      v-on:update="settings[category][defaultValue] = $event; triggerDataChange()"
                     ></textarea-from-array>
                     <number-input
                       v-else-if="typeof currentValue === 'number'"
@@ -86,7 +88,7 @@
                       v-bind:value="currentValue"
                       min="0"
                       v-bind:title="$route.params.type + '.' + $route.params.id + '.settings.' + defaultValue"
-                      v-on:update="value[defaultValue] = $event.value; triggerDataChange()">
+                      v-on:update="settings[category][defaultValue] = $event.value; triggerDataChange()">
                     </number-input>
                     <text-input
                       v-else
@@ -94,7 +96,7 @@
                       v-bind:type="typeof currentValue"
                       v-bind:value="currentValue"
                       v-bind:title="$route.params.type + '.' + $route.params.id + '.settings.' + defaultValue"
-                      v-on:update="value[defaultValue] = $event.value; triggerDataChange()"
+                      v-on:update="settings[category][defaultValue] = $event.value; triggerDataChange()"
                     ></text-input>
                   </template>
                 </div>
@@ -231,6 +233,7 @@ import { cloneDeep, get, pickBy, filter, size } from 'lodash-es';
 import { flatten, unflatten } from 'src/bot/helpers/flatten';
 import { getListOf } from 'src/panel/helpers/getListOf';
 import { getSocket } from 'src/panel/helpers/socket';
+import { OrderedMap, Map, fromJS } from 'immutable';
 
 import { PermissionsInterface } from 'src/bot/database/entity/permissions';
 
@@ -289,38 +292,21 @@ export default class interfaceSettings extends Vue {
   permissions: PermissionsInterface[] = [];
 
   get settingsWithoutPermissions() {
-    let withoutPermissions: any = {};
-    Object.keys(this.settings).filter(o => !o.includes('permission')).forEach((key) => {
-      withoutPermissions[key] = this.settings[key]
-    })
-    for (const k of Object.keys(this.settings['__permission_based__'] || {})) {
-      withoutPermissions = {
-        [k]: null,
-        ...withoutPermissions
-      }
-    }
+    const all = Map(fromJS(this.settings)).filter((value, key) => {
+      return !(key as string).includes('permission') && key !== 'settings' && key !== 'general' && key !== 'commands'
+    }).sortBy((value, key) => key);
 
-    // set settings as first and commands as last
-    const settings = withoutPermissions.settings; delete withoutPermissions.settings;
-    const commands = withoutPermissions.commands; delete withoutPermissions.commands;
-    let ordered = {};
-    Object.keys(withoutPermissions).sort().forEach(function(key) {
-      ordered[key] = withoutPermissions[key];
-    });
-    if (settings) {
-      ordered = {
-        settings,
-        ...ordered,
-      }
-    }
-    if (commands) {
-      ordered = {
-        ...ordered,
-        commands,
-      }
-    }
-    console.log({ordered})
-    return ordered
+    console.log(all.toJS())
+
+    return OrderedMap()
+      .mergeDeepIn(['settings'], Map(fromJS(this.settings.settings)))
+      .mergeDeepIn(['general'], Map(fromJS(this.settings.general)))
+      .merge(fromJS(Object.keys(this.settings.__permission_based__ || {}).sort().reduce((a, b) => {
+          return { ...a, [b]: null }
+        }, {}))) // generate null values for permission_based settings
+      .merge(all)
+      .mergeDeepIn(['commands'], Map(fromJS(this.settings.commands)))
+      .toJS()
   }
 
   mounted() {
@@ -370,6 +356,32 @@ export default class interfaceSettings extends Vue {
       }
   }
 
+  showIfCheck(toCheck) {
+    let shouldBeShown = true;
+    const flattenSettings = flatten(this.settings);
+    for (const [key, value] of Object.entries(toCheck)) {
+      const settingsKey = Object.keys(flattenSettings).find((flattenKey) => {
+        return flattenKey.includes(key)
+      })
+      if (settingsKey) {
+        if ((value as string).includes('lengthAtLeast')) {
+          const lengthAtLeast = (value as string).match(/lengthAtLeast\((?<length>\d+)\)/);
+          if (lengthAtLeast) {
+            shouldBeShown = (value as string).length >= Number(lengthAtLeast.groups?.length);
+            break;
+          } else {
+            shouldBeShown = false;
+            break;
+          }
+        } else if (flattenSettings[settingsKey] !== value) {
+          shouldBeShown = false;
+          break;
+        }
+      }
+    }
+    return shouldBeShown;
+  }
+
   setSelected(system) {
     this.$router.push({ name: 'InterfaceSettings', params: { type: this.$route.params.type, id: system } });
   }
@@ -404,7 +416,7 @@ export default class interfaceSettings extends Vue {
         }
 
         // everything else except commands and enabled and are string|number|bool
-        for (let [name, value] of filter(_settings, o => o[0] !== '_' && o[0] !== 'enabled' && o[0] !== 'commands' && typeof o[1] !== 'object')) {
+        for (let [name, value] of filter(_settings, o => o[0] !== '_' && o[0] !== 'enabled' && o[0] !== 'commands' && o[0] !== 'general' && typeof o[1] !== 'object')) {
           settings.settings[name] = value
         }
         // everything else except commands and enabled and are objects -> own category

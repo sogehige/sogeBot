@@ -38,12 +38,36 @@ class OAuth extends Core {
   @settings('general')
   public generalOwners: string[] = [];
 
+  @settings('general')
+  @ui({ type: 'selector', values: ['simple', 'advanced'] })
+  settingsType = 'simple';
+
+  @settings('general')
+  @ui({
+    type: 'text-input',
+    secret: true,
+    showIf: {
+      settingsType: 'advanced',
+    },
+  })
+  manualClientId = '';
+
+  @settings('general')
+  @ui({
+    type: 'text-input',
+    secret: true,
+    showIf: {
+      settingsType: 'advanced',
+    },
+  })
+  manualClientSecret = '';
+
   @settings('broadcaster')
-  @ui({ type: 'text-input', secret: true })
+  @ui({ type: 'text-input', secret: true, showIf: { settingsType: 'simple' } })
   public broadcasterAccessToken = '';
 
   @settings('broadcaster')
-  @ui({ type: 'text-input', secret: true })
+  @ui({ type: 'text-input', secret: true, showIf: { settingsType: 'simple' } })
   public broadcasterRefreshToken = '';
 
   @settings('broadcaster')
@@ -69,15 +93,37 @@ class OAuth extends Core {
     class: 'btn btn-primary btn-block',
     text: 'commons.generate',
     target: '_blank',
+    showIf: { settingsType: 'simple' },
   }, 'broadcaster')
   public broadcasterGenerateLink = null;
 
+  @ui({
+    type: 'link',
+    href: '',
+    class: 'btn btn-primary btn-block',
+    text: 'commons.authorize',
+    target: '_blank',
+    showIf: { settingsType: 'advanced', broadcasterUsername: '' },
+  }, 'broadcaster')
+  public broadcasterAuthorizeLink = null;
+
+  @ui({
+    type: 'link',
+    href: '',
+    class: 'btn btn-danger btn-block',
+    text: 'commons.deauthorize',
+    target: '_blank',
+    showIf: { settingsType: 'advanced', broadcasterUsername: 'lengthAtLeast(1)' },
+  }, 'broadcaster')
+  public broadcasterDeAuthorizeLink = null;
+
+
   @settings('bot')
-  @ui({ type: 'text-input', secret: true })
+  @ui({ type: 'text-input', secret: true, showIf: { settingsType: 'simple' } })
   public botAccessToken = '';
 
   @settings('bot')
-  @ui({ type: 'text-input', secret: true })
+  @ui({ type: 'text-input', secret: true, showIf: { settingsType: 'simple' } })
   public botRefreshToken = '';
 
   @settings('bot')
@@ -109,8 +155,29 @@ class OAuth extends Core {
     class: 'btn btn-primary btn-block',
     text: 'commons.generate',
     target: '_blank',
+    showIf: { settingsType: 'simple' },
   }, 'bot')
   public botGenerateLink = null;
+
+  @ui({
+    type: 'link',
+    href: '',
+    class: 'btn btn-primary btn-block',
+    text: 'commons.authorize',
+    target: '_blank',
+    showIf: { settingsType: 'advanced', botUsername: '' },
+  }, 'bot')
+  public botAuthorizeLink = null;
+
+  @ui({
+    type: 'link',
+    href: '',
+    class: 'btn btn-danger btn-block',
+    text: 'commons.deauthorize',
+    target: '_blank',
+    showIf: { settingsType: 'advanced', botUsername: 'lengthAtLeast(1)' },
+  }, 'bot')
+  public botDeAuthorizeLink = null;
 
   constructor() {
     super();
@@ -324,4 +391,5 @@ class OAuth extends Core {
   }
 }
 
-export default new OAuth();
+const _class = new OAuth();
+export default _class;
