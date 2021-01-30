@@ -213,7 +213,7 @@ class Queue extends System {
     return (await this.pickUsers(opts, false)).responses;
   }
 
-  async pickUsers (opts: CommandOptions & { users?: QueueInterface[] }, random: boolean): Promise<{ users: QueueInterface[]; responses: CommandResponse[]}> {
+  async pickUsers (opts: CommandOptions & { users?: QueueInterface[] }, random: boolean): Promise<{ users: QueueInterface[]; responses: CommandResponse[]}> {
     let users: QueueInterface[] = [];
     if (!opts.users) {
       const match = opts.parameters.match(/^(\d+)?/);

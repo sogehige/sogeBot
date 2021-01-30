@@ -16,7 +16,7 @@ import oauth from '../oauth';
 import { translate } from '../translate';
 import { getGameIdFromName } from './getGameIdFromName';
 
-async function setTitleAndGame (args: { title?: string | null; game?: string | null }): Promise<{ response: string; status: boolean } | null> {
+async function setTitleAndGame (args: { title?: string | null; game?: string | null }): Promise<{ response: string; status: boolean } | null> {
   args = defaults(args, { title: null }, { game: null });
   const cid = channelId.value;
   const url = `https://api.twitch.tv/helix/channels?broadcaster_id=${cid}`;
@@ -65,7 +65,7 @@ async function setTitleAndGame (args: { title?: string | null; game?: string | 
     try {
       await axios({
         method: 'put',
-        url:    `https://api.twitch.tv/kraken/channels/${cid}`,
+        url:    `https://api.twitch.tv/kraken/channels/${cid}`,
         data:   {
           channel: {
             game:   game,
@@ -99,7 +99,7 @@ async function setTitleAndGame (args: { title?: string | null; game?: string | 
     });
   } catch (e) {
     if (e.isAxiosError) {
-      error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+      error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
       ioServer?.emit('api.stats', {
         method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'setTitleAndGame', api: 'helix', endpoint: e.config.url, code: e.response.status, data: e.response?.data ?? 'n/a', remaining: calls.bot,
       });

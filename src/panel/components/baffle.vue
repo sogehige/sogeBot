@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, onMounted, onUnmounted, reactive, ref, watch, 
+  computed, defineComponent, onMounted, onUnmounted, reactive, ref, watch,
 } from '@vue/composition-api';
 
 const getTimeToReveal = (text: string, maxTimeToDecrypt: number) => {
@@ -26,7 +26,7 @@ interface Props {
   }
 }
 export default defineComponent({
-  props: {
+  props: {
     text:    String,
     options: Object,
   },
@@ -44,14 +44,14 @@ export default defineComponent({
     const start = () => {
       const timeToReveal = getTimeToReveal(props.text, props.options.maxTimeToDecrypt);
       console.debug('== baffle', {
-        interval: interval.value, text: props.text, options: props.options, timeToReveal, 
+        interval: interval.value, text: props.text, options: props.options, timeToReveal,
       });
       clearInterval(interval.value);
       while(baffledTimeToReveal.length > 0) {
-        baffledTimeToReveal.shift(); 
+        baffledTimeToReveal.shift();
       }
       while(baffledTimeToReveal.length !== timeToReveal.length) {
-        baffledTimeToReveal.push(timeToReveal[baffledTimeToReveal.length]); 
+        baffledTimeToReveal.push(timeToReveal[baffledTimeToReveal.length]);
       }
 
       options.startTime = Date.now();

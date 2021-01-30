@@ -145,7 +145,7 @@ library.add(faCircleNotch, faUpload, faLongArrowAltUp, faLongArrowAltDown);
 
 import { CarouselInterface } from 'src/bot/database/entity/carousel';
 
-@Component({ components: { loading: () => import('../../../components/loading.vue') } })
+@Component()
 export default class carouselOverlayList extends Vue {
   translate = translate;
   socket = getSocket('/overlays/carousel');

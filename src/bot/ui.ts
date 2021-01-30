@@ -32,9 +32,6 @@ class UI extends Core {
   public shortennumbers = true;
 
   @settings()
-  public stickystats = true;
-
-  @settings()
   public showdiff = true;
 
   sockets() {

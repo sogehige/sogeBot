@@ -55,7 +55,7 @@ import type { PermissionsInterface } from 'src/bot/database/entity/permissions';
 
 library.add(faLongArrowAltRight);
 
-@Component({ components: { loading: () => import('src/panel/components/loading.vue') } })
+@Component()
 export default class discordChannel extends Vue {
   @PropSync('value') currentValue: any;
 
@@ -83,7 +83,7 @@ export default class discordChannel extends Vue {
         });
       }),
       new Promise<void>((resolve, reject) => {
-        this.socket.emit('discord::getRoles', (err: string | null, roles: { html: string; value: string }[]) => {
+        this.socket.emit('discord::getRoles', (err: string | null, roles: { html: string; value: string }[]) => {
           console.groupCollapsed('discord::getRoles');
           console.log({ roles });
           console.groupEnd();
@@ -126,7 +126,7 @@ export default class discordChannel extends Vue {
     }
   }
 
-  updateMapping(permId: string, value: string) {
+  updateMapping(permId: string, value: string) {
     Vue.set(this.currentValue, permId, value);
   }
 

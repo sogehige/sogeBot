@@ -7,7 +7,7 @@ import _ from 'lodash';
 import Client from 'twitter';
 import { getRepository } from 'typeorm';
 
-import { Event } from '../database/entity/event';
+import { Event, Events } from '../database/entity/event';
 import { WidgetSocial } from '../database/entity/widget';
 import { settings, ui } from '../decorators';
 import { onChange, onStartup } from '../decorators/on';
@@ -53,12 +53,12 @@ class Twitter extends Integration {
     } else {
       events.supportedEventsList.push(
         {
-          id: 'tweet-post-with-hashtag', variables: [ 'tweet.text', 'tweet.username', 'tweet.displayname', 'tweet.url' ], definitions: { hashtag: '' }, check: this.eventHaveCorrectHashtag, 
+          id: 'tweet-post-with-hashtag', variables: [ 'tweet.text', 'tweet.username', 'tweet.displayname', 'tweet.url' ], definitions: { hashtag: '' }, check: this.eventHaveCorrectHashtag,
         },
       );
       events.supportedOperationsList.push(
         {
-          id: 'send-twitter-message', definitions: { messageToSend: '' }, fire: this.fireSendTwitterMessage, 
+          id: 'send-twitter-message', definitions: { messageToSend: '' }, fire: this.fireSendTwitterMessage,
         },
       );
     }

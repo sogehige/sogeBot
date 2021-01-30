@@ -109,7 +109,7 @@ export interface AlertInterface {
     en: boolean;
     ru: boolean;
   };
-  tts: {
+  tts: {
     voice: string;
     pitch: number;
     volume: number;

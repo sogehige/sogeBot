@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
   <b-btn
     class="border-0 ml-1 p-1 pl-2 pr-2"
     variant="null"
@@ -23,14 +24,35 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
 import { getSocket } from '@sogebot/ui-helpers/socket';
+=======
+  <v-btn
+    text
+    @click="toggleTheme"
+  >
+    <v-icon
+      v-if="theme === 'light'"
+      style="color: rgb(253, 177, 0)"
+    >
+      {{ mdiWeatherSunny }}
+    </v-icon>
+    <v-icon
+      v-else
+      style="color: #d0d5d2"
+    >
+      {{ mdiMoonWaxingCrescent }}
+    </v-icon>
+  </v-btn>
+</template>
+
+<script lang="ts">
+import { mdiMoonWaxingCrescent, mdiWeatherSunny } from '@mdi/js';
+>>>>>>> feat(vuetify): add vuetify UI
 import {
   defineComponent, onMounted, ref,
 } from '@vue/composition-api';
 import { get } from 'lodash-es';
 
 import { isUserLoggedIn } from 'src/panel/helpers/isUserLoggedIn';
-
-library.add(faSun, faMoon);
 
 const socket = getSocket('/core/users', true);
 
@@ -39,11 +61,11 @@ export default defineComponent({
     const theme = ref('light');
 
     const toggleTheme = () => {
-      const theme2 = localStorage.getItem('theme');
-      if (theme === null || theme2 === 'light') {
+      const _theme = localStorage.getItem('theme');
+      if (_theme === null || _theme === 'light') {
         localStorage.setItem('theme', 'dark');
       }
-      if (theme2 === 'dark') {
+      if (_theme === 'dark') {
         localStorage.setItem('theme', 'light');
       }
       loadTheme(localStorage.getItem('theme') || 'dark');
@@ -54,11 +76,8 @@ export default defineComponent({
         console.error(`Unknown theme ${themeArg}, setting light theme`);
         themeArg = 'light';
       }
-      const head = document.getElementsByTagName('head')[0];
-      const link = (document.createElement('link') as any);
-      link.setAttribute('rel', 'stylesheet');
-      link.setAttribute('href',`/dist/css/${themeArg}.css`);
-      head.appendChild(link);
+
+      context.root.$vuetify.theme.dark = themeArg === 'dark';
       theme.value = themeArg;
 
       // we need to save users preferred theme
@@ -81,7 +100,9 @@ export default defineComponent({
         loadTheme(localStorage.getItem('theme') || get(context.root.$store.state.configuration, 'core.ui.theme', 'light'));
       }
     });
-    return { theme, toggleTheme };
+    return {
+      theme, toggleTheme, mdiWeatherSunny, mdiMoonWaxingCrescent, 
+    };
   },
 });
 </script>

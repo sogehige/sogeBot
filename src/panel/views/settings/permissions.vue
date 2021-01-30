@@ -81,10 +81,16 @@ library.add(faExclamationTriangle);
 
 export default Vue.extend({
   components: {
+<<<<<<< HEAD
     panel:   () => import('../../components/panel.vue'),
     loading: () => import('../../components/loading.vue'),
     list:    () => import('./components/permissions/list.vue'),
     edit:    () => import('./components/permissions/edit.vue'),
+=======
+    panel: () => import('../../components/panel.vue'),
+    list:  () => import('./components/permissions/list.vue'),
+    edit:  () => import('./components/permissions/edit.vue'),
+>>>>>>> feat(vuetify): add vuetify UI
   },
   beforeRouteUpdate(to: Route, from: Route, next: NextFunction) {
     if (to.name === 'PermissionsSettings') {
@@ -160,7 +166,11 @@ export default Vue.extend({
         return console.error(err);
       }
       this.permissions = data;
+<<<<<<< HEAD
       this.$nextTick(() => {
+=======
+      this.$nextTick(() => {
+>>>>>>> feat(vuetify): add vuetify UI
         this.state.loading = this.$state.success;
       });
     });

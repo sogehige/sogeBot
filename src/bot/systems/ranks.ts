@@ -37,7 +37,7 @@ class Ranks extends System {
   constructor () {
     super();
     this.addMenu({
-      category: 'manage', name: 'ranks', id: 'manage/ranks/list', this: this,
+      category: 'manage', name: 'ranks', id: 'manage/ranks', this: this,
     });
   }
 
@@ -59,9 +59,9 @@ class Ranks extends System {
     adminEndpoint(this.nsp, 'ranks::remove', async (id, cb) => {
       try {
         await getRepository(Rank).delete(id);
-        cb ? cb(null) : null;
+        cb ? cb(null) : null;
       } catch (e) {
-        cb ? cb(e.stack) : null;
+        cb ? cb(e.stack) : null;
       }
     });
     adminEndpoint(this.nsp, 'ranks::save', async (item, cb) => {
@@ -76,7 +76,7 @@ class Ranks extends System {
 
   @command('!rank add')
   @default_permission(defaultPermissions.CASTERS)
-  async add (opts: CommandOptions, type: RankInterface['type'] = 'viewer'): Promise<CommandResponse[]> {
+  async add (opts: CommandOptions, type: RankInterface['type'] = 'viewer'): Promise<CommandResponse[]> {
     const parsed = opts.parameters.match(/^(\d+) ([\S].+)$/);
 
     if (_.isNil(parsed)) {
@@ -116,7 +116,7 @@ class Ranks extends System {
 
   @command('!rank edit')
   @default_permission(defaultPermissions.CASTERS)
-  async edit (opts: CommandOptions, type: RankInterface['type'] = 'viewer'): Promise<CommandResponse[]> {
+  async edit (opts: CommandOptions, type: RankInterface['type'] = 'viewer'): Promise<CommandResponse[]> {
     const parsed = opts.parameters.match(/^(\d+) ([\S].+)$/);
 
     if (_.isNil(parsed)) {
@@ -146,13 +146,13 @@ class Ranks extends System {
 
   @command('!rank edit-flw')
   @default_permission(defaultPermissions.CASTERS)
-  async editflw (opts: CommandOptions) {
+  async editflw (opts: CommandOptions) {
     return this.edit(opts, 'follower');
   }
 
   @command('!rank edit-sub')
   @default_permission(defaultPermissions.CASTERS)
-  async editsub (opts: CommandOptions) {
+  async editsub (opts: CommandOptions) {
     return this.edit(opts, 'subscriber');
   }
 
@@ -198,7 +198,7 @@ class Ranks extends System {
 
   @command('!rank list')
   @default_permission(defaultPermissions.CASTERS)
-  async list (opts: CommandOptions, type: RankInterface['type'] = 'viewer'): Promise<CommandResponse[]> {
+  async list (opts: CommandOptions, type: RankInterface['type'] = 'viewer'): Promise<CommandResponse[]> {
     const ranks = await getRepository(Rank).find({ type });
     const response = prepare(ranks.length === 0 ? 'ranks.list-is-empty' : 'ranks.list-is-not-empty', {
       list: _.orderBy(ranks, 'value', 'asc').map((l) => {
@@ -210,19 +210,19 @@ class Ranks extends System {
 
   @command('!rank list-flw')
   @default_permission(defaultPermissions.CASTERS)
-  async listflw (opts: CommandOptions) {
+  async listflw (opts: CommandOptions) {
     return this.list(opts, 'follower');
   }
 
   @command('!rank list-sub')
   @default_permission(defaultPermissions.CASTERS)
-  async listsub (opts: CommandOptions) {
+  async listsub (opts: CommandOptions) {
     return this.list(opts, 'subscriber');
   }
 
   @command('!rank rm')
   @default_permission(defaultPermissions.CASTERS)
-  async rm (opts: CommandOptions, type: RankInterface['type'] = 'viewer'): Promise<CommandResponse[]> {
+  async rm (opts: CommandOptions, type: RankInterface['type'] = 'viewer'): Promise<CommandResponse[]> {
     const parsed = opts.parameters.match(/^(\d+)$/);
     if (_.isNil(parsed)) {
       const response = prepare('ranks.rank-parse-failed');
@@ -243,13 +243,13 @@ class Ranks extends System {
 
   @command('!rank rm-flw')
   @default_permission(defaultPermissions.CASTERS)
-  async rmflw (opts: CommandOptions) {
+  async rmflw (opts: CommandOptions) {
     return this.rm(opts, 'follower');
   }
 
   @command('!rank rm-sub')
   @default_permission(defaultPermissions.CASTERS)
-  async rmsub (opts: CommandOptions) {
+  async rmsub (opts: CommandOptions) {
     return this.rm(opts, 'subscriber');
   }
 

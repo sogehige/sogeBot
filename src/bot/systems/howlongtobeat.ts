@@ -1,7 +1,7 @@
 import { HowLongToBeatService } from 'howlongtobeat';
 import { getRepository } from 'typeorm';
 
-import * as constants from '../constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import { HowLongToBeatGame, HowLongToBeatGameItem } from '../database/entity/howLongToBeatGame';
 import { command, default_permission } from '../decorators';
 import { onStartup, onStreamStart } from '../decorators/on';
@@ -33,7 +33,7 @@ class HowLongToBeat extends System {
 
     let lastDbgMessage = '';
     setInterval(async () => {
-      const isGameInNotFoundList = stats.value.currentGame && notFoundGames.includes(stats.value.currentGame);
+      const isGameInNotFoundList = stats.value.currentGame && notFoundGames.includes(stats.value.currentGame);
       const dbgMessage = `streamOnline: ${isStreamOnline.value}, enabled: ${this.enabled}, currentGame: ${ stats.value.currentGame}, isGameInNotFoundList: ${isGameInNotFoundList}`;
       if (lastDbgMessage !== dbgMessage) {
         lastDbgMessage = dbgMessage;
@@ -148,7 +148,7 @@ class HowLongToBeat extends System {
       const stream = await getRepository(HowLongToBeatGameItem).findOne({ where: { hltb_id: game.id, createdAt: streamStatusChangeSince.value } });
       if (stream) {
         debug('hltb', 'Another 15s entry of this stream for ' + stats.value.currentGame);
-        await getRepository(HowLongToBeatGameItem).increment({ id: stream.id }, 'timestamp', this.interval);
+        await getRepository(HowLongToBeatGameItem).increment({ id: stream.id }, 'timestamp', this.interval);
       } else {
         debug('hltb', 'First entry of this stream for ' + stats.value.currentGame);
         await getRepository(HowLongToBeatGameItem).save({
@@ -180,7 +180,7 @@ class HowLongToBeat extends System {
             debug('hltb', `Adding game '${stats.value.currentGame}' to not found games.`);
             notFoundGames.push(stats.value.currentGame);
             // do one retry in a minute (we need to call it manually as game is already in notFoundGames)
-            setTimeout(() => {
+            setTimeout(() => {
               this.addToGameTimestamp();
             }, constants.MINUTE);
           } else {

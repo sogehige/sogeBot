@@ -7,7 +7,7 @@ import { v4 as uuid } from 'uuid';
 import XRegExp from 'xregexp';
 
 import { parserReply } from '../commons';
-import * as constants from '../constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import { CacheEmotes, CacheEmotesInterface } from '../database/entity/cacheEmotes';
 import {
   parser, settings, ui,
@@ -484,7 +484,7 @@ class Emotes extends Overlay {
       });
     }
 
-    if (this.enableEmotesCombo && Date.now() - this.comboLastBreak > this.comboCooldown * constants.SECOND) {
+    if (this.enableEmotesCombo && Date.now() - this.comboLastBreak > this.comboCooldown * constants.SECOND) {
       const uniqueEmotes = [...new Set(parsed)];
       // we want to count only messages with emotes (skip text only)
       if (uniqueEmotes.length !== 0) {

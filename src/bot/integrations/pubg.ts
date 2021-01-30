@@ -3,9 +3,9 @@
 import Axios from 'axios';
 import { escapeRegExp } from 'lodash';
 
-import { HOUR, MINUTE } from '../constants';
+import { HOUR, MINUTE } from '@sogebot/ui-helpers/constants';
 import {
-  command, persistent, settings, ui, 
+  command, persistent, settings, ui,
 } from '../decorators';
 import { onChange, onStartup } from '../decorators/on';
 import Expects from '../expects';

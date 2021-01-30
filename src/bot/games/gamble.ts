@@ -49,7 +49,7 @@ class Gamble extends Game {
   jackpotValue = 0;
 
   @command('!gamble')
-  async main (opts: CommandOptions): Promise<CommandResponse[]> {
+  async main (opts: CommandOptions): Promise<CommandResponse[]> {
     let points, message;
 
     opts.sender['message-type'] = 'chat'; // force responses to chat
@@ -145,7 +145,7 @@ class Gamble extends Game {
   }
 
   @command('!gamble jackpot')
-  async jackpot (opts: CommandOptions): Promise<CommandResponse[]> {
+  async jackpot (opts: CommandOptions): Promise<CommandResponse[]> {
     let message: string;
     if (this.enableJackpot) {
       message = prepare('gambling.gamble.currentJackpot', {

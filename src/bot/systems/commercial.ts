@@ -45,7 +45,7 @@ class Commercial extends System {
   @command('!commercial')
   @default_permission(defaultPermissions.CASTERS)
   @helper()
-  async main (opts: CommandOptions) {
+  async main (opts: CommandOptions) {
     const parsed = opts.parameters.match(/^([\d]+)? ?(.*)?$/);
 
     if (_.isNil(parsed)) {

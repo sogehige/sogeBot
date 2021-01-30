@@ -1,64 +1,71 @@
 <template>
-  <footer
-    class="footer"
-    @dblclick="setDebug()"
+  <v-speed-dial
+    bottom
+    right
+    fixed
   >
-    <span
-      class="alert"
-      :class="[className(data.API)]"
-      style="padding:0;"
-      :title="'API ' + title(data.API)"
-    >API</span>
-    <span
-      class="alert"
-      :class="[className(data.TMI)]"
-      style="padding:0;"
-      :title="'TMI ' + title(data.TMI)"
-    >TMI</span>
-    <span
-      class="alert"
-      :class="[classNameMod(data.SOC)]"
-      style="padding:0;"
-      :title="'SOC ' + (data.SOC ? 'connected' : 'disconnected')"
-    >SOC</span>
-    <span
-      class="alert"
-      :class="[classNameMod(data.MOD)]"
-      style="padding:0;"
-      :title="'Bot is ' + (data.MOD ? ' ': 'not ') + 'a MOD.'"
-    >MOD</span>
-    <a href="https://github.com/sogehige/SogeBot">GitHub</a> |
-    <a href="https://github.com/sogehige/SogeBot/issues">Issues</a> |
-    <a href="https://github.com/sogehige/SogeBot/blob/master/LICENSE">GPL-3.0 License</a> |
-    <span
-      class="alert"
-      style="padding:0;"
-    >{{ version }}</span>
-  </footer>
+    <template #activator>
+      <v-chip
+        x-small
+        color="grey darken-4"
+        @dblclick="setDebug()"
+      >
+        {{ version }}
+      </v-chip>
+    </template>
+    <div :title="'API ' + title(data.API)">
+      <v-icon :color="color(data.API)">
+        {{ mdiCheckboxBlankCircle }}
+      </v-icon>
+      API
+    </div>
+    <div :title="'TMI ' + title(data.TMI)">
+      <v-icon :color="color(data.TMI)">
+        {{ mdiCheckboxBlankCircle }}
+      </v-icon>
+      TMI
+    </div>
+    <div :title="'SOC ' + title(data.SOC)">
+      <v-icon :color="colorMod(data.SOC)">
+        {{ mdiCheckboxBlankCircle }}
+      </v-icon>
+      SOC
+    </div>
+    <div :title="'MOD ' + title(data.MOD)">
+      <v-icon :color="colorMod(data.MOD)">
+        {{ mdiCheckboxBlankCircle }}
+      </v-icon>
+      MOD
+    </div>
+  </v-speed-dial>
 </template>
 
 <script lang="ts">
+<<<<<<< HEAD
 import { getSocket } from '@sogebot/ui-helpers/socket';
+=======
+import { mdiCheckboxBlankCircle } from '@mdi/js';
+>>>>>>> feat(vuetify): add vuetify UI
 import {
   defineComponent, onMounted, reactive, ref,
 } from '@vue/composition-api';
 
 const socket = getSocket('/');
 
-function classNameMod(is: boolean) {
-  return is ? 'alert-success' : 'alert-danger';
+function colorMod(is: boolean) {
+  return is ? 'success' : 'red';
 }
 
-function className (status: 0 | 1 | 2 | 3) {
+function color (status: 0 | 1 | 2 | 3) {
   switch (status) {
     case 0:
-      return 'alert-danger';
+      return 'red';
     case 1:
-      return 'alert-warning';
+      return 'orange';
     case 2:
-      return 'alert-warning';
+      return 'orange';
     case 3:
-      return 'alert-success';
+      return 'success';
   }
 }
 
@@ -121,7 +128,7 @@ export default defineComponent({
     });
 
     return {
-      version, data, classNameMod, className, title, setDebug,
+      version, data, colorMod, color, title, setDebug, mdiCheckboxBlankCircle,
     };
   },
 });

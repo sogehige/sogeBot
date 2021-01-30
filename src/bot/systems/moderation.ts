@@ -7,7 +7,7 @@ import { getRepository, LessThan } from 'typeorm';
 import XRegExp from 'xregexp';
 
 import { parserReply } from '../commons';
-import * as constants from '../constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import { Alias } from '../database/entity/alias';
 import { ModerationPermit, ModerationWarning } from '../database/entity/moderation';
 import {
@@ -52,14 +52,14 @@ const immuneUsers = new Map<typeof timeoutType[number], Map<string, number>>([
   ['blacklist', new Map()],
 ]);
 
-setInterval(() => {
+setInterval(() => {
   // cleanup map
   for (const type of timeoutType) {
     const map = immuneUsers.get(type);
     if (map) {
       for (const userId of map.keys()) {
         const immuneExpiresIn = map.get(userId);
-        if(immuneExpiresIn && immuneExpiresIn < Date.now()) {
+        if(immuneExpiresIn && immuneExpiresIn < Date.now()) {
           map.delete(userId);
         }
       }
@@ -73,7 +73,7 @@ class Moderation extends System {
   @settings('lists')
   @ui({
     type:   'textarea-from-array',
-    secret: true,
+    secret: true,
   })
   cListsBlacklist: string[] = [];
   @permission_settings('lists', [ defaultPermissions.CASTERS ], { [defaultPermissions.MODERATORS]: false })
@@ -166,7 +166,7 @@ class Moderation extends System {
     try {
       const [ username, type, time ] = new Expects(opts.parameters)
         .username()
-        .oneOf({ values: timeoutType })
+        .oneOf({ values: timeoutType })
         .duration({})
         .toArray();
 

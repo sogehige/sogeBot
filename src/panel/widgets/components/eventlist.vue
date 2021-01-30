@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
   <div class="widget">
     <b-card
       class="border-0 h-100"
@@ -114,6 +115,30 @@
                 </b-dropdown-item>
               </template>
             </b-dropdown>
+=======
+  <div>
+    <v-toolbar>
+      <v-app-bar-nav-icon />
+      <v-toolbar-title>{{ translate('widget-title-eventlist') }}</v-toolbar-title>
+      <v-spacer />
+      <v-btn icon>
+        <v-icon>{{ mdiMagnify }}</v-icon>
+      </v-btn>
+      <v-btn icon>
+        <v-icon>{{ mdiHeart }}</v-icon>
+      </v-btn>
+      <v-btn icon>
+        <v-icon>{{ mdiDotsVertical }}</v-icon>
+      </v-btn>
+    </v-toolbar>
+  <!--
+  <b-card class="border-0 h-100" no-body="no-body">
+    <b-tabs class="h-100" pills="pills" card="card" style="overflow:hidden">
+      <template v-slot:tabs-start>
+        <template v-if="!popout">
+          <li class="nav-item px-2 grip text-secondary align-self-center" v-if="typeof nodrag === 'undefined'">
+            <fa icon="grip-vertical" fixed-width="fixed-width"></fa>
+>>>>>>> feat(vuetify): add vuetify UI
           </li>
         </template>
         <b-tab active="active">
@@ -379,19 +404,74 @@
             />
           </li>
         </template>
+<<<<<<< HEAD
       </b-tabs>
     </b-card>
+=======
+        <b-card-text>
+          <div class="input-group">
+            <div class="input-group-prepend"><span class="input-group-text">{{translate('eventlist-show-number')}}</span></div>
+            <input class="form-control" type="text" v-model="eventlistShow"/>
+            <div class="input-group-append"><span class="input-group-text">{{translate('eventlist-show')}}</span></div>
+          </div>
+          <div class="input-group">
+            <div class="input-group-prepend"><span class="input-group-text">{{translate('followers-size')}}</span></div>
+            <input class="form-control" type="text" v-model="eventlistSize"/>
+            <div class="input-group-append"><span class="input-group-text">px</span></div>
+          </div>
+          <div class="input-group">
+            <div class="input-group-prepend"><span class="input-group-text">{{translate('followers-message-size')}}</span></div>
+            <input class="form-control" type="text" v-model="eventlistMessageSize"/>
+            <div class="input-group-append"><span class="input-group-text">px</span></div>
+          </div>
+          <hold-button class="mt-2 btn btn-danger w-100" icon="eraser" @trigger="cleanup()">
+            <template slot="title">Cleanup</template>
+            <template slot="onHoldTitle">Hold to cleanup</template>
+          </hold-button>
+        </b-card-text>
+      </b-tab>
+      <template v-slot:tabs-end>
+        <li class="nav-item text-right" style="flex-grow: 1;">
+          <b-button-group>
+            <b-button @click="emitSkipAlertEvent()" class="border-0" :variant="'outline-dark'" id="eventlistAlertsSkipButton">
+              <fa icon="forward" fixed-width />
+            </b-button>
+            <b-button @click="isTTSMuted = !isTTSMuted" class="border-0" :variant="isTTSMuted ? 'outline-secondary' : 'outline-dark'" id="eventlistAlertsTTSButton">
+              <strong>TTS</strong>
+            </b-button>
+            <b-button @click="isSoundMuted = !isSoundMuted" class="border-0" :variant="isSoundMuted ? 'outline-secondary' : 'outline-dark'" id="eventlistSoundToggleButton">
+              <fa icon="volume-up" fixed-width v-if="!isSoundMuted" />
+              <fa icon="volume-mute" fixed-width v-else />
+            </b-button>
+            <b-button @click="areAlertsMuted = !areAlertsMuted" class="border-0" :variant="areAlertsMuted ? 'outline-secondary' : 'outline-dark'" id="eventlistAlertsToggleButton">
+              <fa icon="bell" fixed-width v-if="!areAlertsMuted" />
+              <fa icon="bell-slash" fixed-width v-else />
+            </b-button>
+          </b-button-group>
+          <b-tooltip target="eventlistAlertsSkipButton" :title="'Skip alert'"></b-tooltip>
+          <b-tooltip target="eventlistAlertsTTSButton" :title="isTTSMuted ? 'TTS is disabled.' : 'TTS is enabled!'"></b-tooltip>
+          <b-tooltip target="eventlistSoundToggleButton" :title="isSoundMuted ? 'Sound is muted.' : 'Sound is enabled!'"></b-tooltip>
+          <b-tooltip target="eventlistAlertsToggleButton" :title="areAlertsMuted ? 'Alerts are disabled.' : 'Alerts are enabled!'"></b-tooltip>
+        </li>
+      </template>
+    </b-tabs>
+  </b-card-->
+>>>>>>> feat(vuetify): add vuetify UI
   </div>
 </template>
 
 <script>
-import { library } from '@fortawesome/fontawesome-svg-core';
 import {
+<<<<<<< HEAD
   faBell, faBellSlash, faRedoAlt, faVolumeMute,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeLayers } from '@fortawesome/vue-fontawesome';
 import { getSocket } from '@sogebot/ui-helpers/socket';
 import translate from '@sogebot/ui-helpers/translate';
+=======
+  mdiDotsVertical, mdiHeart, mdiMagnify,
+} from '@mdi/js';
+>>>>>>> feat(vuetify): add vuetify UI
 import {
   chunk, debounce, get,
 } from 'lodash-es';
@@ -400,17 +480,19 @@ import { dayjs } from 'src/bot/helpers/dayjs';
 import { toBoolean } from 'src/bot/helpers/toBoolean';
 import { EventBus } from 'src/panel/helpers/event-bus';
 
-library.add(faRedoAlt, faBell, faBellSlash, faVolumeMute);
-
 export default {
+<<<<<<< HEAD
   components: {
     'font-awesome-layers': FontAwesomeLayers,
     holdButton:            () => import('../../components/holdButton.vue'),
     loading:               () => import('src/panel/components/loading.vue'),
   },
+=======
+>>>>>>> feat(vuetify): add vuetify UI
   props: ['popout', 'nodrag'],
   data:  function () {
     return {
+      mdiMagnify, mdiHeart, mdiDotsVertical,
       translate,
       dayjs,
       EventBus,

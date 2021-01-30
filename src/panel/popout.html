@@ -1,47 +1,28 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#f4f5f6">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#f4f5f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
-<script>
-  // theme load
-  const theme = localStorage.getItem('theme');
-  const head = document.getElementsByTagName('head')[0];
-  const link = (document.createElement('link'));
-  link.setAttribute('rel', 'stylesheet');
-  link.setAttribute('href',`/dist/css/${theme || 'light'}.css`);
-  head.appendChild(link);
-</script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
 
-<head>
-  <title></title>
-  <meta charset="utf-8">
-  <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#f4f5f6">
-  <meta name="apple-mobile-web-app-status-bar-style" content="#f4f5f6">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="dns-prefetch" href="https://api.twitch.tv/">
+    <link rel="dns-prefetch" href="https://player.twitch.tv/">
+    <link rel="dns-prefetch" href="http://player.twitch.tv/">
 
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Poppins|PT+Sans|PT+Sans+Narrow|PT+Mono" rel="stylesheet">
-  <script src="/socket.io/socket.io.js"></script>
-
-  <style>
-    html {
-      height: 100%;
-    }
-
-    #app {
-      height:100%
-    }
-
-    .card, .widget {
-      border: 0 !important;
-    }
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
   </style>
-</head>
 
-<body style="padding-top: 0; height: 100%; width: 100%">
-  <div id="app">
-    <div class="lds-hourglass"></div>
-    <div id="bot-starting-intro" style="display: none" class='bot-starting-intro'></div>
-  </div>
-</body>
+  <body>
+    <div id="app"></div>
+  </body>
+  </html>
+
 </html>

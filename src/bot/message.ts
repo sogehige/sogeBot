@@ -116,7 +116,7 @@ class Message {
       this.message = this.message.replace(/\$spotifySong/g, translate('songs.not-playing'));
     }
 
-    this.message = this.message.replace(/\$lastfmSong/g, lastfm.currentSong ? lastfm.currentSong : translate('songs.not-playing'));
+    this.message = this.message.replace(/\$lastfmSong/g, lastfm.currentSong ? lastfm.currentSong : translate('songs.not-playing'));
 
     if (songs.enabled
         && this.message.includes('$ytSong')

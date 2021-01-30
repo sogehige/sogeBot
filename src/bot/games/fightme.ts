@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { getRepository } from 'typeorm';
 
-import { MINUTE } from '../constants';
+import { MINUTE } from '@sogebot/ui-helpers/constants';
 import { User, UserInterface } from '../database/entity/user';
 import { command, settings } from '../decorators';
 import { prepare } from '../helpers/commons';
@@ -41,7 +41,7 @@ class FightMe extends Game {
   loserWillLose = 0;
 
   @command('!fightme')
-  async main (opts: CommandOptions): Promise<CommandResponse[]> {
+  async main (opts: CommandOptions): Promise<CommandResponse[]> {
     opts.sender['message-type'] = 'chat'; // force responses to chat
     let user: Readonly<Required<UserInterface>>;
     let challenger;

@@ -10,6 +10,9 @@ const store = new Vuex.Store({
     currentGame:   '',
     currentTitle:  '',
     currentTags:   [],
+    loadingMsg:    '',
+    isUILoaded:    false,
+    isMobile:      false,
   },
   mutations: {
     setLoggedUser (state, user) {
@@ -26,6 +29,15 @@ const store = new Vuex.Store({
     },
     setCurrentTags (state, currentTags) {
       Vue.set(state, 'currentTags', currentTags);
+    },
+    setLoadingMsg (state, loadingMsg) {
+      Vue.set(state, 'loadingMsg', loadingMsg);
+    },
+    setUILoaded (state) {
+      Vue.set(state, 'isUILoaded', true);
+    },
+    setMobile (state, value) {
+      Vue.set(state, 'isMobile', value);
     },
   },
 });

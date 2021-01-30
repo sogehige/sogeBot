@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
   <perfect-scrollbar
     class="main-menu"
     :options="{useBothWheelAxes: true, suppressScrollY: true}"
@@ -63,37 +64,82 @@
       </span>
     </nav>
   </perfect-scrollbar>
+=======
+  <v-list
+    nav
+    dense
+  >
+    <v-list-item
+      v-for="item of menu.filter(o => typeof o.category === 'undefined')"
+      :key="item.name"
+      :href="'#/' + item.id.replace(/\./g, '/')"
+    >
+      <v-list-item-icon>
+        <v-icon>{{ icons.get(item.name) }}</v-icon>
+      </v-list-item-icon>
+      <v-list-item-title>{{ translate('menu.' + item.name) }}</v-list-item-title>
+    </v-list-item>
+    <v-list-group
+      v-for="category of categories"
+      :key="category"
+      :value="false"
+      :prepend-icon="icons.get(category)"
+    >
+      <template #activator>
+        <v-list-item-title>{{ translate('menu.' + category) }}</v-list-item-title>
+      </template>
+
+      <v-list-item
+        v-for="item of menu.filter(o => o.category === category)"
+        :key="item.name"
+        :href="'#/' + item.id.replace(/\./g, '/')"
+      >
+        <v-list-item-title
+          :class="{
+            'grey--text': !item.enabled,
+            'darken-3': !item.enabled,
+          }"
+        >
+          {{ translate('menu.' + item.name) }}
+        </v-list-item-title>
+      </v-list-item>
+    </v-list-group>
+  </v-list>
+>>>>>>> feat(vuetify): add vuetify UI
 </template>
 
 <script lang="ts">
 import { getSocket } from '@sogebot/ui-helpers/socket';
 import translate from '@sogebot/ui-helpers/translate';
 import {
+  mdiCog, mdiExclamationThick, mdiFormatListBulletedSquare, mdiInformationVariant, mdiViewDashboard, mdiWrench,
+} from '@mdi/js';
+import {
   defineComponent, onMounted, ref,
 } from '@vue/composition-api';
-import { PerfectScrollbar } from 'vue2-perfect-scrollbar';
 
 import type { menu as menuType } from 'src/bot/helpers/panel';
 
-import 'vue2-perfect-scrollbar/dist/vue2-perfect-scrollbar.css';
-
-type menuWithEnabled = Omit<typeof menuType[number], 'this'> & { enabled: boolean };
+type menuWithEnabled = Omit<typeof menuType[number], 'this'> & { enabled: boolean };
 
 const socket = getSocket('/');
 
+const icons = new Map<string, string>([
+  ['dashboard', mdiViewDashboard],
+  ['commands', mdiExclamationThick],
+  ['settings', mdiCog],
+  ['manage', mdiWrench],
+  ['stats', mdiInformationVariant],
+  ['registry', mdiFormatListBulletedSquare],
+]);
+
 export default defineComponent({
-  components: { PerfectScrollbar },
   setup() {
     const menu = ref([] as menuWithEnabled[]);
-    const categories = ['manage', 'settings', 'registry', /* 'logs', */ 'stats'];
+    const categories = ['commands', 'manage', 'settings', 'registry', /* 'logs', */ 'stats'];
     const isDisabledHidden = ref(true);
 
-    onMounted(async () => {
-      // Workaround for touch screens - https://github.com/mdbootstrap/perfect-scrollbar/issues/867
-      if (typeof (window as any).DocumentTouch === 'undefined') {
-        (window as any).DocumentTouch = HTMLDocument;
-      }
-
+    onMounted(async () => {
       const isLoaded = await Promise.race([
         new Promise<boolean>(resolve => {
           socket.emit('menu', (err: string | null, data: menuWithEnabled[]) => {
@@ -123,7 +169,7 @@ export default defineComponent({
     });
 
     return {
-      menu, categories, isDisabledHidden, translate,
+      menu, categories, isDisabledHidden, translate, icons,
     };
   },
 });

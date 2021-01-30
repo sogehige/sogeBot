@@ -51,9 +51,14 @@ import Vue from 'vue';
 import { EventBus } from 'src/panel/helpers/event-bus';
 
 export default Vue.extend({
+<<<<<<< HEAD
   components: { loading: () => import('src/panel/components/loading.vue') },
   props:      ['popout', 'nodrag'],
   data:       function () {
+=======
+  props: ['popout', 'nodrag'],
+  data:  function () {
+>>>>>>> feat(vuetify): add vuetify UI
     const data: {
       EventBus: any,
       items: Array<Record<string, any>>,

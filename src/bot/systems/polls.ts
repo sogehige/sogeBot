@@ -5,15 +5,15 @@ import { parserReply } from '../commons';
 import currency from '../currency';
 import { Poll, PollVote } from '../database/entity/poll';
 import {
-  command, default_permission, helper, parser, settings, 
+  command, default_permission, helper, parser, settings,
 } from '../decorators';
 import {
-  onBit, onMessage, onStartup, onTip, 
+  onBit, onMessage, onStartup, onTip,
 } from '../decorators/on';
 import Expects from '../expects.js';
 import { isStreamOnline } from '../helpers/api';
 import {
-  announce, getOwnerAsSender, prepare, 
+  announce, getOwnerAsSender, prepare,
 } from '../helpers/commons';
 import { mainCurrency } from '../helpers/currency';
 import { getLocalizedName } from '../helpers/getLocalized';
@@ -58,7 +58,7 @@ class Polls extends System {
     }, 1000);
 
     this.addMenu({
-      category: 'manage', name: 'polls', id: 'manage/polls', this: this, 
+      category: 'manage', name: 'polls', id: 'manage/polls', this: this,
     });
   }
 
@@ -71,6 +71,10 @@ class Polls extends System {
   }
 
   public async sockets() {
+    adminEndpoint(this.nsp, 'generic::deleteById', async (id, cb) => {
+      await getRepository(Poll).delete({ id: String(id) });
+      cb(null);
+    });
     adminEndpoint(this.nsp, 'generic::getAll', async (cb) => {
       try {
         cb(null, await getRepository(Poll).find({
@@ -183,10 +187,10 @@ class Polls extends System {
 
       const [type, title, options] = new Expects(opts.parameters)
         .switch({
-          name: 'type', values: ['tips', 'bits', 'normal', 'numbers'], optional: true, default: 'normal', 
+          name: 'type', values: ['tips', 'bits', 'normal', 'numbers'], optional: true, default: 'normal',
         })
         .argument({
-          name: 'title', optional: false, multi: true, 
+          name: 'title', optional: false, multi: true,
         })
         .list({ delimiter: '|' })
         .toArray();

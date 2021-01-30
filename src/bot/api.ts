@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 
 import Core from './_interface';
-import * as constants from './constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import { ThreadEvent } from './database/entity/threadEvent';
 import {
   TwitchClips, TwitchTag, TwitchTagLocalizationDescription, TwitchTagLocalizationName,
@@ -200,7 +200,7 @@ class API extends Core {
       for (const fnc of intervals.keys()) {
         await setImmediateAwait();
         debug('api.interval', chalk.yellow(fnc + '() ') + 'check');
-        if (loadedTokens.value < 2) {
+        if (loadedTokens.value < 2) {
           debug('api.interval', chalk.yellow(fnc + '() ') + 'tokens not loaded yet.');
           return;
         }
@@ -288,7 +288,7 @@ class API extends Core {
     setInterval(check, 10000);
   }
 
-  async getModerators(opts: { isWarned: boolean }) {
+  async getModerators(opts: { isWarned: boolean }) {
     const token = oauth.broadcasterAccessToken;
     const needToWait = token === '';
     const notEnoughAPICalls = calls.broadcaster.remaining <= 30 && calls.broadcaster.refresh > Date.now() / 1000;
@@ -328,7 +328,7 @@ class API extends Core {
       setStatus('MOD', data.map(o => o.user_id).includes(botId.value));
     } catch (e) {
       if (e.isAxiosError) {
-        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
         ioServer?.emit('api.stats', {
           method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'getModerators', api: 'helix', endpoint: e.config.url, code: e.response?.status ?? 'n/a', data: e.response?.data ?? 'n/a', remaining: calls.broadcaster,
         });
@@ -521,7 +521,7 @@ class API extends Core {
 
   }
 
-  async getChannelSubscribers<T extends { cursor?: string; noAffiliateOrPartnerWarningSent?: boolean; notCorrectOauthWarningSent?: boolean; subscribers?: SubscribersEndpoint['data'] }> (opts: T): Promise<{ state: boolean; opts: T }> {
+  async getChannelSubscribers<T extends { cursor?: string; noAffiliateOrPartnerWarningSent?: boolean; notCorrectOauthWarningSent?: boolean; subscribers?: SubscribersEndpoint['data'] }> (opts: T): Promise<{ state: boolean; opts: T }> {
     opts = opts || {};
 
     const cid = channelId.value;
@@ -982,7 +982,7 @@ class API extends Core {
     return { state: true, opts };
   }
 
-  saveStreamData (streamData: StreamEndpoint['data'][number]) {
+  saveStreamData (streamData: StreamEndpoint['data'][number]) {
     apiStats.value.currentViewers = streamData.viewer_count;
 
     if (apiStats.value.maxViewers < streamData.viewer_count) {
@@ -1055,7 +1055,7 @@ class API extends Core {
         emptyRateLimit('bot', e.response.headers);
       }
       if (e.isAxiosError) {
-        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
         ioServer?.emit('api.stats', {
           method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'checkClips', api: 'helix', endpoint: e.config.url, code: e.response?.status ?? 'n/a', data: e.response?.data ?? 'n/a', remaining: calls.bot,
         });
@@ -1127,7 +1127,7 @@ class API extends Core {
       }
 
       if (e.isAxiosError) {
-        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
         ioServer?.emit('api.stats', {
           method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'createClip', api: 'helix', endpoint: e.config.url, code: e.response?.status ?? 'n/a', data: e.response?.data ?? 'n/a', remaining: calls.bot,
         });
@@ -1187,7 +1187,7 @@ class API extends Core {
 
       if (logError) {
         if (e.isAxiosError) {
-          error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+          error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
           ioServer?.emit('api.stats', {
             method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'fetchAccountAge', api: 'helix', endpoint: e.config.url, code: e.response?.status ?? 'n/a', data: e.response?.data ?? 'n/a', remaining: calls.bot,
           });
@@ -1243,7 +1243,7 @@ class API extends Core {
         emptyRateLimit('bot', e.response.headers);
       }
       if (e.isAxiosError) {
-        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
         ioServer?.emit('api.stats', {
           method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'isFollowerUpdate', api: 'helix', endpoint: e.config.url, code: e.response?.status ?? 'n/a', data: e.response?.data ?? 'n/a', remaining: calls.bot,
         });
@@ -1346,7 +1346,7 @@ class API extends Core {
         return;
       }
       if (e.isAxiosError) {
-        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
         ioServer?.emit('api.stats', {
           method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'createMarker', api: 'helix', endpoint: e.config.url, code: e.response?.status ?? 'n/a', data: e.response?.data ?? 'n/a', remaining: calls.bot,
         });
@@ -1411,6 +1411,54 @@ class API extends Core {
     return response;
   }
 
+  async getVideos(ids: string[]) {
+    const url = 'https://api.twitch.tv/helix/videos?';
+    const token = oauth.botAccessToken;
+
+    const chunkIds = chunk(ids, 5);
+    const videos: string[] = [];
+    for (const chunked of chunkIds) {
+      try {
+        if (token === '') {
+          throw Error('No bot access token');
+        }
+        const request = await axios.get(url + chunked.map(o => `id=${o}`).join('&'), {
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': 'Bearer ' + token,
+            'Client-ID':     oauth.botClientId,
+          },
+          timeout: 20000,
+        });
+
+        // save remaining api calls
+        setRateLimit('bot', request.headers);
+
+        ioServer?.emit('api.stats', {
+          method: 'GET', data: request.data, timestamp: Date.now(), call: 'getVideos', api: 'helix', endpoint: url, code: request.status, remaining: calls.bot,
+        });
+        for (const item of request.data.data) {
+          videos.push(item.id);
+        }
+      } catch (e) {
+        if (e.isAxiosError) {
+          if (e.response?.status !== 404) {
+            error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+            ioServer?.emit('api.stats', {
+              method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'getVideos', api: 'helix', endpoint: e.config.url, code: e.response?.status ?? 'n/a', data: e.response?.data ?? 'n/a', remaining: calls.bot,
+            });
+          }
+        } else {
+          error(e.stack);
+          ioServer?.emit('api.stats', {
+            method: 'GET', timestamp: Date.now(), call: 'getVideos', api: 'helix', endpoint: 'n/a', code: e.response?.status ?? 'n/a', data: e.stack, remaining: calls.bot,
+          });
+        }
+      }
+    }
+    return videos;
+  }
+
   async getTopClips (opts: any) {
     let url = 'https://api.twitch.tv/helix/clips?broadcaster_id=' + channelId.value;
     const token = oauth.botAccessToken;
@@ -1465,7 +1513,7 @@ class API extends Core {
       return request.data.data;
     } catch (e) {
       if (e.isAxiosError) {
-        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
         ioServer?.emit('api.stats', {
           method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'getClipById', api: 'helix', endpoint: e.config.url, code: e.response?.status ?? 'n/a', data: e.response?.data ?? 'n/a', remaining: calls.bot,
         });

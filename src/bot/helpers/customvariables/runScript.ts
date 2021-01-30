@@ -1,3 +1,4 @@
+import { getTime } from '@sogebot/ui-helpers/getTime';
 import axios from 'axios';
 import { js as jsBeautify } from 'js-beautify';
 import _ from 'lodash';
@@ -17,7 +18,6 @@ import {
 } from '../api';
 import { mainCurrency, symbol } from '../currency';
 import { getAllOnlineUsernames } from '../getAllOnlineUsernames';
-import { getTime } from '../getTime';
 import {
   debug, error, info, warning,
 } from '../log';

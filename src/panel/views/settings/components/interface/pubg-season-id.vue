@@ -91,7 +91,7 @@ import { getVariantByState } from 'src/panel/helpers/variant';
 const socket = getSocket('/integrations/pubg');
 
 type Props = {
-  value: string; title: string, settings: { [x: string]: any }
+  value: string; title: string, settings: { [x: string]: any }
 };
 
 export default defineComponent({

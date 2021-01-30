@@ -51,7 +51,7 @@ import { error } from 'src/panel/helpers/error';
 const socket = getSocket('/integrations/pubg');
 
 type Props = {
-  value: string; title: string, settings: { [x: string]: any }
+  value: string; title: string, settings: { [x: string]: any }
 };
 
 export default defineComponent({

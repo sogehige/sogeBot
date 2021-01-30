@@ -24,7 +24,7 @@
         /></b-button>
       </b-input-group-append>
     </b-input-group>
-    <small><strong>{{ translate("events.myRewardIsNotListed") }}</strong> {{ translate("events.redeemAndClickRefreshToSeeReward") }}</small>
+    <small><strong>{{ translate("events.myRewardIsNotListed") }}</strong> {{ translate("events.redeemAndClickRefreshToSeeReward") }}</small>
   </span>
 </template>
 
@@ -47,14 +47,14 @@ interface Props {
 }
 
 export default defineComponent({
-  props: {
+  props: {
     value: String,
     state: [Boolean, Object],
   },
   setup(props: Props, ctx) {
     const redeemRewards = ref([] as string[]);
     const selectedReward = ref(props.value);
-    const progress = ref({ redeemRewards: ButtonStates.progress } as { redeemRewards: number });
+    const progress = ref({ redeemRewards: ButtonStates.progress } as { redeemRewards: number });
 
     const refreshRedeemedRewards = async () => {
       progress.value.redeemRewards = ButtonStates.progress;

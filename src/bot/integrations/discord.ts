@@ -2,6 +2,7 @@
 
 // bot libraries
 
+import { HOUR, MINUTE } from '@sogebot/ui-helpers/constants';
 import chalk from 'chalk';
 import * as DiscordJs from 'discord.js';
 import { get } from 'lodash';
@@ -10,8 +11,8 @@ import {
 } from 'typeorm';
 import { v5 as uuidv5 } from 'uuid';
 
-import { HOUR, MINUTE } from '../constants';
 import { DiscordLink } from '../database/entity/discord';
+import { Events } from '../database/entity/event';
 import { Permissions as PermissionsEntity } from '../database/entity/permissions';
 import { User } from '../database/entity/user';
 import {
@@ -357,7 +358,7 @@ class Discord extends Integration {
         if (e.message !== String(errors.NOT_UUID)) {
           warning(e.stack);
         }
-        return [{ response: prepare('integrations.discord.invalid-or-expired-token', { sender: opts.sender }), ...opts }];
+        return [{ response: prepare('integrations.discord.invalid-or-expired-token', { sender: opts.sender }), ...opts }];
       }
     }
   }

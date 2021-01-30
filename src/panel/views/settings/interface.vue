@@ -219,15 +219,11 @@
       <div class="col-lg-3 col-md-4 col-sm-6">
         <div
           ref="menu"
-          :class="{
-            'sticky-top': $store.state.configuration.core.ui.stickystats,
-            'pr-2': $store.state.configuration.core.ui.stickystats,
-          }"
           class="pt-3"
           :style="{
-            top: $store.state.configuration.core.ui.stickystats ? topOfMenu + 'px' : '',
-            height: $store.state.configuration.core.ui.stickystats ? heightOfMenu : 'auto',
-            overflow: $store.state.configuration.core.ui.stickystats ? 'scroll' : 'inherit',
+            top: '',
+            height: 'auto',
+            overflow: 'inherit',
             'overflow-x': 'hidden',
             'z-index': 0
           }"

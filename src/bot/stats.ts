@@ -6,7 +6,7 @@ import { cloneDeep, isNil } from 'lodash';
 import { getRepository, LessThan } from 'typeorm';
 
 import Core from './_interface';
-import { DAY, MINUTE } from './constants';
+import { DAY, MINUTE } from '@sogebot/ui-helpers/constants';
 import { TwitchStats, TwitchStatsInterface } from './database/entity/twitch';
 import { persistent } from './decorators';
 import { onStreamStart } from './decorators/on';

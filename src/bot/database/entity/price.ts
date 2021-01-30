@@ -6,14 +6,14 @@ export interface PriceInterface {
   enabled?: boolean;
   price: number;
   priceBits: number;
-  emitRedeemEvent: boolean;
+  emitRedeemEvent: boolean;
 }
 
 export const Price = new EntitySchema<Readonly<Required<PriceInterface>>>({
   name:    'price',
   columns: {
     id: {
-      type: String, primary: true, generated: 'uuid', 
+      type: String, primary: true, generated: 'uuid',
     },
     command:         { type: String },
     enabled:         { type: Boolean, default: true },
@@ -23,7 +23,7 @@ export const Price = new EntitySchema<Readonly<Required<PriceInterface>>>({
   },
   indices: [
     {
-      name: 'IDX_d12db23d28020784096bcb41a3', unique: true, columns: ['command'], 
+      name: 'IDX_d12db23d28020784096bcb41a3', unique: true, columns: ['command'],
     },
   ],
 });

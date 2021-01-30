@@ -26,6 +26,7 @@
           {{ translate('dialog.title.add') }}
         </button-with-icon>
       </template>
+<<<<<<< HEAD
       <template #right>
         <b-button
           id="registryAlertsToggleButton"
@@ -53,6 +54,12 @@
           variant="secondary"
         >
           {{ translate('registry.alerts.test') }}
+=======
+      <template v-slot:right>
+        <b-button @click="areAlertsMuted = !areAlertsMuted" class="border-0" :variant="areAlertsMuted ? 'secondary' : 'dark'" id="registryAlertsToggleButton">
+          <fa icon="bell" fixed-width v-if="!areAlertsMuted" />
+          <fa icon="bell-slash" fixed-width v-else />
+>>>>>>> feat(vuetify): add vuetify UI
         </b-button>
       </template>
     </panel>

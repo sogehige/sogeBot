@@ -11,7 +11,7 @@
         variant="light"
         class="text-left"
       >
-        {{ translate('registry.alerts.' + (title ? title : 'font') + '.setting') }}
+        {{ translate('registry.alerts.' + (title ? title : 'font') + '.setting') }}
       </b-button>
     </b-card-header>
     <b-collapse
@@ -450,7 +450,7 @@ interface Props {
   } | null
 }
 export default defineComponent({
-  props: {
+  props: {
     parent: Object, data: Object, isChild: Boolean, title: [String, Object],
   },
   setup(props: Props, ctx) {
@@ -493,7 +493,7 @@ export default defineComponent({
 
         request.send();
       });
-      console.log({ items: response.items });
+      console.log({ items: response.items });
       for (const font of response.items.map((o: { family: string }) => {
         return { text: o.family, value: o.family };
       })) {
@@ -505,7 +505,7 @@ export default defineComponent({
     });
 
     watch(() => fontData.value?.family || '', (val) => loadFont(val));
-    watch(isOverriden, (val) => {
+    watch(isOverriden, (val) => {
       if (val) {
         // add default values
         console.log(props);

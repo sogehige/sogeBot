@@ -108,7 +108,7 @@ class Duel extends Game {
   }
 
   @command('!duel bank')
-  async bank (opts: CommandOptions) {
+  async bank (opts: CommandOptions) {
     const users = await getRepository(DuelEntity).find();
     const bank = users.map((o) => o.tickets).reduce((a, b) => a + b, 0);
 
@@ -123,7 +123,7 @@ class Duel extends Game {
   }
 
   @command('!duel')
-  async main (opts: CommandOptions) {
+  async main (opts: CommandOptions) {
     const responses: CommandResponse[] = [];
     let bet;
 

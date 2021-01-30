@@ -42,15 +42,15 @@ export default defineComponent({
     value:    Array,
     title:    String,
     readonly: Boolean,
-    secret:   Boolean,
+    secret:   Boolean,
   },
-  setup(props: { value: string[]; title: string; readonly: boolean; secret: boolean }, ctx) {
+  setup(props: { value: string[]; title: string; readonly: boolean; secret: boolean }, ctx) {
     const currentValue = ref(props.value.join('\n'));
     const hiddenValue = ref(props.value.map(val => val.replace(/\S/g, '*')).join('\n'));
     const showHiddenValue = ref(true);
     const translatedTitle = ref(translate(props.title));
 
-    const hiddenOrCurrentValue = computed(() => 
+    const hiddenOrCurrentValue = computed(() =>
       showHiddenValue.value && props.secret ? hiddenValue.value : currentValue.value,
     );
 

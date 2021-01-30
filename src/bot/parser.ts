@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import _ from 'lodash';
 import { v4 as uuid } from 'uuid';
 
-import * as constants from './constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import {
   addToParserFindCache, cachedCommandsPermissions, parserFindCache,
 } from './helpers/cache';

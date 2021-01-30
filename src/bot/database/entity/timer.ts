@@ -6,7 +6,7 @@ export interface TimerInterface {
   id?: string;
   name: string;
   isEnabled: boolean;
-  tickOffline: boolean;
+  tickOffline: boolean;
   triggerEveryMessage: number;
   triggerEverySecond: number;
   triggeredAtTimestamp?: number;

@@ -593,7 +593,7 @@ export default class AlertsEditFollowForm extends Vue {
     data: {
       variantAmount:   { required, minValue: minValue(0) },
       messageTemplate: { required },
-      rewardId:        { required },
+      rewardId:        { required },
     },
   };
 

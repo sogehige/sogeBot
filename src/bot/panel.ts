@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import express from 'express';
 import RateLimit from 'express-rate-limit';
 import gitCommitInfo from 'git-commit-info';
@@ -33,6 +34,7 @@ import { flatten } from './helpers/flatten';
 import { setValue } from './helpers/general';
 import { getLang } from './helpers/locales';
 import {
+  error,
   getDEBUG, info, setDEBUG,
 } from './helpers/log';
 import {
@@ -71,6 +73,7 @@ const limiter = RateLimit({
 export const init = () => {
   setApp(express());
   app?.use(limiter);
+  app?.use(cors());
   app?.use(bodyParser.json());
   app?.use(bodyParser.urlencoded({ extended: true }));
   setServer();
@@ -80,7 +83,6 @@ export const init = () => {
     highlights.url(req, res);
   });
 
-  // customvariables system
   app?.get('/health', (req, res) => {
     if (getIsBotStarted()) {
       res.status(200).send('OK');
@@ -106,6 +108,8 @@ export const init = () => {
       // search through node_modules to find correct nuxt file
       const paths = [
         path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', '_nuxt'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'dist', '_nuxt'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'dist', '_nuxt'),
       ];
       for (const dir of paths) {
         const pathToFile = path.join(dir, req.url.replace('_nuxt', ''));
@@ -114,37 +118,19 @@ export const init = () => {
         }
       }
     }
-    res.sendFile(nuxtCache.get(req.url) as string);
-  });
-  app?.get('/dist/*/*.js', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', (req.url + '.gz').split('/').map(o => sanitize(o)).join('/')), {
-      headers: {
-        'Content-Type':     'text/javascript',
-        'Content-Encoding': 'gzip',
-        'Cache-Control':    'public',
-      },
-    });
-  });
-  app?.get('/dist/*/*.map', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', (req.url + '.gz').split('/').map(o => sanitize(o)).join('/')), {
-      headers: {
-        'Content-Type':     'text/javascript',
-        'Content-Encoding': 'gzip',
-        'Cache-Control':    'public',
-      },
-    });
-  });
-  app?.get('/dist/*/*.css', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', (req.url + '.gz').split('/').map(o => sanitize(o)).join('/')), {
-      headers: {
-        'Content-Type':     'text/css',
-        'Content-Encoding': 'gzip',
-        'Cache-Control':    'public',
-      },
-    });
+
+    const filepath = nuxtCache.get(req.url) as string;
+    if (fs.existsSync(filepath)) {
+      res.sendFile(filepath);
+    } else {
+      res.sendStatus(404);
+    }
   });
   app?.get('/popout/', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'popout.html'));
+  });
+  app?.get('/public/', function (req, res) {
+    res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'dist', 'index.html'));
   });
   app?.get('/oauth/:page?', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', 'oauth', 'index.html'));
@@ -161,17 +147,14 @@ export const init = () => {
   app?.get('/custom/:custom', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'custom', sanitize(req.params.custom) + '.html'));
   });
-  app?.get('/public/', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'public', 'public.html'));
-  });
   app?.get('/fonts', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'fonts.json'));
   });
   app?.get('/favicon.ico', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'favicon.ico'));
   });
-  app?.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  app?.get('/:page?', function (req, res) {
+    res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'dist', 'index.html'));
   });
 
   menu.push({
@@ -190,7 +173,7 @@ export const init = () => {
     });
     socketsConnectedInc();
 
-    socket.on('getCachedTags', async (cb: (results: TwitchTagInterface[]) => void) => {
+    socket.on('getCachedTags', async (cb: (results: TwitchTagInterface[]) => void) => {
       const connection = await getConnection();
       const joinQuery = connection.options.type === 'postgres' ? '"names"."tagId" = "tag_id" AND "names"."locale"' : 'names.tagId = tag_id AND names.locale';
       let query = getRepository(TwitchTag)
@@ -239,7 +222,7 @@ export const init = () => {
       const titles = await getRepository(CacheTitles).find();
       socket.emit('sendUserTwitchGamesAndTitles', titles);
     });
-    socket.on('cleanupGameAndTitle', async (data: { titles: { title: string, game: string; id: string }[], game: string, title: string }, cb: (err: string|null, titles: Readonly<Required<CacheTitlesInterface>>[]) => void) => {
+    socket.on('cleanupGameAndTitle', async (data: { titles: { title: string, game: string; id: string }[], game: string, title: string }, cb: (err: string|null, titles: Readonly<Required<CacheTitlesInterface>>[]) => void) => {
       // remove empty titles
       await getManager()
         .createQueryBuilder()
@@ -301,7 +284,7 @@ export const init = () => {
       }
       cb(null, allTitles);
     });
-    socket.on('updateGameAndTitle', async (data: { game: string, title: string, tags: string[] }, cb: (status: boolean | null) => void) => {
+    socket.on('updateGameAndTitle', async (data: { game: string, title: string, tags: string[] }, cb: (status: boolean | null) => void) => {
       const status = await setTitleAndGame(data);
       await setTags(data.tags);
 
@@ -350,7 +333,7 @@ export const init = () => {
       cb(null, value);
     });
 
-    socket.on('responses.get', async function (at: string | null, callback: (responses: Record<string, string>) => void) {
+    socket.on('responses.get', async function (at: string | null, callback: (responses: Record<string, string>) => void) {
       const responses = flatten(!_.isNil(at) ? translateLib.translations[getLang()][at] : translateLib.translations[getLang()]);
       _.each(responses, function (value, key) {
         const _at = !_.isNil(at) ? at + '.' + key : key;
@@ -375,7 +358,7 @@ export const init = () => {
       );
       socket.emit('lang', lang);
     });
-    socket.on('responses.revert', async function (data: { name: string }, callback: (translation: string) => void) {
+    socket.on('responses.revert', async function (data: { name: string }, callback: (translation: string) => void) {
       _.remove(translateLib.custom, function (o: any) {
         return o.name === data.name;
       });
@@ -394,15 +377,15 @@ export const init = () => {
     adminEndpoint('/', 'panel::alerts', (cb) => {
       const toShow: { errors: typeof errors, warns: typeof warns }  = { errors: [], warns: [] };
       do {
-        const error = errors.shift();
-        if (!error) {
+        const err = errors.shift();
+        if (!err) {
           break;
         }
 
         if (!toShow.errors.find((o) => {
-          return o.name === error.name && o.message === error.message;
+          return o.name === err.name && o.message === err.message;
         })) {
-          toShow.errors.push(error);
+          toShow.errors.push(err);
         }
       } while (errors.length > 0);
       do {
@@ -475,7 +458,7 @@ export const init = () => {
       }));
     });
 
-    socket.on('addWidget', async function (widgetName: string, id: string, cb: (dashboard?: DashboardInterface) => void) {
+    socket.on('addWidget', async function (widgetName: string, id: string, cb: (dashboard?: DashboardInterface) => void) {
       // add widget to bottom left
       const dashboard = await getRepository(Dashboard).findOne({
         relations: ['widgets'],
@@ -585,18 +568,18 @@ export const init = () => {
       cb(null, toEmit);
     });
 
-    socket.on('name', function (cb: (botUsername: string) => void) {
+    socket.on('name', function (cb: (botUsername: string) => void) {
       cb(oauth.botUsername);
     });
-    socket.on('channelName', function (cb: (currentChannel: string) => void) {
+    socket.on('channelName', function (cb: (currentChannel: string) => void) {
       cb(oauth.currentChannel);
     });
-    socket.on('version', function (cb: (version: string) => void) {
+    socket.on('version', function (cb: (version: string) => void) {
       const version = _.get(process, 'env.npm_package_version', 'x.y.z');
       cb(version.replace('SNAPSHOT', gitCommitInfo().shortHash || 'SNAPSHOT'));
     });
 
-    socket.on('parser.isRegistered', function (data: { emit: string, command: string }) {
+    socket.on('parser.isRegistered', function (data: { emit: string, command: string }) {
       socket.emit(data.emit, { isRegistered: new Parser().find(data.command) });
     });
 
@@ -616,7 +599,7 @@ export const init = () => {
         lang,
         translate({ root: 'webpanel' }),
         translate({ root: 'ui' }), // add ui root -> slowly refactoring to new name
-        { bot: translate({ root: 'core' }) },
+        { bot: translate({ root: 'core' }) },
       );
       cb(lang);
     });
@@ -627,7 +610,7 @@ export const init = () => {
       lang,
       translate({ root: 'webpanel' }),
       translate({ root: 'ui' }), // add ui root -> slowly refactoring to new name,
-      { bot: translate({ root: 'core' }) },
+      { bot: translate({ root: 'core' }) },
     );
     socket.emit('lang', lang);
   });
@@ -654,7 +637,7 @@ let lastDataSent: null | Record<string, unknown> = null;
 const sendStreamData = async () => {
   try {
     if (!translateLib.isLoaded) {
-      throw new Error('Translation not yet loaded');
+      throw new Error('Translation not yet loaded');
     }
 
     const ytCurrentSong = Object.values(songs.isPlaying).find(o => o) ? _.get(JSON.parse(songs.currentSong), 'title', null) : null;
@@ -686,7 +669,11 @@ const sendStreamData = async () => {
       ioServer?.emit('panel::stats', data);
     }
     lastDataSent = data;
-  } catch (e) {}
+  } catch (e) {
+    if (e.message !== 'Translation not yet loaded') {
+      error(e);
+    }
+  }
   setTimeout(async () => await sendStreamData(), 5000);
 };
 

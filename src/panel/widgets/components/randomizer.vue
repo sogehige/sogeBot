@@ -95,9 +95,14 @@ import { EventBus } from 'src/panel/helpers/event-bus';
 library.add(faDice, faDiceOne, faDiceTwo, faDiceThree, faDiceFour, faDiceFive, faDiceSix);
 
 export default {
+<<<<<<< HEAD
   components: { loading: () => import('src/panel/components/loading.vue') },
   props:      ['popout', 'nodrag'],
   data:       function () {
+=======
+  props: ['popout', 'nodrag'],
+  data:  function () {
+>>>>>>> feat(vuetify): add vuetify UI
     return {
       EventBus,
       translate,

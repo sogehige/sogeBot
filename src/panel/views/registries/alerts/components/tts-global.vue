@@ -163,7 +163,7 @@ export default defineComponent({
   setup(props: { tts: AlertInterface['tts'] | null, uuid: string}, ctx) {
     const text = ref('This message should be said by TTS to test your settings.');
     const state = ref({ loaded: ButtonStates.progress } as { loaded: number });
-    const TTSData = ref(props.tts ?? {
+    const TTSData = ref(props.tts ?? {
       voice:  'UK English Female',
       volume: 1,
       rate:   1,
@@ -185,12 +185,12 @@ export default defineComponent({
 
     async function speak() {
       for (const toSpeak of text.value.split('/ ')) {
-        await new Promise<void>(resolve => {
+        await new Promise<void>(resolve => {
           if (toSpeak.trim().length === 0) {
             setTimeout(() => resolve(), 500);
           } else {
             window.responsiveVoice.speak(toSpeak.trim(), TTSData.value.voice, {
-              rate: TTSData.value.rate, pitch: TTSData.value.pitch, volume: TTSData.value.volume, onend: () => setTimeout(() => resolve(), 500),
+              rate: TTSData.value.rate, pitch: TTSData.value.pitch, volume: TTSData.value.volume, onend: () => setTimeout(() => resolve(), 500),
             });
           }
         });

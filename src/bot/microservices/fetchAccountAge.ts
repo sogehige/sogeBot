@@ -39,7 +39,7 @@ async function fetchAccountAge (id?: string | null) {
 
     if (logError) {
       if (e.isAxiosError) {
-        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+        error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
         ioServer?.emit('api.stats', {
           method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'fetchAccountAge', api: 'helix', endpoint: e.config.url, code: e.response.status ?? 'n/a', data: e.response?.data ?? 'n/a', remaining: e.request.headers,
         });

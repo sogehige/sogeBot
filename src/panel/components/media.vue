@@ -202,8 +202,7 @@ interface Props {
 }
 
 export default defineComponent({
-  components: { loading: () => import('./loading.vue') },
-  props:      {
+  props: {
     media:   String,
     default: String,
     socket:  String,

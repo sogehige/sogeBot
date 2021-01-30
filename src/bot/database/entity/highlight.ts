@@ -7,6 +7,7 @@ export interface HighlightInterface {
   videoId: string;
   game: string;
   title: string;
+  expired: boolean;
   timestamp: {
     hours: number; minutes: number; seconds: number;
   };
@@ -17,11 +18,12 @@ export const Highlight = new EntitySchema<Readonly<Required<HighlightInterface>>
   name:    'highlight',
   columns: {
     id: {
-      type: 'uuid', primary: true, generated: 'uuid', 
+      type: 'uuid', primary: true, generated: 'uuid',
     },
     videoId:   { type: String },
     game:      { type: String },
     title:     { type: String },
+    expired:   { type: Boolean, default: false },
     timestamp: { type: 'simple-json' },
     createdAt: { type: 'bigint', transformer: new ColumnNumericTransformer() },
   },

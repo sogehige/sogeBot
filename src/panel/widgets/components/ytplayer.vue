@@ -187,7 +187,7 @@ Vue.use(VuePlyr, { plyr: {} });
 
 type Props = {
   popout: boolean;
-  nodrag: boolean;
+  nodrag: boolean;
 };
 
 const emptyCurrentSong = {
@@ -197,17 +197,17 @@ const emptyCurrentSong = {
 const socket = getSocket('/systems/songs');
 export default defineComponent({
   props: {
-    popout: Boolean,
+    popout: Boolean,
     nodrag: Boolean,
   },
   setup(props: Props, ctx) {
     const currentTag = ref('general');
     const availableTags = ref ([] as string[]);
     const autoplay = ref(false);
-    const currentSong = ref(emptyCurrentSong as  currentSongType);
+    const currentSong = ref(emptyCurrentSong as  currentSongType);
     const requests = ref([] as SongRequestInterface[]);
     const playerRef = ref(null as null | any);
-    const player = computed(() => {
+    const player = computed(() => {
       return playerRef.value ? playerRef.value.player : null;
     });
     const updateTime = ref(Date.now());
@@ -388,7 +388,7 @@ export default defineComponent({
             }
           });
         }
-        socket.emit('songs::getAllRequests', {}, (err: any, items: SongRequestInterface[]) => {
+        socket.emit('songs::getAllRequests', {}, (err: any, items: SongRequestInterface[]) => {
           if (err) {
             error(err);
           }

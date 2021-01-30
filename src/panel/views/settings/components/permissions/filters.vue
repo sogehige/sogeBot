@@ -147,7 +147,7 @@ export default Vue.extend({
   data() {
     const data: {
       cFilters: any[],
-      translate: typeof translate,
+      translate: typeof translate,
     } = {
       cFilters:  this.filters,
       translate: translate,
@@ -157,10 +157,10 @@ export default Vue.extend({
   methods: {
     setComparator(filter: any) {
       if (this.isNumber(filter.type)) {
-        filter.comparator = '=='; 
+        filter.comparator = '==';
       }
     },
-    isNumber(type: string) {
+    isNumber(type: string) {
       return !type.includes('ranks');
     },
     remove(index: number) {

@@ -46,7 +46,7 @@ import { defineComponent } from '@vue/composition-api';
 
 export default defineComponent({
   components: { buttonWithIcon: () => import('./button.vue') },
-  props:      {
+  props:      {
     state:   Number,
     text:    String,
     icon:    [String, Array],

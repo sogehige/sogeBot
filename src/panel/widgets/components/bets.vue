@@ -48,15 +48,15 @@ import translate from '@sogebot/ui-helpers/translate';
 import {
   defineComponent, onMounted, onUnmounted, ref, watch,
 } from '@vue/composition-api';
+import { capitalize } from 'lodash-es';
 
 import type { BetsInterface, BetsParticipationsInterface } from 'src/bot/database/entity/bets';
-import { capitalize } from 'src/panel/helpers/capitalize';
 import { error } from 'src/panel/helpers/error';
 import { EventBus } from 'src/panel/helpers/event-bus';
 
 type Props = {
   popout: boolean;
-  nodrag: boolean;
+  nodrag: boolean;
 };
 
 const socket = getSocket('/systems/bets');
@@ -75,7 +75,11 @@ export default defineComponent({
     },
   },
   props: {
+<<<<<<< HEAD
     popout: Boolean,
+=======
+    popout: Boolean,
+>>>>>>> feat(vuetify): add vuetify UI
     nodrag: Boolean,
   },
   setup(props: Props, ctx) {
@@ -118,7 +122,7 @@ export default defineComponent({
           }
         }), 1000),
       );
-      socket.emit('settings', (err: string | null, settings: {[x: string]: any}) => {
+      socket.emit('settings', (err: string | null, settings: {[x: string]: any}) => {
         betPercentGain.value = settings.betPercentGain[0];
       });
     });

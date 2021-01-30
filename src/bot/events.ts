@@ -8,7 +8,9 @@ import { getRepository } from 'typeorm';
 import Core from './_interface';
 import api from './api';
 import { parserReply } from './commons';
-import { Event, EventInterface } from './database/entity/event';
+import {
+  Event, EventInterface, Events,
+} from './database/entity/event';
 import { User } from './database/entity/user';
 import { onStreamEnd } from './decorators/on';
 import events from './events';
@@ -123,7 +125,7 @@ class Events extends Core {
       },
       { id: 'game-changed', variables: [ 'oldGame', 'game' ] },
       {
-        id: 'reward-redeemed', definitions: { titleOfReward: '' }, variables: [ 'username', 'is.moderator', 'is.subscriber', 'is.vip', 'is.follower', 'is.broadcaster', 'is.bot', 'is.owner', 'userInput' ], check: this.isCorrectReward,
+        id: 'reward-redeemed', definitions: { titleOfReward: '' }, variables: [ 'username', 'is.moderator', 'is.subscriber', 'is.vip', 'is.follower', 'is.broadcaster', 'is.bot', 'is.owner', 'userInput' ], check: this.isCorrectReward,
       },
     ];
 
@@ -170,7 +172,7 @@ class Events extends Core {
     ];
 
     this.addMenu({
-      category: 'manage', name: 'event-listeners', id: 'manage/events/list', this: null,
+      category: 'manage', name: 'event-listeners', id: 'manage/events', this: null,
     });
     this.fadeOut();
 

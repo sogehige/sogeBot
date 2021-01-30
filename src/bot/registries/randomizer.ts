@@ -1,6 +1,6 @@
 import { getRepository, IsNull } from 'typeorm';
 
-import { LOW } from '../constants';
+import { LOW } from '@sogebot/ui-helpers/constants';
 import { Randomizer as RandomizerEntity, RandomizerItem } from '../database/entity/randomizer';
 import { parser } from '../decorators';
 import { addToViewersCache, getFromViewersCache } from '../helpers/permissions';

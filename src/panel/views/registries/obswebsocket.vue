@@ -142,13 +142,13 @@ import {
   computed, defineComponent, getCurrentInstance, onMounted, ref, watch,
 } from '@vue/composition-api';
 import { escapeRegExp, isNil } from 'lodash-es';
+import { capitalize } from 'lodash-es';
 import shortid from 'shortid';
 
 library.add(faVial);
 
 import type { OBSWebsocketInterface } from 'src/bot/database/entity/obswebsocket';
 import { ButtonStates } from 'src/panel/helpers/buttonStates';
-import { capitalize } from 'src/panel/helpers/capitalize';
 import { EventBus } from 'src/panel/helpers/event-bus';
 
 const socket = getSocket('/integrations/obswebsocket');

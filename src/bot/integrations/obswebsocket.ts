@@ -1,7 +1,8 @@
+import { SECOND } from '@sogebot/ui-helpers/constants';
 import OBSWebSocket from 'obs-websocket-js';
 import { getRepository } from 'typeorm';
 
-import { SECOND } from '../constants';
+import { Events } from '../database/entity/event';
 import { OBSWebsocket as OBSWebsocketEntity, OBSWebsocketInterface } from '../database/entity/obswebsocket';
 import {
   command, default_permission, settings, ui,
@@ -301,7 +302,7 @@ class OBSWebsocket extends Integration {
       const isParameterError = (err instanceof ParameterError);
 
       if (isEntityNotFound) {
-        const match = new RegExp('matching: \"(.*)\"').exec(err.message);
+        const match = new RegExp('matching: "(.*)"').exec(err.message);
         return [{ response: translate('integrations.obswebsocket.runTask.EntityNotFound').replace('$id', match ? match[1] : 'n/a'), ...opts }];
       } else if (isParameterError) {
         return [{ response: translate('integrations.obswebsocket.runTask.ParameterError'), ...opts }];

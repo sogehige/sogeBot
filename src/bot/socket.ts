@@ -6,7 +6,7 @@ import { getRepository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
 import Core from './_interface';
-import { DAY } from './constants';
+import { DAY } from '@sogebot/ui-helpers/constants';
 import { User } from './database/entity/user';
 import {
   persistent, settings, ui,

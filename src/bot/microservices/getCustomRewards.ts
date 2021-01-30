@@ -18,8 +18,8 @@ import { getMigrationType } from '../helpers/getMigrationType';
 import { debug, warning } from '../helpers/log';
 import { TypeORMLogger } from '../helpers/logTypeorm';
 
-type CustomRewardEndpoint = { data: { broadcaster_name: string; broadcaster_id: string; id: string; image: string | null; background_color: string; is_enabled: boolean; cost: number; title: string; prompt: string; is_user_input_required: false; max_per_stream_setting: { is_enabled: boolean; max_per_stream: number; }; max_per_user_per_stream_setting: { is_enabled: boolean; max_per_user_per_stream: number }; global_cooldown_setting: { is_enabled: boolean; global_cooldown_seconds: number }; is_paused: boolean; is_in_stock: boolean; default_image: { url_1x: string; url_2x: string; url_4x: string; }; should_redemptions_skip_request_queue: boolean; redemptions_redeemed_current_stream: null | number; cooldown_expires_at: null | string; }[] };
-type getCustomRewardReturn = { headers: rateHeaders; method: string; response: CustomRewardEndpoint | null; status: number | string; url: string; error?: Error };
+type CustomRewardEndpoint = { data: { broadcaster_name: string; broadcaster_id: string; id: string; image: string | null; background_color: string; is_enabled: boolean; cost: number; title: string; prompt: string; is_user_input_required: false; max_per_stream_setting: { is_enabled: boolean; max_per_stream: number; }; max_per_user_per_stream_setting: { is_enabled: boolean; max_per_user_per_stream: number }; global_cooldown_setting: { is_enabled: boolean; global_cooldown_seconds: number }; is_paused: boolean; is_in_stock: boolean; default_image: { url_1x: string; url_2x: string; url_4x: string; }; should_redemptions_skip_request_queue: boolean; redemptions_redeemed_current_stream: null | number; cooldown_expires_at: null | string; }[] };
+type getCustomRewardReturn = { headers: rateHeaders; method: string; response: CustomRewardEndpoint | null; status: number | string; url: string; error?: Error };
 
 const isThreadingEnabled = process.env.THREAD !== '0';
 
@@ -114,7 +114,7 @@ export const getCustomRewards = async (): Promise<getCustomRewardReturn> => {
       warning(errors[e.response.status as keyof typeof errors]);
       const toReturn = {
         headers:  e.response.headers,
-        url:      e.config.url,
+        url:      e.config.url,
         method:   e.config.method.toUpperCase(),
         status:   e.response.status,
         response: null,
@@ -130,7 +130,7 @@ export const getCustomRewards = async (): Promise<getCustomRewardReturn> => {
       warning('Microservice getCustomRewards ended with error: unknown HTTP request error');
       const toReturn = {
         headers:  e.response.headers,
-        url:      e.config.url,
+        url:      e.config.url,
         method:   e.config.method.toUpperCase(),
         status:   e.response.status ?? 'n/a',
         response: null,
@@ -146,7 +146,7 @@ export const getCustomRewards = async (): Promise<getCustomRewardReturn> => {
       warning('Microservice getCustomRewards ended with error: unknown error');
       const toReturn = {
         headers:  e.response.headers,
-        url:      e.config.url,
+        url:      e.config.url,
         method:   e.config.method.toUpperCase(),
         status:   e.response.status ?? 'n/a',
         response: e.response.data,
@@ -161,7 +161,7 @@ export const getCustomRewards = async (): Promise<getCustomRewardReturn> => {
       return toReturn;
     }
   } finally {
-    setTimeout(() => {
+    setTimeout(() => {
       if (!isMainThread) {
         debug('microservice', 'getCustomRewards::kill');
         process.exit(0);

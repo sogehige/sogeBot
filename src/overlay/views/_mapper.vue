@@ -34,7 +34,7 @@ export default defineComponent({
   },
   setup(props, ctx) {
     const type = ref(null as null | OverlayMapperInterface | OverlayMapperOBSWebsocket);
-    onMounted(async () => {
+    onMounted(async () => {
       try {
         if (!ctx.root.$route.params.id) {
           throw new Error('Unknown overlay link!');
@@ -54,7 +54,7 @@ export default defineComponent({
       }
     });
 
-    return { type };
+    return { type };
   },
 });
 </script>

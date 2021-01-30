@@ -73,7 +73,7 @@ export default Vue.extend({
       currentData: PermissionsInterface[],
       socket: any,
     } = {
-      translate:   translate,
+      translate:   translate,
       orderBy:     orderBy,
       draggingPID: null,
       currentData: this.permissions,

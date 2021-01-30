@@ -110,7 +110,7 @@ class Songs extends System {
     });
     adminEndpoint(this.nsp, 'set.playlist.tag', async (tag) => {
       if (this.currentTag !== tag) {
-        info(`SONGS: Playlist changed to ${tag}`);
+        info(`SONGS: Playlist changed to ${tag}`);
       }
       this.currentTag = tag;
     });
@@ -124,12 +124,17 @@ class Songs extends System {
         cb(e, []);
       }
     });
-    publicEndpoint(this.nsp, 'find.playlist', async (opts: { page?: number; search?: string, tag?: string }, cb) => {
+    publicEndpoint(this.nsp, 'find.playlist', async (opts: { perPage?: number, page?: number; search?: string, tag?: string }, cb) => {
       const connection = await getConnection();
       opts.page = opts.page ?? 0;
+      opts.perPage = opts.perPage ?? 25;
+
+      if (opts.perPage === -1) {
+        opts.perPage = Number.MAX_SAFE_INTEGER;
+      }
       const query = getRepository(SongPlaylist).createQueryBuilder('playlist')
-        .offset(opts.page * 25)
-        .limit(25);
+        .offset(opts.page * opts.perPage)
+        .limit(opts.perPage);
 
       if (typeof opts.search !== 'undefined') {
         query.andWhere(new Brackets(w => {
@@ -293,7 +298,7 @@ class Songs extends System {
   @command('!bansong')
   @default_permission(defaultPermissions.CASTERS)
   async banSong (opts: CommandOptions): Promise<CommandResponse[]> {
-    const videoID: string | null = opts.parameters.trim().length === 0 ? JSON.parse(this.currentSong).videoId : opts.parameters.trim();
+    const videoID: string | null = opts.parameters.trim().length === 0 ? JSON.parse(this.currentSong).videoId : opts.parameters.trim();
     if (!videoID) {
       throw new Error('Unknown videoId to ban song.');
     }
@@ -484,7 +489,7 @@ class Songs extends System {
       }
 
       return this.addSongToPlaylist({
-        sender: getBotSender(), parameters: currentSong.videoId, attr: {}, createdAt: Date.now(), command: '',
+        sender: getBotSender(), parameters: currentSong.videoId, attr: {}, createdAt: Date.now(), command: '',
       });
     } catch (err) {
       return [{ response: translate('songs.no-song-is-currently-playing'), ...opts }];
@@ -706,7 +711,7 @@ class Songs extends System {
     }
     const ids = await this.getSongsIdsFromPlaylist(opts.parameters);
 
-    if (!ids || ids.length === 0) {
+    if (!ids || ids.length === 0) {
       return [{
         response: prepare('songs.playlist-is-empty'), ...opts, imported: 0, skipped: 0,
       }];

@@ -127,6 +127,7 @@
         </b-form-group>
       </b-card-body>
 
+<<<<<<< HEAD
       <div
         :key="timestamp"
         class="w-25 m-auto pb-4"
@@ -155,6 +156,13 @@
             >
               EXAMPLE TEXT
             </div>
+=======
+      <div class="w-25 m-auto pb-4" :key="timestamp">
+        <div class="w-100" ref="example">
+          <b-aspect aspect="16:9" class="border-primary border" style="position: relative">
+            <fa icon="square" size="xs" class="text-primary" style="position:absolute;" :style="positionGenerator('anchor')" ref="anchor"/>
+            <div style="font-size: 1rem; position:absolute;" :style="positionGenerator('text')" ref="text">EXAMPLE TEXT</div>
+>>>>>>> feat(vuetify): add vuetify UI
           </b-aspect>
         </div>
       </div>
@@ -182,7 +190,7 @@ interface Props {
 
 let interval = 0;
 export default defineComponent({
-  props: { position: Object },
+  props: { position: Object },
   setup(props: Props, context) {
     const timestamp = ref(0);
     const pos = reactive(props.position);

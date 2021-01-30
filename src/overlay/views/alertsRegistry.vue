@@ -84,7 +84,7 @@
                 center: runningAlert.alert.layout === '3',
                 ['animate__' + runningAlert.animation]: true,
               }"
-              :style="{'text-align': (runningAlert.alert.font ? runningAlert.alert.font.align : data.font.align), 'animation-duration': runningAlert.animationSpeed + 'ms'}"
+              :style="{'text-align': (runningAlert.alert.font ? runningAlert.alert.font.align : data.font.align), 'animation-duration': runningAlert.animationSpeed + 'ms'}"
               class="animate__animated"
             >
               <span
@@ -346,12 +346,12 @@ export default class AlertsRegistryOverlays extends Vue {
   async speak(text: string, voice: string, rate: number, pitch: number, volume: number) {
     isTTSPlaying = true;
     for (const TTS of text.split('/ ')) {
-      await new Promise<void>(resolve => {
+      await new Promise<void>(resolve => {
         if (TTS.trim().length === 0) {
           setTimeout(() => resolve(), 500);
         } else {
           window.responsiveVoice.speak(TTS, voice, {
-            rate, pitch, volume, onend: () => setTimeout(() => resolve(), 500),
+            rate, pitch, volume, onend: () => setTimeout(() => resolve(), 500),
           });
         }
       });
@@ -497,7 +497,7 @@ export default class AlertsRegistryOverlays extends Vue {
           }
           if (possibleAlerts.length > 0) {
             // filter variants
-            possibleAlerts = possibleAlerts.filter(o => {
+            possibleAlerts = possibleAlerts.filter(o => {
               if (!o.enabled) {
                 return false;
               }
@@ -519,7 +519,7 @@ export default class AlertsRegistryOverlays extends Vue {
               return true;
             });
 
-            // after we have possible alerts -> generate random
+            // after we have possible alerts -> generate random
             const possibleAlertsWithRandomCount: (CommonSettingsInterface | AlertTipInterface | AlertResubInterface)[] = [];
             // check if exclusive alert is there then run only it (+ other exclusive)
             if (possibleAlerts.find(o => o.variantAmount === 5)) {
@@ -540,7 +540,7 @@ export default class AlertsRegistryOverlays extends Vue {
             });
 
             const alert: CommonSettingsInterface | AlertTipInterface | AlertResubInterface | undefined = possibleAlertsWithRandomCount[Math.floor(Math.random() * possibleAlertsWithRandomCount.length)];
-            if (!alert || !alert.id) {
+            if (!alert || !alert.id) {
               console.log('No alert found or all are disabled');
               return;
             }
@@ -925,14 +925,14 @@ export default class AlertsRegistryOverlays extends Vue {
     if (this.runningAlert !== null) {
       let name: string | string[] = this.runningAlert.name.split('').map((char, index) => {
         if (this.runningAlert !== null) {
-          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
+          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
         } else {
           return char;
         }
       });
       let recipient: string | string[] = (this.runningAlert.recipient || '').split('').map((char, index) => {
         if (this.runningAlert !== null) {
-          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
+          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
         } else {
           return char;
         }
@@ -940,7 +940,7 @@ export default class AlertsRegistryOverlays extends Vue {
 
       let amount: string | string[] = String(this.runningAlert.amount).split('').map((char, index) => {
         if (this.runningAlert !== null) {
-          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
+          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
         } else {
           return char;
         }
@@ -948,7 +948,7 @@ export default class AlertsRegistryOverlays extends Vue {
 
       let currency: string | string[] = String(this.runningAlert.currency).split('').map((char, index) => {
         if (this.runningAlert !== null) {
-          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
+          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
         } else {
           return char;
         }
@@ -956,7 +956,7 @@ export default class AlertsRegistryOverlays extends Vue {
 
       let monthsName: string | string[] = String(this.runningAlert.monthsName).split('').map((char, index) => {
         if (this.runningAlert !== null) {
-          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
+          return `<div class="animate__animated animate__infinite animate__${this.runningAlert.alert.animationText} animate__${this.runningAlert.alert.animationTextOptions.speed}" style="animation-delay: ${index * 50}ms; color: ${this.runningAlert.alert.font ? this.runningAlert.alert.font.highlightcolor : this.data?.font.highlightcolor}; display: inline-block;">${char}</div>`;
         } else {
           return char;
         }

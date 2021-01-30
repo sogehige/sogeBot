@@ -1,3 +1,4 @@
+import path from 'path';
 import { setTimeout } from 'timers';
 
 import { isNil } from 'lodash';
@@ -11,6 +12,7 @@ import { onStartup } from './decorators/on';
 import { getBot } from './helpers/commons';
 import { runScript, updateWidgetAndTitle } from './helpers/customvariables';
 import { isDbConnected } from './helpers/database';
+import { app } from './helpers/panel';
 import { adminEndpoint } from './helpers/socket';
 
 class CustomVariables extends Core {
@@ -21,9 +23,19 @@ class CustomVariables extends Core {
   @onStartup()
   onStartup() {
     this.addMenu({
-      category: 'registry', name: 'custom-variables', id: 'registry.customVariables/list', this: null,
+      category: 'registry', name: 'custom-variables', id: 'registry.customvariables', this: null,
     });
     this.checkIfCacheOrRefresh();
+
+    (function initEndpoint() {
+      if (!app) {
+        setTimeout(() => initEndpoint(), 1000);
+      } else {
+        app.get('/assets/custom-variables-code.txt', async (req, res) => {
+          res.sendFile(path.join(__dirname, '..', 'assets', 'custom-variables-code.txt'));
+        });
+      }
+    })();
   }
 
   sockets () {
@@ -135,7 +147,9 @@ class CustomVariables extends Core {
           await getRepository(Variable).save(item);
           await updateWidgetAndTitle(item.variableName);
         }
-      } catch (e) {} // silence errors
+      } catch (e) {
+        continue;
+      } // silence errors
     }
     this.timeouts[`${this.constructor.name}.checkIfCacheOrRefresh`] = setTimeout(() => this.checkIfCacheOrRefresh(), 1000);
   }

@@ -215,7 +215,7 @@
                 v-for="event in supportedEvents"
                 :key="'event-tab-' + event"
               >
-                <title-divider>{{ translate('registry.alerts.event.' + event) }}</title-divider>
+                <title-divider>{{ translate('registry.alerts.event.' + event) }}</title-divider>
                 <b-button-group
                   v-for="(alert, idx) of item[event]"
                   :key="event + alert.id"

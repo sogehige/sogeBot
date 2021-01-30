@@ -9,6 +9,7 @@
           v-if="currentValue.length > 0"
           class="list-inline d-inline-block m-0 border border-right-0 px-1"
           :class="{
+<<<<<<< HEAD
             'focus-border': (isFocused || isHovered),
             'border-input': !(isFocused || isHovered),
             'border-bottom-0': !isSearching && isDirty && (isFocused || isHovered),
@@ -20,6 +21,13 @@
             class="list-inline-item mr-0"
             style="transform: translateY(4px);"
           >
+=======
+            'focus-border': (isFocused || isHovered),
+            'border-input': !(isFocused || isHovered),
+            'border-bottom-0': !isSearching && isDirty && (isFocused || isHovered),
+          }">
+          <li v-for="tag in currentValue" :key="tag" class="list-inline-item mr-0" style="transform: translateY(4px);">
+>>>>>>> feat(vuetify): add vuetify UI
             <b-form-tag
               style="font-size: 75%; text-transform: initial; font-weight: normal;"
               :title="tag"
@@ -38,6 +46,7 @@
         :class="{
           'border-right-0': isSearching,
           'border-left-0': multiple && currentValue.length > 0,
+<<<<<<< HEAD
           'border-bottom-0': !isSearching && isDirty && (isFocused || isHovered),
         }"
         @keyup="emitSearch"
@@ -64,6 +73,18 @@
       </template>
       <b-list-group
         v-if="isDirty && !isSearching && (isFocused || isHovered)"
+=======
+          'border-bottom-0': !isSearching && isDirty && (isFocused || isHovered),
+        }"/>
+      <template v-slot:append v-if="isSearching">
+        <div class="border border-left-0 input-bg" :class="{'focus-border': (isFocused || isHovered), 'border-input': !(isFocused || isHovered) }">
+          <b-spinner style="position: relative; top: 2px;" variant="primary" label="Spinning" small class="m-2"></b-spinner>
+        </div>
+      </template>
+      <b-list-group v-if="isDirty && !isSearching && (isFocused || isHovered)"
+        @mouseenter="isHovered = true;"
+        @mouseleave="isHovered = false;"
+>>>>>>> feat(vuetify): add vuetify UI
         class="focus-border"
         :style="{
           position: 'absolute',
@@ -116,7 +137,7 @@ interface Props {
 }
 
 export default defineComponent({
-  props: {
+  props: {
     value:          Array,
     multiple:       Boolean,
     options:        Array,
@@ -176,7 +197,7 @@ export default defineComponent({
     watch(() => props.options, (val) => {
       isSearching.value = false;
       // check if current value have game -> emit input
-      const lowerCasedOptions: string[] = props.options.map((o: string) => o.toLowerCase());
+      const lowerCasedOptions: string[] = props.options.map((o: string) => o.toLowerCase());
       if (lowerCasedOptions.includes(addToCurrentValue.value.toLowerCase())) {
         const i = lowerCasedOptions.findIndex(option => option === addToCurrentValue.value.toLowerCase());
         if (i >= 0) {

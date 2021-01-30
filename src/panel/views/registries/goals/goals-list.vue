@@ -196,7 +196,7 @@ export default Vue.extend({
   },
   data: function () {
     const object: {
-      translate: typeof translate,
+      translate: typeof translate,
       groups: GoalGroupInterface[],
       socket: any,
       search: string,
@@ -208,7 +208,7 @@ export default Vue.extend({
       filter: any,
       orderBy: any,
     } = {
-      translate:   translate,
+      translate:   translate,
       socket:      getSocket('/overlays/goals'),
       search:      '',
       groups:      [],

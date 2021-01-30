@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <v-main>
+    <statsbar />
     <div
       class="btn-group"
       role="group"
@@ -125,7 +126,7 @@
         @removeDashboard="removeDashboard"
       />
     </div>
-  </div>
+  </v-main>
 </template>
 
 <script>
@@ -142,6 +143,7 @@ const socket = getSocket('/');
 
 export default defineComponent({
   components: {
+    statsbar:        () => import('src/panel/components/statsbar/statsbar.vue'),
     bets:            () => import('src/panel/widgets/components/bets.vue'),
     chat:            () => import('src/panel/widgets/components/chat.vue'),
     cmdboard:        () => import('src/panel/widgets/components/cmdboard.vue'),

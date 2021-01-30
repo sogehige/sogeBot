@@ -5,7 +5,7 @@ import {
   FindConditions, getConnection, getRepository, LessThanOrEqual,
 } from 'typeorm';
 
-import { MINUTE } from '../constants';
+import { MINUTE } from '@sogebot/ui-helpers/constants';
 import { PointsChangelog } from '../database/entity/points';
 import { User, UserInterface } from '../database/entity/user';
 import {

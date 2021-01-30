@@ -193,7 +193,7 @@ export const getChannelChattersUnofficialAPI = async (): Promise<{ partedUsers: 
       .from(ThreadEvent)
       .where('event = :event', { event: 'getChannelChattersUnofficialAPI' })
       .execute();
-    setTimeout(() => {
+    setTimeout(() => {
       if (!isMainThread) {
         debug('microservice', 'getChannelChattersUnofficialAPI::kill');
         process.exit(0);

@@ -287,7 +287,7 @@ export function itemsToEvalPart (items: any[], operator: string): string {
   let output = '';
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    if (item !== null && typeof item.items === 'undefined') {
+    if (item !== null && typeof item.items === 'undefined') {
       if (i > 0) {
         output += ` ${evalOperatorMap.get(operator)} `;
       }
@@ -372,11 +372,11 @@ export default defineComponent({
       }
     };
 
-    const itemsToStringifiedPart = (items: any[], operator: string): string => {
+    const itemsToStringifiedPart = (items: any[], operator: string): string => {
       let output = '';
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        if (item !== null && typeof item.items === 'undefined') {
+        if (item !== null && typeof item.items === 'undefined') {
           if (i > 0) {
             output += ` ${operator} `;
           }
@@ -413,7 +413,7 @@ export default defineComponent({
       return output;
     };
 
-    const stringifiedFilter = computed(() => {
+    const stringifiedFilter = computed(() => {
       if (_filter.value) {
         const filter = itemsToStringifiedPart(_filter.value.items, _filter.value.operator);
         return filter.length > 0 ? filter : `<< ${translate('registry.alerts.filter.noFilter')} >>`;
@@ -436,7 +436,7 @@ export default defineComponent({
       }
     };
 
-    watch(_filter, (val) => {
+    watch(_filter, (val) => {
       ctx.emit('update:filter', val);
     }, { deep: true });
 

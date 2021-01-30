@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { getRepository } from 'typeorm';
 
 import { parserReply } from '../commons';
-import * as constants from '../constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import {
   Commands, CommandsInterface, CommandsResponsesInterface,
 } from '../database/entity/commands';
@@ -50,7 +50,7 @@ class CustomCommands extends System {
   constructor () {
     super();
     this.addMenu({
-      category: 'manage', name: 'customcommands', id: 'manage/commands', this: this,
+      category: 'commands', name: 'customcommands', id: 'manage/commands', this: this,
     });
   }
 
@@ -377,7 +377,7 @@ class CustomCommands extends System {
       this.invalidateCache();
       return [{ response: prepare(!cmd.enabled ? 'customcmds.command-was-enabled' : 'customcmds.command-was-disabled', { command: cmd.command }), ...opts }];
     } catch (e) {
-      const response = prepare('customcmds.commands-parse-failed', { command: this.getCommand('!command') });
+      const response = prepare('customcmds.commands-parse-failed', { command: this.getCommand('!command') });
       return [{ response, ...opts }];
     }
   }
@@ -403,7 +403,7 @@ class CustomCommands extends System {
       return [{ response, ...opts }];
 
     } catch (e) {
-      const response = prepare('customcmds.commands-parse-failed', { command: this.getCommand('!command') });
+      const response = prepare('customcmds.commands-parse-failed', { command: this.getCommand('!command') });
       return [{ response, ...opts }];
     }
   }

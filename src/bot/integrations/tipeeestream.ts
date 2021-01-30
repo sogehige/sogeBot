@@ -130,7 +130,7 @@ class TipeeeStream extends Integration {
           }
         });
 
-        this.socketToTipeeestream.on('new-event', async (data: TipeeestreamEvent) => {
+        this.socketToTipeeestream.on('new-event', async (data: TipeeestreamEvent) => {
           this.parse(data);
         });
       }
@@ -139,7 +139,7 @@ class TipeeeStream extends Integration {
     }
   }
 
-  async parse(data: TipeeestreamEvent) {
+  async parse(data: TipeeestreamEvent) {
     if (data.event.type !== 'donation') {
       return;
     }

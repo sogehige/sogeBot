@@ -151,10 +151,9 @@ import { PermissionsInterface } from 'src/bot/database/entity/permissions';
 
 export default Vue.extend({
   components: {
-    holdButton: () => import('../../../../components/holdButton.vue'),
-    userslist:  () => import('./userslist.vue'),
-    filters:    () => import('./filters.vue'),
-    test:       () => import('./test.vue'),
+    userslist: () => import('./userslist.vue'),
+    filters:   () => import('./filters.vue'),
+    test:      () => import('./test.vue'),
   },
   props: ['permissions'],
   data() {
@@ -165,7 +164,7 @@ export default Vue.extend({
       isRouteChange: boolean,
       socket: any,
     } = {
-      translate:     translate,
+      translate:     translate,
       some:          some,
       item:          this.permissions.find((o: PermissionsInterface) => o.id === this.$route.params.id),
       socket:        getSocket('/core/permissions'),

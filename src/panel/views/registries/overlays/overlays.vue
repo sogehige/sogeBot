@@ -183,7 +183,7 @@ export default defineComponent({
       });
     };
 
-    watch(items, async (val) => {
+    watch(items, async (val) => {
       if (isEqual(cacheItems.value, val)) {
         console.log('skip');
         return;
@@ -209,7 +209,7 @@ export default defineComponent({
         );
       }
       await Promise.all(promised);
-    }, { deep: true });
+    }, { deep: true });
     watch(copied, (val) => {
       if (val.length > 0) {
         navigator.clipboard.writeText(`${document.location.protocol}//${document.location.host}/overlays/${val}`);
@@ -220,7 +220,7 @@ export default defineComponent({
       }
     });
 
-    const newItem = () => {
+    const newItem = () => {
       items.value.push({
         id: uuid(), value: null, opts: null,
       });

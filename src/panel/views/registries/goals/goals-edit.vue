@@ -555,16 +555,15 @@ import { GoalGroupInterface, GoalInterface } from 'src/bot/database/entity/goal'
 
 export default Vue.extend({
   components: {
-    panel:      () => import('../../../components/panel.vue'),
-    holdButton: () => import('../../../components/holdButton.vue'),
-    font:       () => import('../../../components/font.vue'),
-    datetime:   VueFlatPickr,
+    panel:    () => import('../../../components/panel.vue'),
+    font:     () => import('../../../components/font.vue'),
+    datetime: VueFlatPickr,
     codemirror,
   },
   data: function () {
     const object: {
       get: typeof get,
-      translate: typeof translate,
+      translate: typeof translate,
       socket: any,
       search: string,
       groupId: string,
@@ -583,7 +582,7 @@ export default Vue.extend({
       dateTimePicker: any,
     } = {
       get:       get,
-      translate: translate,
+      translate: translate,
       socket:    getSocket('/overlays/goals'),
       search:    '',
       groupId:   uuid(),

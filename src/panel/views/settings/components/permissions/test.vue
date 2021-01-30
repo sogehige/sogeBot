@@ -103,7 +103,7 @@ export default Vue.extend({
       status: Record<string, any>,
       partialStatus: Record<string, any>,
     } = {
-      translate:     translate,
+      translate:     translate,
       socket:        getSocket('/core/permissions'),
       inputUsername: '',
       testUsername:  '',
@@ -138,7 +138,7 @@ export default Vue.extend({
       } else {
         this.socket.emit('test.user', {
           pid: this.$route.params.id, value: val, state,
-        }, (err: string | null, r: { state: string; partial:  { access: boolean }; status: { access: boolean } }) => {
+        }, (err: string | null, r: { state: string; partial:  { access: boolean }; status: { access: boolean } }) => {
           if (err) {
             this.error = err;
             this.isTesting = false;

@@ -2,9 +2,9 @@ import fs from 'fs';
 import inspector from 'inspector';
 import { gzip } from 'zlib';
 
-import { MINUTE, SECOND } from './constants';
+import { MINUTE, SECOND } from '@sogebot/ui-helpers/constants';
 import {
-  error, getDEBUG, isDebugEnabled, setDEBUG, warning, 
+  error, getDEBUG, isDebugEnabled, setDEBUG, warning,
 } from './helpers/log';
 
 let isProfilerRunning = false;

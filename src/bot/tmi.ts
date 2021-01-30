@@ -10,7 +10,7 @@ import { getRepository } from 'typeorm';
 import Core from './_interface';
 import api from './api';
 import { parserReply } from './commons';
-import * as constants from './constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import type { EmitData } from './database/entity/alert';
 import { Price } from './database/entity/price';
 import {
@@ -362,7 +362,7 @@ class TMI extends Core {
     const client = this.client[type];
     if (!client) {
       error('Cannot init listeners for TMI ' + type + 'client');
-      error(new Error().stack || '');
+      error(new Error().stack || '');
       return;
     }
     client.chat.removeAllListeners();
@@ -861,7 +861,7 @@ class TMI extends Core {
       let redeemTriggered = false;
       if (messageFromUser.trim().startsWith('!')) {
         try {
-          const price = await getRepository(Price).findOneOrFail({ where: { command: messageFromUser.trim().toLowerCase(), enabled: true } });
+          const price = await getRepository(Price).findOneOrFail({ where: { command: messageFromUser.trim().toLowerCase(), enabled: true } });
           if (price.priceBits <= Number(userstate.bits)) {
             if (customcommands.enabled) {
               await customcommands.run({

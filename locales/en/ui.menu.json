@@ -9,6 +9,8 @@
   "timers": "Timers",
   "keywords": "Keywords",
   "customcommands": "Custom commands",
+  "botcommands": "Bot commands",
+  "commands": "Commands",
   "event-listeners": "Event listeners",
   "ranks": "Ranks",
   "songs": "Songs",

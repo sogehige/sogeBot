@@ -15,6 +15,7 @@
         </template>
       </span>
     </div>
+<<<<<<< HEAD
     <input
       v-model="currentValue"
       class="form-control"
@@ -27,6 +28,10 @@
       v-if="!secret && defaultValue !== currentValue && !readonly"
       class="input-group-append"
     >
+=======
+    <input @focus="show = true" @blur="show = false" v-model="currentValue" class="form-control" :type="secret && !show ? 'password' : 'text'" :readonly="readonly" />
+    <div class="input-group-append" v-if="!secret && defaultValue !== currentValue && !readonly">
+>>>>>>> feat(vuetify): add vuetify UI
       <b-button @click="currentValue = defaultValue">
         <fa
           icon="history"
