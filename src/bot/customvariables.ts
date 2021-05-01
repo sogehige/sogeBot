@@ -40,7 +40,7 @@ class CustomVariables extends Core {
 
   sockets () {
     adminEndpoint(this.nsp, 'customvariables::list', async (cb) => {
-      const variables = await getRepository(Variable).find();
+      const variables = await getRepository(Variable).find({ relations: ['history', 'urls'] });
       cb(null, variables);
     });
     adminEndpoint(this.nsp, 'customvariables::runScript', async (id, cb) => {
@@ -86,12 +86,6 @@ class CustomVariables extends Core {
       if (cb) {
         cb(null);
       }
-    });
-    adminEndpoint(this.nsp, 'generic::getOne', async (id, cb) => {
-      cb(null, await getRepository(Variable).findOne({
-        relations: ['history', 'urls'],
-        where:     { id },
-      }));
     });
     adminEndpoint(this.nsp, 'customvariables::save', async (item, cb) => {
       try {
