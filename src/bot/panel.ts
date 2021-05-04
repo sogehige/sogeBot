@@ -205,22 +205,12 @@ export const init = () => {
       cb(results);
     });
     // twitch game and title change
-    socket.on('getGameFromTwitch', function (game: string) {
-      sendGameFromTwitch(socket, game);
+    socket.on('getGameFromTwitch', function (game: string, cb) {
+      sendGameFromTwitch(game).then((data) => cb(data));
     });
-    socket.on('getUserTwitchGames', async () => {
+    socket.on('getUserTwitchGames', async (cb) => {
       const titles = await getRepository(CacheTitles).find();
-      socket.emit('sendUserTwitchGamesAndTitles', titles) ;
-    });
-    socket.on('deleteUserTwitchGame', async (game: string) => {
-      await getManager()
-        .createQueryBuilder()
-        .delete()
-        .from(CacheTitles, 'titles')
-        .where('game = :game', { game })
-        .execute();
-      const titles = await getRepository(CacheTitles).find();
-      socket.emit('sendUserTwitchGamesAndTitles', titles);
+      cb(titles);
     });
     socket.on('cleanupGameAndTitle', async (data: { titles: { title: string, game: string; id: string }[], game: string, title: string }, cb: (err: string|null, titles: Readonly<Required<CacheTitlesInterface>>[]) => void) => {
       // remove empty titles

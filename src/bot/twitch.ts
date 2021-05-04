@@ -155,7 +155,7 @@ class Twitch extends Core {
     if (opts.parameters.length === 0) {
       return [ { response: translate('game.current').replace(/\$title/g, stats.value.currentGame || 'n/a'), ...opts }];
     }
-    const games = await sendGameFromTwitch(null, opts.parameters);
+    const games = await sendGameFromTwitch(opts.parameters);
     if (Array.isArray(games) && games.length > 0) {
       const exactMatchIdx = games.findIndex(name => name.toLowerCase() === opts.parameters.toLowerCase());
       const status = await setTitleAndGame({ game: games[exactMatchIdx !== -1 ? exactMatchIdx : 0] });
