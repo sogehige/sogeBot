@@ -3,7 +3,7 @@ import {
 } from 'lodash';
 
 import Core from './_interface';
-import { settings, ui } from './decorators';
+import { settings } from './decorators';
 import general from './general';
 import { mainCurrency, symbol } from './helpers/currency';
 import { timezone } from './helpers/dayjs';
@@ -12,16 +12,8 @@ import { generalChannel } from './helpers/oauth/generalChannel';
 import { generalOwners } from './helpers/oauth/generalOwners';
 import { find, list } from './helpers/register';
 import { adminEndpoint, publicEndpoint } from './helpers/socket';
-import { default as uiModule } from './ui';
 
 class UI extends Core {
-  @settings()
-  @ui({
-    type:   'selector',
-    values: ['light', 'dark'],
-  })
-  public theme: 'light' | 'dark' = 'light';
-
   @settings()
   public domain = 'localhost';
 
@@ -92,9 +84,6 @@ class UI extends Core {
 
         // lang
         data.lang = general.lang;
-
-        // theme
-        set(data, 'core.ui.theme', uiModule.theme);
 
         cb(null, data);
       } catch (e) {
