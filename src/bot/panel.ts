@@ -15,7 +15,7 @@ import {
 } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
-import { CacheTitles, CacheTitlesInterface } from './database/entity/cacheTitles';
+import { CacheTitles } from './database/entity/cacheTitles';
 import {
   Dashboard, DashboardInterface, Widget,
 } from './database/entity/dashboard';
@@ -212,7 +212,7 @@ export const init = () => {
       const titles = await getRepository(CacheTitles).find();
       cb(titles);
     });
-    socket.on('cleanupGameAndTitle', async (data: { titles: { title: string, game: string; id: string }[], game: string, title: string }, cb: (err: string|null, titles: Readonly<Required<CacheTitlesInterface>>[]) => void) => {
+    socket.on('cleanupGameAndTitle', async () => {
       // remove empty titles
       await getManager()
         .createQueryBuilder()
@@ -221,49 +221,12 @@ export const init = () => {
         .where('title = :title', { title: '' })
         .execute();
 
-      // update titles
-      const updateTitles = data.titles.filter(o => o.title.trim().length > 0);
-      for (const t of updateTitles) {
-        if (t.title === data.title && t.game === data.game) {
-          await getManager()
-            .createQueryBuilder()
-            .update(CacheTitles)
-            .set({ timestamp: Date.now(), title: t.title })
-            .where('id = :id', { id: t.id })
-            .execute();
-        } else {
-          await getManager()
-            .createQueryBuilder()
-            .update(CacheTitles)
-            .set({ title: t.title })
-            .where('id = :id', { id: t.id })
-            .execute();
-        }
-      }
-
-      // remove removed titles
-      let allTitles = await getRepository(CacheTitles).find();
-      for (const t of allTitles) {
-        const titles = updateTitles.filter(o => o.game === t.game && o.title === t.title);
-        if (titles.length === 0) {
-          if (t.game !== data.game || t.title !== data.title) { // don't remove current/new title
-            await getManager()
-              .createQueryBuilder()
-              .delete()
-              .from(CacheTitles, 'titles')
-              .where('id = :id', { id: t.id })
-              .execute();
-          }
-        }
-      }
-
       // remove duplicates
-      allTitles = await getRepository(CacheTitles).find();
+      const allTitles = await getRepository(CacheTitles).find();
       for (const t of allTitles) {
         const titles = allTitles.filter(o => o.game === t.game && o.title === t.title);
         if (titles.length > 1) {
           // remove title if we have more than one title
-          allTitles = allTitles.filter(o => String(o.id) !== String(t.id));
           await getManager()
             .createQueryBuilder()
             .delete()
@@ -272,7 +235,6 @@ export const init = () => {
             .execute();
         }
       }
-      cb(null, allTitles);
     });
     socket.on('updateGameAndTitle', async (data: { game: string, title: string, tags: string[] }, cb: (status: boolean | null) => void) => {
       const status = await setTitleAndGame(data);
@@ -301,6 +263,9 @@ export const init = () => {
             },
           ])
           .execute();
+      } else {
+        // update timestamp
+        await getRepository(CacheTitles).save({ ...item, timestamp: Date.now() });
       }
       cb(null);
     });
