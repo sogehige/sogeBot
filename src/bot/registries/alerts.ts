@@ -1,9 +1,9 @@
 import {
-  getRepository, In, IsNull, Not, 
+  getRepository, In, IsNull, Not,
 } from 'typeorm';
 
 import {
-  Alert, AlertCheer, AlertCommandRedeem, AlertFollow, AlertHost, AlertInterface, AlertMedia, AlertMediaInterface, AlertRaid, AlertResub, AlertSub, AlertSubcommunitygift, AlertSubgift, AlertTip, EmitData, 
+  Alert, AlertCheer, AlertCommandRedeem, AlertFollow, AlertHost, AlertInterface, AlertMedia, AlertMediaInterface, AlertRaid, AlertResub, AlertSub, AlertSubcommunitygift, AlertSubgift, AlertTip, EmitData,
 } from '../database/entity/alert';
 import { persistent } from '../decorators';
 import { getLocalizedName } from '../helpers/getLocalized';
@@ -24,7 +24,7 @@ class Alerts extends Registry {
   constructor() {
     super();
     this.addMenu({
-      category: 'registry', name: 'alerts', id: 'registry/alerts/list', this: null, 
+      category: 'registry', name: 'alerts', id: 'registry/alerts/list', this: null,
     });
     const init = (retry = 0) => {
       if (retry === 10000) {
@@ -71,19 +71,19 @@ class Alerts extends Registry {
       if (areAlertsMuted !== null) {
         this.areAlertsMuted = areAlertsMuted;
       }
-      cb(null, this.areAlertsMuted);
+      typeof cb === 'function' ? cb(null, this.areAlertsMuted) : null;
     });
     adminEndpoint(this.nsp, 'alerts::isSoundMuted', (isSoundMuted: boolean | null, cb) => {
       if (isSoundMuted !== null) {
         this.isSoundMuted = isSoundMuted;
       }
-      cb(null, this.isSoundMuted);
+      typeof cb === 'function' ? cb(null, this.isSoundMuted) : null;
     });
     adminEndpoint(this.nsp, 'alerts::isTTSMuted', (isTTSMuted: boolean | null, cb) => {
       if (isTTSMuted !== null) {
         this.isTTSMuted = isTTSMuted;
       }
-      cb(null, this.isTTSMuted);
+      typeof cb === 'function' ? cb(null, this.isTTSMuted) : null;
     });
     adminEndpoint(this.nsp, 'alerts::deleteMedia', async (id, cb) => {
       cb(
@@ -98,7 +98,7 @@ class Alerts extends Registry {
           null,
           await getRepository(AlertMedia).save({
             ...item,
-            id: toClone[1], 
+            id: toClone[1],
           }),
         );
       } catch (e) {
@@ -216,7 +216,7 @@ class Alerts extends Registry {
   trigger(opts: EmitData) {
     if (!this.areAlertsMuted) {
       ioServer?.of('/registries/alerts').emit('alert', {
-        ...opts, isTTSMuted: this.isTTSMuted, isSoundMuted: this.isSoundMuted, 
+        ...opts, isTTSMuted: this.isTTSMuted, isSoundMuted: this.isSoundMuted,
       });
     }
   }
