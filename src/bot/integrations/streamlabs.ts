@@ -193,6 +193,8 @@ class Streamlabs extends Integration {
   async parse(eventData: StreamlabsEvent.Donation) {
     if (eventData.type === 'donation') {
       for (const event of eventData.message) {
+        const timestamp = (event.created_at * 1000) || Date.now();
+
         debug('streamlabs', event);
         if (!event.isTest) {
           const user = await users.getUserByUsername(event.from.toLowerCase());
@@ -200,17 +202,16 @@ class Streamlabs extends Integration {
 
           // workaround for https://github.com/sogehige/sogeBot/issues/3338
           // incorrect currency on event rerun
-          const parsedCurrency = (event.formatted_amount as string).match(/(?<currency>[A-Z\$]{3}|\$)/);
+          const parsedCurrency = (event.formatted_amount as string).match(/(?<currency>[A-Z$]{3}|\$)/);
           if (parsedCurrency && parsedCurrency.groups) {
             event.currency = (parsedCurrency.groups.currency === '$' ? 'USD' : parsedCurrency.groups.currency) as currency;
           }
 
-          const created_at = (event.created_at * 1000) || Date.now();
           // check if it is new tip (by message and by tippedAt time interval)
           if (tips.find(item => {
             return item.message === event.message
-            && (item.tippedAt || 0) - 30000 < created_at
-            && (item.tippedAt || 0) + 30000 > created_at;
+            && (item.tippedAt || 0) - 30000 < timestamp
+            && (item.tippedAt || 0) + 30000 > timestamp;
           })) {
             return; // we already have this one
           }
@@ -220,7 +221,7 @@ class Streamlabs extends Integration {
             currency:      event.currency,
             sortAmount:    currency.exchange(Number(event.amount), event.currency, mainCurrency.value),
             message:       event.message,
-            tippedAt:      created_at,
+            tippedAt:      timestamp,
             exchangeRates: currency.rates,
             userId:        user.userId,
           };
@@ -232,13 +233,13 @@ class Streamlabs extends Integration {
           tip(`${event.from.toLowerCase()}${user.userId ? '#' + user.userId : ''}, amount: ${Number(event.amount).toFixed(2)}${event.currency}, message: ${event.message}`);
         }
         eventlist.add({
-          event:     'tip',
-          amount:    Number(event.amount),
-          currency:  event.currency,
-          userId:    String(await users.getIdByName(event.from.toLowerCase())),
-          message:   event.message,
-          timestamp: Date.now(),
-          isTest:    event.isTest,
+          event:    'tip',
+          amount:   Number(event.amount),
+          currency: event.currency,
+          userId:   String(await users.getIdByName(event.from.toLowerCase())),
+          message:  event.message,
+          timestamp,
+          isTest:   event.isTest,
         });
         eventEmitter.emit('tip', {
           isAnonymous:         false,
@@ -260,11 +261,11 @@ class Streamlabs extends Integration {
         });
 
         triggerInterfaceOnTip({
-          username:  event.from.toLowerCase(),
-          amount:    Number(event.amount),
-          message:   event.message,
-          currency:  event.currency,
-          timestamp: Date.now(),
+          username: event.from.toLowerCase(),
+          amount:   Number(event.amount),
+          message:  event.message,
+          currency: event.currency,
+          timestamp,
         });
       }
     }

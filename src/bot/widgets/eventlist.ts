@@ -1,7 +1,9 @@
-import { getRepository } from 'typeorm';
+import { SECOND } from '@sogebot/ui-helpers/constants';
+import { Between, getRepository } from 'typeorm';
 
 import type { EmitData } from '../database/entity/alert';
 import { EventList as EventListDB } from '../database/entity/eventList';
+import { UserTip } from '../database/entity/user';
 import { getLocalizedName } from '../helpers/getLocalized';
 import { error } from '../helpers/log';
 import { adminEndpoint } from '../helpers/socket';
@@ -135,6 +137,7 @@ class EventList extends Widget {
       });
       // we need to change userId => username and from => from username for eventlist compatibility
       const mapping = new Map() as Map<string, string>;
+      const tipMapping = new Map() as Map<string, number>;
       for (const event of events) {
         const values = JSON.parse(event.values_json);
         if (values.fromId && values.fromId != '0') {
@@ -149,6 +152,17 @@ class EventList extends Widget {
         } else {
           mapping.set(event.userId, event.userId.replace('#__anonymous__', ''));
         }
+        // pair tips so we have sortAmount to use in eventlist filter
+        if (event.event === 'tip') {
+          // search in DB for corresponding tip, unfortunately pre 13.0.0 timestamp won't exactly match (we are adding 10 seconds up/down)
+          const tip = await getRepository(UserTip).findOne({
+            where: {
+              userId:   event.userId,
+              tippedAt: Between(event.timestamp - (10 * SECOND), event.timestamp + (10 * SECOND)),
+            },
+          });
+          tipMapping.set(event.id, tip?.sortAmount ?? 0);
+        }
       }
       this.emit('update',
         events.map(event => {
@@ -159,6 +173,7 @@ class EventList extends Widget {
           return {
             ...event,
             username:    mapping.get(event.userId),
+            sortAmount:  tipMapping.get(event.id),
             values_json: JSON.stringify(values),
           };
         }),

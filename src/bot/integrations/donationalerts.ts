@@ -151,13 +151,15 @@ class Donationalerts extends Integration {
       parsedTips.length = 20;
     }
 
+    const timestamp = Date.now();
+
     eventlist.add({
-      event:     'tip',
-      amount:    data.amount,
-      currency:  data.currency,
-      userId:    String(await users.getIdByName(data.username.toLowerCase()) ?? '0'),
-      message:   data.message,
-      timestamp: Date.now(),
+      event:    'tip',
+      amount:   data.amount,
+      currency: data.currency,
+      userId:   String(await users.getIdByName(data.username.toLowerCase()) ?? '0'),
+      message:  data.message,
+      timestamp,
     });
 
     eventEmitter.emit('tip', {
@@ -187,7 +189,7 @@ class Donationalerts extends Integration {
         currency:      data.currency,
         sortAmount:    currency.exchange(Number(data.amount), data.currency, mainCurrency.value),
         message:       data.message,
-        tippedAt:      Date.now(),
+        tippedAt:      timestamp,
         exchangeRates: currency.rates,
         userId:        user.userId,
       };
@@ -201,11 +203,11 @@ class Donationalerts extends Integration {
     }
 
     triggerInterfaceOnTip({
-      username:  data.username.toLowerCase(),
-      amount:    data.amount,
-      message:   data.message,
-      currency:  data.currency,
-      timestamp: Date.now(),
+      username: data.username.toLowerCase(),
+      amount:   data.amount,
+      message:  data.message,
+      currency: data.currency,
+      timestamp,
     });
   }
 }

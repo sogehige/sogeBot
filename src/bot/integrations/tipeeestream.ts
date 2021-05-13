@@ -153,6 +153,7 @@ class TipeeeStream extends Integration {
       }
 
       let isAnonymous = false;
+      const timestamp = Date.now();
       users.getUserByUsername(username)
         .then(async(user) => {
           const newTip: UserTipInterface = {
@@ -161,30 +162,30 @@ class TipeeeStream extends Integration {
             sortAmount:    currency.exchange(Number(amount), donationCurrency, mainCurrency.value),
             message,
             exchangeRates: currency.rates,
-            tippedAt:      Date.now(),
+            tippedAt:      timestamp,
             userId:        user.userId,
           };
           getRepository(UserTip).save(newTip);
           tip(`${username.toLowerCase()}${user.userId ? '#' + user.userId : ''}, amount: ${Number(amount).toFixed(2)}${donationCurrency}, message: ${message}`);
           eventlist.add({
-            event:     'tip',
+            event:    'tip',
             amount,
-            currency:  donationCurrency,
-            userId:    user.userId,
+            currency: donationCurrency,
+            userId:   user.userId,
             message,
-            timestamp: Date.now(),
+            timestamp,
           });
         })
         .catch(() => {
           // user not found on Twitch
           tip(`${username.toLowerCase()}#__anonymous__, amount: ${Number(amount).toFixed(2)}${donationCurrency}, message: ${message}`);
           eventlist.add({
-            event:     'tip',
+            event:    'tip',
             amount,
-            currency:  donationCurrency,
-            userId:    `${username}#__anonymous__`,
+            currency: donationCurrency,
+            userId:   `${username}#__anonymous__`,
             message,
-            timestamp: Date.now(),
+            timestamp,
           });
           isAnonymous = true;
         }).finally(() => {
@@ -208,11 +209,11 @@ class TipeeeStream extends Integration {
           });
 
           triggerInterfaceOnTip({
-            username:  username.toLowerCase(),
+            username: username.toLowerCase(),
             amount,
             message,
-            currency:  donationCurrency,
-            timestamp: Date.now(),
+            currency: donationCurrency,
+            timestamp,
           });
         });
     } catch (e) {
