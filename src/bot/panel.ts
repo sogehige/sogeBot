@@ -11,14 +11,10 @@ import gitCommitInfo from 'git-commit-info';
 import _, { isEqual } from 'lodash';
 import sanitize from 'sanitize-filename';
 import {
-  getConnection, getManager, getRepository, IsNull,
+  getConnection, getManager, getRepository,
 } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 
 import { CacheTitles } from './database/entity/cacheTitles';
-import {
-  Dashboard, DashboardInterface, Widget,
-} from './database/entity/dashboard';
 import { Translation } from './database/entity/translation';
 import { TwitchTag, TwitchTagInterface } from './database/entity/twitch';
 import { User } from './database/entity/user';
@@ -38,7 +34,7 @@ import {
   getDEBUG, info, setDEBUG,
 } from './helpers/log';
 import {
-  app, ioServer, menu, menuPublic, server, serverSecure, setApp, setServer, widgets,
+  app, ioServer, menu, menuPublic, server, serverSecure, setApp, setServer,
 } from './helpers/panel';
 import { socketsConnectedDec, socketsConnectedInc } from './helpers/panel/';
 import { errors, warns } from './helpers/panel/alerts';
@@ -356,90 +352,6 @@ export const init = () => {
         }
       } while (warns.length > 0);
       cb(null, toShow);
-    });
-
-    adminEndpoint('/', 'panel::availableWidgets', async (opts, cb) => {
-      const dashboards = await getRepository(Dashboard).find({
-        where:     { userId: opts.userId, type: opts.type },
-        relations: ['widgets'],
-        order:     { createdAt: 'ASC' },
-      });
-
-      const sendWidgets: typeof widgets = [];
-      const dashWidgets = dashboards.map(o => o.widgets).flat();
-      for(const widget of widgets) {
-        if (!dashWidgets.find(o => o.name === widget.id)) {
-          sendWidgets.push(widget);
-        }
-      }
-      cb(null, sendWidgets);
-    });
-
-    adminEndpoint('/', 'panel::dashboards', async (opts, cb) => {
-      const userId = opts.userId;
-      const dashboards = async () => {
-        getRepository(Widget).delete({ dashboardId: IsNull() });
-        return getRepository(Dashboard).find({
-          where:     { userId: opts.userId, type: opts.type },
-          relations: ['widgets'],
-          order:     { createdAt: 'ASC' },
-        });
-      };
-
-      if ((await dashboards()).length === 0) {
-        const mainDashboard = await getRepository(Dashboard).findOne({
-          userId, name: 'Main', type: 'admin',
-        });
-        if (!mainDashboard) {
-          await getRepository(Dashboard).save({
-            name: 'Main', createdAt: 0, userId, type: 'admin',
-          });
-        }
-      }
-      cb(null, await dashboards());
-    });
-
-    adminEndpoint('/', 'panel::dashboards::remove', async (opts, cb) => {
-      await getRepository(Dashboard).delete({
-        userId: opts.userId, type: opts.type, id: opts.id,
-      });
-      await getRepository(Widget).delete({ dashboardId: IsNull() });
-      cb(null);
-    });
-
-    adminEndpoint('/', 'panel::dashboards::create', async (opts, cb) => {
-      cb(null, await getRepository(Dashboard).save({
-        name: opts.name, createdAt: Date.now(), id: uuid(), userId: opts.userId, type: 'admin',
-      }));
-    });
-
-    socket.on('addWidget', async function (widgetName: string, id: string, cb: (dashboard?: DashboardInterface) => void) {
-      // add widget to bottom left
-      const dashboard = await getRepository(Dashboard).findOne({
-        relations: ['widgets'],
-        where:     { id } ,
-      });
-      if (dashboard) {
-        let y = 0;
-        for (const w of dashboard.widgets) {
-          y = Math.max(y, w.positionY + w.height);
-        }
-        dashboard.widgets.push({
-          name:      widgetName,
-          positionX: 0,
-          positionY: y,
-          width:     4,
-          height:    3,
-        });
-        cb(await getRepository(Dashboard).save(dashboard));
-      } else {
-        cb(undefined);
-      }
-    });
-
-    adminEndpoint('/', 'panel::dashboards::save', async (dashboards) => {
-      await getRepository(Dashboard).save(dashboards);
-      await getRepository(Widget).delete({ dashboardId: IsNull() });
     });
 
     socket.on('connection_status', (cb: (status: typeof statusObj) => void) => {

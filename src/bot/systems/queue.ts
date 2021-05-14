@@ -34,12 +34,6 @@ class Queue extends System {
 
   pickedUsers: QueueInterface[] = [];
 
-  constructor () {
-    super();
-
-    this.addWidget('queue', 'widget-title-queue', 'fas fa-users');
-  }
-
   sockets () {
     adminEndpoint(this.nsp, 'queue::getAllPicked', async(cb) => {
       try {

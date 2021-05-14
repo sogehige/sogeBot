@@ -3,7 +3,7 @@
 import { getRepository } from 'typeorm';
 
 import {
-  Variable, VariableWatch, VariableWatchInterface, 
+  Variable, VariableWatch, VariableWatchInterface,
 } from '../database/entity/variable';
 import { isVariableSetById, setValueOf } from '../helpers/customvariables';
 import { csEmitter } from '../helpers/customvariables/emitter';
@@ -13,8 +13,6 @@ import Widget from './_interface';
 class CustomVariables extends Widget {
   constructor() {
     super();
-    this.addWidget('customvariables', 'widget-title-customvariables', 'fas fa-dollar-sign');
-
     csEmitter.on('refresh', () => {
       this.emit('refresh');
     });

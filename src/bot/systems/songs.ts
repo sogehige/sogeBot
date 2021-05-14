@@ -10,6 +10,7 @@ import ytpl from 'ytpl';
 import ytsr from 'ytsr';
 
 import {
+  currentSongType,
   SongBan, SongPlaylist, SongPlaylistInterface, SongRequest,
 } from '../database/entity/song';
 import { User } from '../database/entity/user';
@@ -33,10 +34,6 @@ const cachedTags = new Set<string>();
 let isCachedTagsValid = false;
 const emptyCurrentSong = {
   videoId: null, title: '', type: '', username: '', volume: 0, loudness: 0, forceVolume: false, startTime: 0, endTime: Number.MAX_SAFE_INTEGER,
-};
-
-export type currentSongType = {
-  videoId: null | string, title: string, type: string, username: string, volume: number; loudness: number; forceVolume: boolean; startTime: number; endTime: number;
 };
 
 class Songs extends System {
@@ -82,7 +79,6 @@ class Songs extends System {
     });
     this.addMenuPublic({ id: 'songrequests', name: 'songs' });
     this.addMenuPublic({ id: 'playlist', name: 'playlist' });
-    this.addWidget('ytplayer', 'widget-title-ytplayer', 'fas fa-headphones');
   }
 
   async getTags() {
@@ -570,7 +566,7 @@ class Songs extends System {
       return [{ response: translate('songs.song-is-banned'), ...opts }];
     }
 
-    return new Promise(async (resolve) => {
+    return new Promise((resolve) => {
       try {
         const videoInfo = await ytdl.getInfo('https://www.youtube.com/watch?v=' + videoID);
         if (Number(videoInfo.videoDetails.lengthSeconds) / 60 > this.duration) {

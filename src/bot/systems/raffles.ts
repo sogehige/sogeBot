@@ -68,8 +68,6 @@ class Raffles extends System {
 
   @onStartup()
   onStartup() {
-    this.addWidget('raffles', 'widget-title-raffles', 'fas fa-gift');
-
     this.announce();
     setInterval(() => {
       if (this.announceNewEntries && announceNewEntriesTime !== 0 && announceNewEntriesTime <= Date.now()) {

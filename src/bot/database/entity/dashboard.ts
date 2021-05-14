@@ -1,76 +1,29 @@
 import { EntitySchema } from 'typeorm';
 
-import { ColumnNumericTransformer } from './_transformer';
+declare namespace QuickActions {
+  type RunCommand = {
+    type: 'run-command';
+    command: string;
+  };
+}
 
-export interface DashboardInterface {
+export interface QuickActionInterface {
   id?: string;
-  widgets?: WidgetInterface[];
-  name: string;
-  createdAt: number;
-  type: 'admin' | 'mod' | 'viewer';
   userId: string;
+  order: number;
+  title: string;
+  action: QuickActions.RunCommand
 }
 
-export interface WidgetInterface {
-  id?: string;
-  dashboardId?: string;
-  dashboard?: DashboardInterface;
-  name: string;
-  positionX: number;
-  positionY: number;
-  height: number;
-  width: number;
-}
-
-export const Dashboard = new EntitySchema<Readonly<Required<DashboardInterface>>>({
-  name:    'dashboard',
+export const QuickAction = new EntitySchema<Readonly<Required<QuickActionInterface>>>({
+  name:    'quickaction',
   columns: {
     id: {
       type: 'uuid', primary: true, generated: 'uuid',
     },
-    name:      { type: String },
-    type:      { type: String, length: 6 },
-    userId:    { type: String },
-    createdAt: { type: 'bigint', transformer: new ColumnNumericTransformer() },
-  },
-  indices: [
-    {
-      name: 'IDX_dashboard_userId_createdAt_type', columns: ['userId', 'createdAt', 'type'], unique: true,
-    },
-  ],
-  relations: {
-    widgets: {
-      type:        'one-to-many',
-      target:      'widget',
-      inverseSide: 'dashboard',
-      cascade:     true,
-    },
-  },
-});
-
-export const Widget = new EntitySchema<Readonly<Required<WidgetInterface>>>({
-  name:    'widget',
-  columns: {
-    id: {
-      type: String, primary: true, generated: 'uuid',
-    },
-    name:        { type: String },
-    positionX:   { type: Number },
-    positionY:   { type: Number },
-    height:      { type: Number },
-    width:       { type: Number },
-    dashboardId: ['mysql', 'mariadb'].includes(process.env.TYPEORM_CONNECTION ?? 'better-sqlite3') ? {
-      type: 'varchar', length: '36', nullable: true,
-    } : { type: 'uuid', nullable: true },
-  },
-  relations: {
-    dashboard: {
-      type:        'many-to-one',
-      target:      'dashboard',
-      joinColumn:  { name: 'dashboardId' },
-      inverseSide: 'widgets',
-      onDelete:    'CASCADE',
-      onUpdate:    'CASCADE',
-    },
+    userId: { type: String },
+    order:  { type: Number },
+    title:  { type: String },
+    action: { type: 'simple-json' },
   },
 });

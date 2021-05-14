@@ -51,11 +51,6 @@ class Bets extends System {
   })
   public betPercentGain = 20;
 
-  constructor() {
-    super();
-    this.addWidget('bets', 'widget-title-bets', 'far fa-money-bill-alt');
-  }
-
   @onStartup()
   public async checkIfBetExpired() {
     if (!isDbConnected) {
@@ -280,9 +275,10 @@ class Bets extends System {
           return [{ response: prepare('bets.undefinedBet', { command: opts.command }), ...opts }];
         case ERROR_IS_LOCKED:
           return [{ response: prepare('bets.timeUpBet'), ...opts } ];
-        case ERROR_DIFF_BET:
+        case ERROR_DIFF_BET: {
           const result = (currentBet as Required<BetsInterface>).participations.find(o => String(o.userId) === String(opts.sender.userId));
           return [{ response: prepare('bets.diffBet').replace(/\$option/g, String((result?.optionIdx || 0) + 1)), ...opts } ];
+        }
         default:
           warning(e.stack);
           return [{ response: prepare('bets.error', { command: opts.command }).replace(/\$maxIndex/g, String((currentBet as BetsInterface).options.length)), ...opts }];

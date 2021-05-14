@@ -25,11 +25,6 @@ import System from './_interface';
  */
 
 class Commercial extends System {
-  constructor () {
-    super();
-    this.addWidget('commercial', 'widget-title-commercial', 'fas fa-dollar-sign');
-  }
-
   sockets() {
     adminEndpoint(this.nsp, 'commercial.run', (data) => {
       tmi.message({

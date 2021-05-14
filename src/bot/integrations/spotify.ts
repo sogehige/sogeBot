@@ -1,11 +1,11 @@
 import crypto from 'crypto';
 
+import { HOUR, SECOND } from '@sogebot/ui-helpers/constants';
 import chalk from 'chalk';
 import _ from 'lodash';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { getRepository } from 'typeorm';
 
-import { HOUR, SECOND } from '@sogebot/ui-helpers/constants';
 import { SpotifySongBan } from '../database/entity/spotify';
 import {
   command, default_permission, persistent, settings, ui,
@@ -113,7 +113,6 @@ class Spotify extends Integration {
 
   @onStartup()
   onStartup() {
-    this.addWidget('spotify', 'widget-title-spotify', 'fab fa-spotify');
     this.addMenu({
       category: 'manage', name: 'spotifybannedsongs', id: 'manage/spotify/bannedsongs', this: this,
     });

@@ -5,11 +5,6 @@ import { publicEndpoint } from '../helpers/socket';
 import Widget from './_interface';
 
 class Social extends Widget {
-  constructor() {
-    super();
-    this.addWidget('social', 'widget-title-social', 'fas fa-share-square');
-  }
-
   sockets() {
     publicEndpoint(this.nsp, 'generic::getAll', async (opts: { limit?: number }, cb) => {
       if (cb) {

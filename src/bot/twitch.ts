@@ -24,13 +24,7 @@ import users from './users';
 class Twitch extends Core {
   @settings('general')
   isTitleForced = false;
-
-  constructor () {
-    super();
-
-    this.addWidget('twitch', 'widget-title-twitch', 'fab fa-twitch');
-  }
-
+  
   sockets() {
     adminEndpoint(this.nsp, 'broadcaster', (cb) => {
       try {

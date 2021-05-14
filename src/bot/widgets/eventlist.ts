@@ -13,11 +13,6 @@ import users from '../users';
 import Widget from './_interface';
 
 class EventList extends Widget {
-  constructor() {
-    super();
-    this.addWidget('eventlist', 'widget-title-eventlist', 'far fa-calendar');
-  }
-
   public sockets() {
     adminEndpoint(this.nsp, 'eventlist::removeById', async (idList, cb) => {
       const ids = Array.isArray(idList) ? [...idList] : [idList];

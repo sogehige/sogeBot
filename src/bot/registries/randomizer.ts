@@ -1,6 +1,6 @@
+import { LOW } from '@sogebot/ui-helpers/constants';
 import { getRepository, IsNull } from 'typeorm';
 
-import { LOW } from '@sogebot/ui-helpers/constants';
 import { Randomizer as RandomizerEntity, RandomizerItem } from '../database/entity/randomizer';
 import { parser } from '../decorators';
 import { addToViewersCache, getFromViewersCache } from '../helpers/permissions';
@@ -14,7 +14,6 @@ class Randomizer extends Registry {
     this.addMenu({
       category: 'registry', name: 'randomizer', id: 'registry/randomizer/list', this: null,
     });
-    this.addWidget('randomizer', 'widget-title-randomizer', 'fas fa-dice');
   }
 
   sockets () {

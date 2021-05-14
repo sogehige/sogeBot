@@ -1,15 +1,14 @@
 import { readdirSync, writeFileSync } from 'fs';
 
+import { HOUR, MINUTE } from '@sogebot/ui-helpers/constants';
 import gitCommitInfo from 'git-commit-info';
 import {
   capitalize,
-  get, isNil, map,
+  get, isNil,
 } from 'lodash';
 import { getConnection, getRepository } from 'typeorm';
 
 import Core from './_interface';
-import { HOUR, MINUTE } from '@sogebot/ui-helpers/constants';
-import { Widget } from './database/entity/dashboard';
 import { PermissionCommands } from './database/entity/permissions';
 import {
   command, default_permission, settings, ui,
@@ -197,7 +196,6 @@ class General extends Core {
   @command('!_debug')
   @default_permission(defaultPermissions.CASTERS)
   public async debug(opts: CommandOptions): Promise<CommandResponse[]> {
-    const widgets = await getRepository(Widget).find();
     const connection = await getConnection();
 
     const lang = this.lang;
@@ -239,7 +237,6 @@ class General extends Core {
     debug('*', `SYSTEMS      | ${enabledSystems.systems.join(', ')}`);
     debug('*', `GAMES        | ${enabledSystems.games.join(', ')}`);
     debug('*', `INTEGRATIONS | ${enabledSystems.integrations.join(', ')}`);
-    debug('*', `WIDGETS      | ${map(widgets, 'name').join(', ')}`);
     debug('*', `OAUTH        | BOT ${getOAuthStatus('bot')} | BROADCASTER ${getOAuthStatus('broadcaster')}`);
     debug('*', '======= END OF DEBUG MESSAGE =======');
     return [];

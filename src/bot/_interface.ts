@@ -21,7 +21,7 @@ import {
   error, info, warning,
 } from './helpers/log';
 import {
-  addMenu, addMenuPublic, addWidget, ioServer, menu, menuPublic,
+  addMenu, addMenuPublic, ioServer, menu, menuPublic,
 } from './helpers/panel';
 import { defaultPermissions } from './helpers/permissions/';
 import { register } from './helpers/register';
@@ -460,11 +460,7 @@ class Module {
   public addMenuPublic(opts: typeof menuPublic[number]) {
     addMenuPublic(opts);
   }
-
-  public addWidget(...opts: any[]) {
-    addWidget(opts[0], opts[1], opts[2]);
-  }
-
+  
   public async getAllSettings(withoutDefaults = false) {
     const promisedSettings: {
       [x: string]: any;
