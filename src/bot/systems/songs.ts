@@ -566,48 +566,48 @@ class Songs extends System {
       return [{ response: translate('songs.song-is-banned'), ...opts }];
     }
 
-    return new Promise((resolve) => {
-      try {
-        const videoInfo = await ytdl.getInfo('https://www.youtube.com/watch?v=' + videoID);
-        if (Number(videoInfo.videoDetails.lengthSeconds) / 60 > this.duration) {
-          resolve([{ response: translate('songs.song-is-too-long'), ...opts }]);
-        } else if (videoInfo.videoDetails.category !== 'Music' && this.onlyMusicCategory) {
-          if (Number(retry ?? 0) < 5) {
-            // try once more to be sure
-            setTimeout(() => {
-              resolve(this.addSongToQueue(opts, (retry ?? 0) + 1 ));
-            }, 500);
-          }
-          if (global.mocha) {
-            error('-- TEST ONLY ERROR --');
-            error({ category: videoInfo.videoDetails.category });
-          }
-          resolve([{ response: translate('songs.incorrect-category'), ...opts }]);
-        } else {
-          await getRepository(SongRequest).save({
-            videoId:  videoID,
-            title:    videoInfo.videoDetails.title,
-            addedAt:  Date.now(),
-            loudness: Number(videoInfo.loudness ?? -15),
-            length:   Number(videoInfo.videoDetails.lengthSeconds),
-            username: opts.sender.username,
-          });
-          this.getMeanLoudness();
-          const response = prepare('songs.song-was-added-to-queue', { name: videoInfo.videoDetails.title });
-          resolve([{ response, ...opts }]);
-        }
-      } catch (e) {
+    try {
+      const videoInfo = await ytdl.getInfo('https://www.youtube.com/watch?v=' + videoID);
+      if (Number(videoInfo.videoDetails.lengthSeconds) / 60 > this.duration) {
+        return [{ response: translate('songs.song-is-too-long'), ...opts }];
+      } else if (videoInfo.videoDetails.category !== 'Music' && this.onlyMusicCategory) {
         if (Number(retry ?? 0) < 5) {
           // try once more to be sure
-          setTimeout(() => {
-            resolve(this.addSongToQueue(opts, (retry ?? 0) + 1 ));
-          }, 500);
-        } else {
-          error(e);
-          resolve([{ response: translate('songs.song-was-not-found'), ...opts }]);
+          await new Promise((resolve) => {
+            setTimeout(() => resolve(true), 500);
+          });
+          return this.addSongToQueue(opts, (retry ?? 0) + 1 );
         }
+        if (global.mocha) {
+          error('-- TEST ONLY ERROR --');
+          error({ category: videoInfo.videoDetails.category });
+        }
+        return [{ response: translate('songs.incorrect-category'), ...opts }];
+      } else {
+        await getRepository(SongRequest).save({
+          videoId:  videoID,
+          title:    videoInfo.videoDetails.title,
+          addedAt:  Date.now(),
+          loudness: Number(videoInfo.loudness ?? -15),
+          length:   Number(videoInfo.videoDetails.lengthSeconds),
+          username: opts.sender.username,
+        });
+        this.getMeanLoudness();
+        const response = prepare('songs.song-was-added-to-queue', { name: videoInfo.videoDetails.title });
+        return [{ response, ...opts }];
       }
-    });
+    } catch (e) {
+      if (Number(retry ?? 0) < 5) {
+        // try once more to be sure
+        await new Promise((resolve) => {
+          setTimeout(() => resolve(true), 500);
+        });
+        return this.addSongToQueue(opts, (retry ?? 0) + 1 );
+      } else {
+        error(e);
+        return [{ response: translate('songs.song-was-not-found'), ...opts }];
+      }
+    }
   }
 
   @command('!wrongsong')
