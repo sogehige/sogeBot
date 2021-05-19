@@ -50,7 +50,7 @@ function adminEndpoint (
   nsp: string,
   on: 'generic::getOne' | 'generic::deleteById' | 'customvariables::runScript' | 'customvariables::delete'
   | 'test.event' | 'alerts::deleteMedia' | 'alerts::getOneMedia' | 'randomizer::showById'
-  | 'eventlist::resend' | 'viewers::followedAt',
+  | 'eventlist::resend' | 'viewers::followedAt' | 'quickactions::getAll',
   callback: (id: string, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 
 // string + cb
