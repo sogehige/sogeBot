@@ -4,6 +4,8 @@ import https from 'https';
 import { normalize } from 'path';
 
 import express from 'express';
+import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import { Server as io } from 'socket.io';
 
 import type { Module } from '../_interface';
@@ -60,5 +62,30 @@ export const setServer = () => {
     } else {
       info(`No certificates were provided, serving only HTTP.`);
     }
+  }
+};
+
+export const authorize = async (req: Request, res: Response, next: (error?: string) => void) => {
+  try {
+    const { authorization } = req.headers;
+    if (!authorization) {
+      throw new Error('You must send an Authorization header');
+    }
+
+    const [authType, token] = authorization.trim().split(' ');
+    if (authType !== 'Bearer') {
+      throw new Error('Expected a Bearer token');
+    }
+    const JWTKey = require('../socket').default.JWTKey;
+    const validatedToken = jwt.verify(token, JWTKey) as {
+      userId: string; username: string; privileges: any;
+    };
+
+    if (validatedToken.privileges.haveAdminPrivileges !== 2 /* authorized */) {
+      throw new Error('You don\'t have permission to access this resource.');
+    }
+    next();
+  } catch (error) {
+    res.status(401).send(error.message);
   }
 };
