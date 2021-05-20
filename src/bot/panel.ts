@@ -85,7 +85,7 @@ const swaggerDefinition = {
   },
 };
 
-const options = {
+const options: swaggerJSDoc.Options = {
   swaggerDefinition,
   basePath: '/',
   security: [{ bearerAuth: [] }],
@@ -100,7 +100,8 @@ export const init = () => {
   app?.use(cors());
   app?.use(bodyParser.json());
   app?.use(bodyParser.urlencoded({ extended: true }));
-  app?.use('/api-explorer', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app?.use('/frame-api-explorer', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
   setServer();
 
   // highlights system
@@ -184,6 +185,10 @@ export const init = () => {
 
   menu.push({
     category: 'main', name: 'dashboard', id: 'dashboard', this: null,
+  });
+
+  menu.push({
+    category: 'stats', name: 'api-explorer', id: 'stats/api-explorer', this: null,
   });
 
   setTimeout(() => {

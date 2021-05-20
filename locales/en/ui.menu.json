@@ -89,5 +89,7 @@
   "lastfm": "Last.fm",
   "pubg": "PLAYERUNKNOWN'S BATTLEGROUNDS",
   "levels": "Levels",
-  "obswebsocket": "OBS Websocket"
+  "obswebsocket": "OBS Websocket",
+  "api-explorer": "API Explorer"
+
 }
