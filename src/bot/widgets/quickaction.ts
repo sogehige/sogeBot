@@ -15,6 +15,8 @@ class QuickAction extends Widget {
      * @swagger
      * /api/v1/quickaction:
      *   get:
+     *     tags:
+     *      - Quick Actions
      *     security:
      *      - bearerAuth: []
      *     summary: Retrieve a list of quick actions
@@ -25,6 +27,8 @@ class QuickAction extends Widget {
      *       '401':
      *         description: Not authenticated
      *   post:
+     *     tags:
+     *      - Quick Actions
      *     security:
      *      - bearerAuth: []
      *     consumes:
@@ -65,6 +69,8 @@ class QuickAction extends Widget {
      * @swagger
      * /api/v1/quickaction/{id}/trigger:
      *   post:
+     *     tags:
+     *      - Quick Actions
      *     security:
      *      - bearerAuth: []
      *     summary: Trigger quick action
@@ -100,6 +106,8 @@ class QuickAction extends Widget {
      * @swagger
      * /api/v1/quickaction/{id}:
      *   delete:
+     *     tags:
+     *      - Quick Actions
      *     security:
      *      - bearerAuth: []
      *     summary: Removes quick action
