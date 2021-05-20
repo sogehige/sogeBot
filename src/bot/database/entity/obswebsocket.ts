@@ -33,7 +33,7 @@ export const OBSWebsocket = new EntitySchema<Readonly<Required<OBSWebsocketInter
   name:    'obswebsocket',
   columns: {
     id: {
-      type: 'varchar', length: '14', primary: true, 
+      type: 'varchar', length: '14', primary: true,
     },
     name:             { type: String },
     advancedMode:     { type: 'boolean', default: false },

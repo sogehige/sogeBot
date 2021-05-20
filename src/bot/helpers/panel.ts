@@ -84,6 +84,8 @@ export const authorize = async (req: Request, res: Response, next: (error?: stri
     if (validatedToken.privileges.haveAdminPrivileges !== 2 /* authorized */) {
       throw new Error('You don\'t have permission to access this resource.');
     }
+    req.headers.userid = validatedToken.userId;
+    req.headers.username = validatedToken.username;
     next();
   } catch (error) {
     res.status(401).send(error.message);

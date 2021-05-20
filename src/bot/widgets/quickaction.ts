@@ -1,7 +1,9 @@
 import { getRepository } from 'typeorm';
 
+import { parserReply } from '../commons';
 import { QuickAction as qa, QuickActions } from '../database/entity/dashboard';
 import { onStartup } from '../decorators/on';
+import { getUserSender } from '../helpers/commons';
 import { error } from '../helpers/log';
 import { app, authorize } from '../helpers/panel';
 import Widget from './_interface';
@@ -10,10 +12,7 @@ class QuickAction extends Widget {
   @onStartup()
   enableAPI() {
     app?.get('/api/v1/quickaction', authorize, async (req, res) => {
-      const userId = req.headers.userid;
-      if (!userId) {
-        res.status(400).send('Missing userId header');
-      }
+      const userId = req.headers.userid as string;
       const [actions, count] = await getRepository(qa).findAndCount({ where: { userId } });
       res.send({
         data: actions,
@@ -21,14 +20,11 @@ class QuickAction extends Widget {
       });
     });
     app?.post('/api/v1/quickaction/', authorize, async (req, res) => {
-      const userId = req.headers.userid;
-      if (!userId) {
-        res.status(400).send('Missing userId header');
-      }
-      const item = req.body as QuickActions.Item<QuickActions.Types>;
+      const userId = req.headers.userid as string;
+      const item = req.body as QuickActions.Item;
       try {
         if (item.order === -1) {
-          item.order = await getRepository(qa).count({ userId: item.userId });
+          item.order = await getRepository(qa).count({ userId });
         }
         await getRepository(qa).save(item);
       } catch (e) {
@@ -36,12 +32,20 @@ class QuickAction extends Widget {
       }
       res.status(200).send(item);
     });
-    app?.delete('/api/v1/quickaction/:id', authorize, async (req, res) => {
-      const userId = req.headers.userid;
-      if (!userId) {
-        res.status(400).send('Missing userId header');
+    app?.post('/api/v1/quickaction/:id/trigger', authorize, async (req, res) => {
+      const userId = req.headers.userid as string;
+      const username = req.headers.username as string;
+      try {
+        const item = await getRepository(qa).findOneOrFail({ where: { id: req.params.id, userId } });
+        this.trigger(item, { userId, username });
+        res.status(200).send();
+      } catch (e) {
+        res.status(404).send('Not Found');
       }
 
+    });
+    app?.delete('/api/v1/quickaction/:id', authorize, async (req, res) => {
+      const userId = req.headers.userid as string;
       try {
         const item = await getRepository(qa).findOneOrFail({ id: req.params.id, userId: String(userId) });
 
@@ -58,6 +62,22 @@ class QuickAction extends Widget {
         res.status(500).send();
       }
     });
+  }
+
+  async trigger(item: QuickActions.Item, user: { userId: string, username: string }) {
+    switch (item.type) {
+      case 'command': {
+        const parser = new (require('../parser').default)();
+        const responses = await parser.command(getUserSender(user.userId, user.username), item.options.command, true);
+        for (let i = 0; i < responses.length; i++) {
+          setTimeout(async () => {
+            parserReply(await responses[i].response, { sender: responses[i].sender, attr: responses[i].attr });
+          }, 500 * i);
+        }
+
+        break;
+      }
+    }
   }
 }
 
