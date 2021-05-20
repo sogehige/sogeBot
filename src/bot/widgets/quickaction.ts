@@ -11,6 +11,34 @@ import Widget from './_interface';
 class QuickAction extends Widget {
   @onStartup()
   enableAPI() {
+    /**
+     * @swagger
+     * /api/v1/quickaction:
+     *   get:
+     *     security:
+     *      - bearerAuth: []
+     *     summary: Retrieve a list of quick actions
+     *     description: Retrieve a list of quick actions for current authenticated user
+     *     responses:
+     *       '200':
+     *         description: OK
+     *       '401':
+     *         description: Not authenticated
+     *   post:
+     *     security:
+     *      - bearerAuth: []
+     *     consumes:
+     *      - application/json
+     *     summary: Add new quick action item
+     *     description: Add new quick action item for current authenticated user
+     *     responses:
+     *       '200':
+     *         description: OK
+     *       '401':
+     *         description: Not authenticated
+     *       '400':
+     *         description: Bad request
+    */
     app?.get('/api/v1/quickaction', authorize, async (req, res) => {
       const userId = req.headers.userid as string;
       const [actions, count] = await getRepository(qa).findAndCount({ where: { userId } });
@@ -28,10 +56,34 @@ class QuickAction extends Widget {
         }
         await getRepository(qa).save(item);
       } catch (e) {
-        res.status(500).send(e);
+        res.status(400).send(e);
       }
       res.status(200).send(item);
     });
+
+    /**
+     * @swagger
+     * /api/v1/quickaction/{id}/trigger:
+     *   post:
+     *     security:
+     *      - bearerAuth: []
+     *     summary: Trigger quick action
+     *     description: Triggers quick action for authenticated user
+     *     parameters:
+     *      - in: path
+     *        name: id
+     *        schema:
+     *         type: string
+     *        required: true
+     *        description: The quick action id
+     *     responses:
+     *       '200':
+     *         description: OK
+     *       '401':
+     *         description: Not authenticated
+     *       '404':
+     *         description: Not Found
+    */
     app?.post('/api/v1/quickaction/:id/trigger', authorize, async (req, res) => {
       const userId = req.headers.userid as string;
       const username = req.headers.username as string;
@@ -42,8 +94,31 @@ class QuickAction extends Widget {
       } catch (e) {
         res.status(404).send('Not Found');
       }
-
     });
+
+    /**
+     * @swagger
+     * /api/v1/quickaction/{id}:
+     *   delete:
+     *     security:
+     *      - bearerAuth: []
+     *     summary: Removes quick action
+     *     description: Removes quick action for authenticated user
+     *     parameters:
+     *      - in: path
+     *        name: id
+     *        schema:
+     *         type: string
+     *        required: true
+     *        description: The quick action id
+     *     responses:
+     *       '400':
+     *         description: Bad request
+     *       '401':
+     *         description: Not authenticated
+     *       '404':
+     *         description: Not Found
+    */
     app?.delete('/api/v1/quickaction/:id', authorize, async (req, res) => {
       const userId = req.headers.userid as string;
       try {
@@ -59,7 +134,7 @@ class QuickAction extends Widget {
         res.status(404).send('Not Found');
       } catch (e) {
         error(e);
-        res.status(500).send();
+        res.status(400).send();
       }
     });
   }

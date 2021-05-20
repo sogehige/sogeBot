@@ -10,6 +10,8 @@ import RateLimit from 'express-rate-limit';
 import gitCommitInfo from 'git-commit-info';
 import _, { isEqual } from 'lodash';
 import sanitize from 'sanitize-filename';
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 import {
   getConnection, getManager, getRepository,
 } from 'typeorm';
@@ -66,12 +68,39 @@ const limiter = RateLimit({
   },
 });
 
+const swaggerDefinition = {
+  openapi: '3.0.1',
+  info:    {
+    title:   'sogeBot API Explorer',
+    version: '1.0.0',
+  },
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type:         'http',
+        scheme:       'bearer',
+        bearerFormat: 'JWT',
+      },
+    },
+  },
+};
+
+const options = {
+  swaggerDefinition,
+  basePath: '/',
+  security: [{ bearerAuth: [] }],
+  // Paths to files containing OpenAPI definitions
+  apis:     ['./src/bot/widgets/*.ts'],
+};
+
+const swaggerSpec = swaggerJSDoc(options);
 export const init = () => {
   setApp(express());
   app?.use(limiter);
   app?.use(cors());
   app?.use(bodyParser.json());
   app?.use(bodyParser.urlencoded({ extended: true }));
+  app?.use('/api-explorer', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   setServer();
 
   // highlights system
