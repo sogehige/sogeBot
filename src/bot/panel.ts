@@ -60,10 +60,13 @@ const port = process.env.PORT ?? '20000';
 const secureport = process.env.SECUREPORT ?? '20443';
 
 const limiter = RateLimit({
-  windowMs:     5 * 60 * 1000,
-  max:          100,
+  windowMs: 5 * 60 * 1000,
+  max:      100,
+  skip:     (req) => {
+    return req.url.includes('/socket/refresh');
+  },
   message:      'Too many requests from this IP, please try again after several minutes.',
-  keyGenerator: (req, res) => {
+  keyGenerator: (req) => {
     return req.ip + req.url;
   },
 });
