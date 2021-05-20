@@ -4,7 +4,7 @@ import { parserReply } from '../commons';
 import { QuickAction as qa, QuickActions } from '../database/entity/dashboard';
 import { onStartup } from '../decorators/on';
 import { getUserSender } from '../helpers/commons';
-import { error } from '../helpers/log';
+import { error, info } from '../helpers/log';
 import { app, authorize } from '../helpers/panel';
 import Widget from './_interface';
 
@@ -148,6 +148,7 @@ class QuickAction extends Widget {
   }
 
   async trigger(item: QuickActions.Item, user: { userId: string, username: string }) {
+    info(`Quick Action ${item.id} triggered by ${user.username}#${user.userId}`);
     switch (item.type) {
       case 'command': {
         const parser = new (require('../parser').default)();
