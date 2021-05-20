@@ -14,7 +14,7 @@ export declare namespace QuickActions {
 
   type CommandItem = QuickActions.defaultAttributes & {
     type: 'command',
-    options: {
+    options: defaultOptions & {
       command: string,
     },
   };
