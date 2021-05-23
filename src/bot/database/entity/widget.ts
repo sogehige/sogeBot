@@ -2,6 +2,24 @@ import { EntitySchema } from 'typeorm';
 
 import { ColumnNumericTransformer } from './_transformer';
 
+export interface WidgetCustomInterface {
+  id: string;
+  url: string;
+  name: string;
+}
+
+export const WidgetCustom = new EntitySchema<Readonly<Required<WidgetCustomInterface>>>({
+  name:    'widget_custom',
+  columns: {
+    id: {
+      type:    String,
+      primary: true,
+    },
+    url:  { type: String },
+    name: { type: String },
+  },
+});
+
 export interface WidgetSocialInterface {
   id: string;
   type: string;
