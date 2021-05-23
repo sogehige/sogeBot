@@ -161,10 +161,10 @@ export const init = () => {
   app?.get('/public/', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'dist', 'index.html'));
   });
-  app?.get('/oauth/:page?', function (req, res) {
+  app?.get('/credentials/oauth/:page?', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', 'oauth', 'index.html'));
   });
-  app?.get('/login', function (req, res) {
+  app?.get('/credentials/login', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', 'login', 'index.html'));
   });
   app?.get('/overlays/:overlay', function (req, res) {

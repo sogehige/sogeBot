@@ -77,7 +77,7 @@ class Spotify extends Integration {
   @ui({ type: 'text-input', secret: true })
   clientSecret = '';
   @settings('connection')
-  redirectURI = 'http://localhost:20000/oauth/spotify';
+  redirectURI = 'http://localhost:20000/credentials/oauth/spotify';
   @settings('connection')
   @ui({ type: 'text-input', readOnly: true })
   username = '';
