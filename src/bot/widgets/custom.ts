@@ -1,7 +1,8 @@
 import { getRepository } from 'typeorm';
 
-import { WidgetCustom } from '../database/entity/widget';
+import { WidgetCustom, WidgetCustomInterface } from '../database/entity/widget';
 import { onStartup } from '../decorators/on';
+import { error } from '../helpers/log';
 import { app, authorize } from '../helpers/panel';
 import Widget from './_interface';
 
@@ -16,57 +17,89 @@ class Custom extends Widget {
      *      - Widgets
      *     security:
      *      - bearerAuth: []
-     *     summary: Retrieve a list of custom urls for widget
-     *     parameters:
-     *      - in: header
-     *        name: cursor
-     *        schema:
-     *         type: string
-     *        description: Pagination cursor
+     *     summary: Retrieve a list of custom urls for widget for authenticated user
      *     responses:
      *       '200':
      *         description: OK
      *       '401':
      *         description: Not authenticated
+     *   post:
+     *     tags:
+     *      - Widgets
+     *     security:
+     *      - bearerAuth: []
+     *     consumes:
+     *      - application/json
+     *     summary: Add new custom url item
+     *     description: Add new custom url item for current authenticated user
+     *     responses:
+     *       '200':
+     *         description: OK
+     *       '401':
+     *         description: Not authenticated
+     *       '400':
+     *         description: Bad request
     */
     app?.get('/api/v1/custom', authorize, async (req, res) => {
-      const b64cookie = req.headers.cursor as string | undefined;
+      const userId = req.headers.userid as string;
 
-      let take =  25;
-      let page = 0;
-      let count = 0;
-
-      if (b64cookie) {
-        const cookie = JSON.parse(Buffer.from(b64cookie, 'base64').toString('utf-8'));
-        take = cookie.take;
-        page = cookie.page;
-        count = cookie.count;
-      }
-
-      if (count === 0) {
-        count = await getRepository(WidgetCustom).count();
-      }
-
-      const items = await getRepository(WidgetCustom).find({
-        take,
+      const [items, count] = await getRepository(WidgetCustom).findAndCount({
+        where: { userId },
         order: { name: 'DESC' },
-        skip:  page * take,
       });
 
-      let cursor = null;
-      if (count > take + (page * take)) {
-        // we have some left, we need to generate new cursor
-        cursor = Buffer.from(JSON.stringify({
-          take: 25,
-          page: page + 1,
-          count,
-        })).toString('base64');
-      }
       res.send({
         data: items,
         count,
-        cursor,
       });
+    });
+    app?.post('/api/v1/custom/', authorize, async (req, res) => {
+      const userId = req.headers.userid as string;
+      const item = req.body as WidgetCustomInterface;
+      try {
+        await getRepository(WidgetCustom).save({ ...item, userId });
+      } catch (e) {
+        res.status(400).send(e);
+      }
+      res.status(200).send(item);
+    });
+
+    /**
+     * @swagger
+     * /api/v1/custom/{id}:
+     *   delete:
+     *     tags:
+     *      - Widgets
+     *     security:
+     *      - bearerAuth: []
+     *     summary: Removes custom url from widget
+     *     description: Removes custom url from widget for authenticated user
+     *     parameters:
+     *      - in: path
+     *        name: id
+     *        schema:
+     *         type: string
+     *        required: true
+     *        description: The quick action id
+     *     responses:
+     *       '400':
+     *         description: Bad request
+     *       '401':
+     *         description: Not authenticated
+     *       '404':
+     *         description: Not Found
+    */
+    app?.delete('/api/v1/custom/:id', authorize, async (req, res) => {
+      const userId = req.headers.userid as string;
+      try {
+        const item = await getRepository(WidgetCustom).findOneOrFail({ id: req.params.id, userId: String(userId) });
+
+        await getRepository(WidgetCustom).remove(item);
+        res.status(404).send('Not Found');
+      } catch (e) {
+        error(e);
+        res.status(400).send();
+      }
     });
   }
 }

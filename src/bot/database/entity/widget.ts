@@ -4,6 +4,7 @@ import { ColumnNumericTransformer } from './_transformer';
 
 export interface WidgetCustomInterface {
   id: string;
+  userId: string;
   url: string;
   name: string;
 }
@@ -15,8 +16,9 @@ export const WidgetCustom = new EntitySchema<Readonly<Required<WidgetCustomInter
       type:    String,
       primary: true,
     },
-    url:  { type: String },
-    name: { type: String },
+    userId: { type: String },
+    url:    { type: String },
+    name:   { type: String },
   },
 });
 

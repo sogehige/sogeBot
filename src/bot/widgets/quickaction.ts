@@ -58,7 +58,7 @@ class QuickAction extends Widget {
         if (item.order === -1) {
           item.order = await getRepository(qa).count({ userId });
         }
-        await getRepository(qa).save(item);
+        await getRepository(qa).save({ ...item, userId });
       } catch (e) {
         res.status(400).send(e);
       }
