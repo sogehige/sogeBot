@@ -1,0 +1,20 @@
+{
+  "entryFile": "src/bot/main.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/bot/api/*.ts"],
+  "spec": {
+    "outputDirectory": "src/bot/.cache/",
+    "specVersion": 3,
+    "securityDefinitions": {
+      "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+      }
+    }
+  },
+  "routes": {
+    "routesDir": "src/bot/.cache/",
+    "authenticationModule": "./src/bot/helpers/api/authenticate.ts"
+  }
+}

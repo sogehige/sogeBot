@@ -3,7 +3,7 @@ import { getRepository } from 'typeorm';
 import { WidgetCustom, WidgetCustomInterface } from '../database/entity/widget';
 import { onStartup } from '../decorators/on';
 import { error } from '../helpers/log';
-import { app, authorize } from '../helpers/panel';
+import { app /* authorize */ } from '../helpers/panel';
 import Widget from './_interface';
 
 class Custom extends Widget {
@@ -40,7 +40,7 @@ class Custom extends Widget {
      *       '400':
      *         description: Bad request
     */
-    app?.get('/api/v1/custom', authorize, async (req, res) => {
+    app?.get('/api/v1/custom', /* authorize, */ async (req, res) => {
       const userId = req.headers.userid as string;
 
       const [items, count] = await getRepository(WidgetCustom).findAndCount({
@@ -53,7 +53,7 @@ class Custom extends Widget {
         count,
       });
     });
-    app?.post('/api/v1/custom/', authorize, async (req, res) => {
+    app?.post('/api/v1/custom/', /* authorize, */ async (req, res) => {
       const userId = req.headers.userid as string;
       const item = req.body as WidgetCustomInterface;
       try {
@@ -89,7 +89,7 @@ class Custom extends Widget {
      *       '404':
      *         description: Not Found
     */
-    app?.delete('/api/v1/custom/:id', authorize, async (req, res) => {
+    app?.delete('/api/v1/custom/:id', /* authorize, */ async (req, res) => {
       const userId = req.headers.userid as string;
       try {
         const item = await getRepository(WidgetCustom).findOneOrFail({ id: req.params.id, userId: String(userId) });

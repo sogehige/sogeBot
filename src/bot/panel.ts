@@ -8,14 +8,16 @@ import cors from 'cors';
 import express from 'express';
 import RateLimit from 'express-rate-limit';
 import gitCommitInfo from 'git-commit-info';
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import _, { isEqual } from 'lodash';
 import sanitize from 'sanitize-filename';
-import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import {
   getConnection, getManager, getRepository,
 } from 'typeorm';
 
+import { RegisterRoutes } from './.cache/routes';
+import * as swaggerJSON from './.cache/swagger.json';
 import { CacheTitles } from './database/entity/cacheTitles';
 import { Translation } from './database/entity/translation';
 import { TwitchTag, TwitchTagInterface } from './database/entity/twitch';
@@ -28,6 +30,7 @@ import {
   getURL, getValueOf, isVariableSet, postURL,
 } from './helpers/customvariables';
 import { getIsBotStarted } from './helpers/database';
+import { UnauthorizedError } from './helpers/errors';
 import { flatten } from './helpers/flatten';
 import { setValue } from './helpers/general';
 import { getLang } from './helpers/locales';
@@ -71,39 +74,30 @@ const limiter = RateLimit({
   },
 });
 
-const swaggerDefinition = {
-  openapi: '3.0.1',
-  info:    {
-    title:   'sogeBot API Explorer',
-    version: '1.0.0',
-  },
-  components: {
-    securitySchemes: {
-      bearerAuth: {
-        type:         'http',
-        scheme:       'bearer',
-        bearerFormat: 'JWT',
-      },
-    },
-  },
-};
-
-const options: swaggerJSDoc.Options = {
-  swaggerDefinition,
-  basePath: '/',
-  security: [{ bearerAuth: [] }],
-  // Paths to files containing OpenAPI definitions
-  apis:     ['./src/bot/widgets/*.ts'],
-};
-
-const swaggerSpec = swaggerJSDoc(options);
 export const init = () => {
   setApp(express());
   app?.use(limiter);
   app?.use(cors());
   app?.use(bodyParser.json());
   app?.use(bodyParser.urlencoded({ extended: true }));
-  app?.use('/frame-api-explorer', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app?.use('/frame-api-explorer', swaggerUi.serve, swaggerUi.setup(swaggerJSON));
+  RegisterRoutes(app as any);
+  app?.use(function errorHandler(
+    err: UnauthorizedError | Error,
+    _req: any,
+    res: any,
+    next: () => void,
+  ): Express.Response | void {
+    if (err instanceof UnauthorizedError || err instanceof TokenExpiredError || err instanceof JsonWebTokenError) {
+      return res.status(401).send(err.message);
+    }
+    if (err instanceof Error) {
+      error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    next();
+  });
 
   setServer();
 

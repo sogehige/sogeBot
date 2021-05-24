@@ -5,7 +5,7 @@ import { QuickAction as qa, QuickActions } from '../database/entity/dashboard';
 import { onStartup } from '../decorators/on';
 import { getUserSender } from '../helpers/commons';
 import { error, info } from '../helpers/log';
-import { app, authorize } from '../helpers/panel';
+import { app /* authorize */ } from '../helpers/panel';
 import Widget from './_interface';
 
 class QuickAction extends Widget {
@@ -43,7 +43,7 @@ class QuickAction extends Widget {
      *       '400':
      *         description: Bad request
     */
-    app?.get('/api/v1/quickaction', authorize, async (req, res) => {
+    app?.get('/api/v1/quickaction', /* authorize, */ async (req, res) => {
       const userId = req.headers.userid as string;
       const actions = await getRepository(qa).find({ where: { userId } });
       res.send({
@@ -51,7 +51,7 @@ class QuickAction extends Widget {
         paging: null,
       });
     });
-    app?.post('/api/v1/quickaction/', authorize, async (req, res) => {
+    app?.post('/api/v1/quickaction/', /* authorize, */ async (req, res) => {
       const userId = req.headers.userid as string;
       const item = req.body as QuickActions.Item;
       try {
@@ -90,7 +90,7 @@ class QuickAction extends Widget {
      *       '404':
      *         description: Not Found
     */
-    app?.post('/api/v1/quickaction/:id/trigger', authorize, async (req, res) => {
+    app?.post('/api/v1/quickaction/:id/trigger', /* authorize, */ async (req, res) => {
       const userId = req.headers.userid as string;
       const username = req.headers.username as string;
       try {
@@ -127,7 +127,7 @@ class QuickAction extends Widget {
      *       '404':
      *         description: Not Found
     */
-    app?.delete('/api/v1/quickaction/:id', authorize, async (req, res) => {
+    app?.delete('/api/v1/quickaction/:id', /* authorize, */ async (req, res) => {
       const userId = req.headers.userid as string;
       try {
         const item = await getRepository(qa).findOneOrFail({ id: req.params.id, userId: String(userId) });

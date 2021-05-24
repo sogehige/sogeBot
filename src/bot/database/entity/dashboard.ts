@@ -1,5 +1,11 @@
 import { EntitySchema } from 'typeorm';
 
+type CommandItem = QuickActions.defaultAttributes & {
+  type: 'command',
+  options: QuickActions.defaultOptions & {
+    command: string,
+  },
+};
 export declare namespace QuickActions {
   type defaultAttributes = {
     id: string,
@@ -10,13 +16,6 @@ export declare namespace QuickActions {
   type defaultOptions = {
     label: string,
     color: string,
-  };
-
-  type CommandItem = QuickActions.defaultAttributes & {
-    type: 'command',
-    options: defaultOptions & {
-      command: string,
-    },
   };
 
   type Item = CommandItem;

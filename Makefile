@@ -35,6 +35,10 @@ jsonlint:
 
 bot:
 	@rm -rf dest
+	@echo -ne "\n\t ----- Generating swagger.json \n"
+	@npx tsoa spec
+	@echo -ne "\n\t ----- Generating swagger routes \n"
+	@npx tsoa routes
 ifeq ($(ENV),production)
 	@echo -ne "\n\t ----- Building bot (strip comments)\n"
 	@npx tsc -p src/bot --removeComments true
