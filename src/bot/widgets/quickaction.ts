@@ -45,10 +45,10 @@ class QuickAction extends Widget {
     */
     app?.get('/api/v1/quickaction', authorize, async (req, res) => {
       const userId = req.headers.userid as string;
-      const [actions, count] = await getRepository(qa).findAndCount({ where: { userId } });
+      const actions = await getRepository(qa).find({ where: { userId } });
       res.send({
-        data: actions,
-        count,
+        data:   actions,
+        paging: null,
       });
     });
     app?.post('/api/v1/quickaction/', authorize, async (req, res) => {

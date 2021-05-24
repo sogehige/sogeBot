@@ -18,11 +18,16 @@ class Social extends Widget {
      *      - bearerAuth: []
      *     summary: Retrieve a list of social interactions on twitter
      *     parameters:
-     *      - in: header
-     *        name: cursor
+     *      - in: query
+     *        name: _page
      *        schema:
-     *         type: string
-     *        description: Pagination cursor
+     *          type: number
+     *        required: false
+     *      - in: query
+     *        name: _limit
+     *        schema:
+     *          type: number
+     *        required: false
      *     responses:
      *       '200':
      *         description: OK
@@ -30,42 +35,20 @@ class Social extends Widget {
      *         description: Not authenticated
     */
     app?.get('/api/v1/social', authorize, async (req, res) => {
-      const b64cookie = req.headers.cursor as string | undefined;
+      const page = req.query._page ? Number(req.query._page) : 0;
+      const limit = req.query._limit ? Number(req.query._limit) : 0;
 
-      let take =  25;
-      let page = 0;
-      let count = 0;
-
-      if (b64cookie) {
-        const cookie = JSON.parse(Buffer.from(b64cookie, 'base64').toString('utf-8'));
-        take = cookie.take;
-        page = cookie.page;
-        count = cookie.count;
-      }
-
-      if (count === 0) {
-        count = await getRepository(WidgetSocial).count();
-      }
-
+      const count = await getRepository(WidgetSocial).count();
       const items = await getRepository(WidgetSocial).find({
-        take,
+        take:  limit,
         order: { timestamp: 'DESC' },
-        skip:  page * take,
+        skip:  page * limit,
       });
-
-      let cursor = null;
-      if (count > take + (page * take)) {
-        // we have some left, we need to generate new cursor
-        cursor = Buffer.from(JSON.stringify({
-          take: 25,
-          page: page + 1,
-          count,
-        })).toString('base64');
-      }
       res.send({
-        data: items,
-        count,
-        cursor,
+        data:   items,
+        paging: {
+          count, _limit: limit, _page: page,
+        },
       });
     });
   }
