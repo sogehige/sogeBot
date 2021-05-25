@@ -19,7 +19,7 @@ export class WidgetSocialController {
    * @isInt _page
    * @isInt _limit
    */
-  @Response<string>(401, 'Unauthorized')
+  @Response('401', 'Unauthorized')
   @Get()
   public async get(@Query() _page?: number, @Query() _limit?: number): Promise<{ data: WidgetSocialInterface[], paging: { count: number, _limit: number, _page: number }}> {
     const page = _page ? _page : 0;

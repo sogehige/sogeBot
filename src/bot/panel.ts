@@ -12,6 +12,7 @@ import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import _, { isEqual } from 'lodash';
 import sanitize from 'sanitize-filename';
 import swaggerUi from 'swagger-ui-express';
+import { ValidateError } from 'tsoa';
 import {
   getConnection, getManager, getRepository,
 } from 'typeorm';
@@ -88,6 +89,12 @@ export const init = () => {
     res: any,
     next: () => void,
   ): Express.Response | void {
+    if (err instanceof ValidateError) {
+      return res.status(400).json({
+        message: 'Validation Failed',
+        details: err?.fields,
+      });
+    }
     if (err instanceof UnauthorizedError || err instanceof TokenExpiredError || err instanceof JsonWebTokenError) {
       return res.status(401).send(err.message);
     }
