@@ -64,8 +64,8 @@ const port = process.env.PORT ?? '20000';
 const secureport = process.env.SECUREPORT ?? '20443';
 
 const limiter = RateLimit({
-  windowMs: 5 * 60 * 1000,
-  max:      100,
+  windowMs: 60 * 1000,
+  max:      1000,
   skip:     (req) => {
     return req.url.includes('/socket/refresh');
   },
@@ -79,9 +79,18 @@ export const init = () => {
   setApp(express());
   app?.use(limiter);
   app?.use(cors());
-  app?.use(bodyParser.json());
-  app?.use(bodyParser.urlencoded({ extended: true }));
-  app?.use('/frame-api-explorer', swaggerUi.serve, swaggerUi.setup(swaggerJSON));
+  app?.use(bodyParser.json({ limit: '500mb' }));
+  app?.use(bodyParser.urlencoded({ extended: true, limit: '500mb' }));
+  app?.use('/frame-api-explorer', swaggerUi.serve, swaggerUi.setup({
+    ...swaggerJSON,
+    info: {
+      ...swaggerJSON.info,
+      title:       'API Explorer',
+      description: {},
+      contact:     {},
+      license:     {},
+    },
+  }));
   RegisterRoutes(app as any);
   app?.use(function errorHandler(
     err: UnauthorizedError | Error,

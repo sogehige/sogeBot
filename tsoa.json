@@ -16,5 +16,8 @@
   "routes": {
     "routesDir": "src/bot/.cache/",
     "authenticationModule": "./src/bot/helpers/api/authenticate.ts"
-  }
+  },
+  "ignore": [
+    "**/node_modules/@types/lodash/**"
+  ]
 }
