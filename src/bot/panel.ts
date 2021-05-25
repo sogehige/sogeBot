@@ -142,7 +142,7 @@ export const init = () => {
   app?.use('/dist', express.static(path.join(__dirname, '..', 'public', 'dist')));
 
   const nuxtCache = new Map<string, string>();
-  app?.get('/_nuxt/*', (req, res) => {
+  app?.get(['/_nuxt/*', '/credentials/_nuxt/*'], (req, res) => {
     if (!nuxtCache.get(req.url)) {
       // search through node_modules to find correct nuxt file
       const paths = [
@@ -151,7 +151,7 @@ export const init = () => {
         path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'dist', '_nuxt'),
       ];
       for (const dir of paths) {
-        const pathToFile = path.join(dir, req.url.replace('_nuxt', ''));
+        const pathToFile = path.join(dir, req.url.replace('_nuxt', '').replace('credentials', ''));
         if (fs.existsSync(pathToFile)) {
           nuxtCache.set(req.url, pathToFile);
         }
