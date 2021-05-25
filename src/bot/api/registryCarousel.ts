@@ -3,9 +3,11 @@ import {
   Controller,
   Delete,
   Get,
+  Hidden,
   Patch,
   Path,
   Post,
+  Request,
   Response,
   Route,
   Security,
@@ -17,6 +19,8 @@ import { getRepository } from 'typeorm';
 
 import { Carousel, CarouselInterface } from '../database/entity/carousel';
 
+export type CarouselItem = Omit<CarouselInterface, 'base64' | 'type'> & { imageUrl: string };
+
 @Route('/api/v1/carousel')
 @Tags('Registries')
 export class RegistryCarouselController extends Controller {
@@ -24,18 +28,57 @@ export class RegistryCarouselController extends Controller {
   * Retrieves the quick actions of an authenticated user.
   */
   @Get()
-  public async getAll(): Promise<{ data: CarouselInterface[], paging: null}> {
-    const items = await getRepository(Carousel).find({ order: { order: 'ASC' } });
+  public async getAll(): Promise<{ data: CarouselItem[], paging: null}> {
+    const items = (await getRepository(Carousel).find({
+      select: [
+        'id', 'order', 'waitAfter',
+        'waitBefore', 'duration', 'animationInDuration',
+        'animationOut', 'animationOutDuration', 'showOnlyOncePerStream',
+      ],
+      order: { order: 'ASC' },
+    })).map(item => ({ ...item, imageUrl: '/api/v1/carousel/image/' + item.id })) as CarouselItem[];
     return {
       data:   items,
       paging: null,
     };
   }
+
+  @Hidden()
+  @Get('/image/{id}')
+  public async getImage(@Request() request: any, @Path() id: string) {
+    try {
+      const response = (<any>request).res;
+
+      const file = await getRepository(Carousel).findOneOrFail({ id });
+      const data = Buffer.from(file.base64, 'base64');
+      response.writeHead(200, {
+        'Content-Type':   file.type,
+        'Content-Length': data.length,
+        'Cache-Control':  'public, max-age=31536000',
+        'ETag':           id,
+      });
+      response.end(data);
+    } catch (e) {
+      this.setStatus(404);
+    }
+    return;
+  }
   @Response('404', 'Not Found')
   @Get('/{id}')
-  public async getOne(@Path() id: string): Promise<CarouselInterface | void> {
+  public async getOne(@Path() id: string): Promise<CarouselItem | void> {
     try {
-      return await getRepository(Carousel).findOneOrFail(id);
+      const item = {
+        ...(await getRepository(Carousel).findOneOrFail({
+          select: [
+            'id', 'order', 'waitAfter',
+            'waitBefore', 'duration', 'animationInDuration',
+            'animationOut', 'animationOutDuration', 'showOnlyOncePerStream',
+          ],
+          where: { id },
+        })),
+        imageUrl: '/api/v1/carousel/image/' + id,
+      };
+      return item;
     } catch (e) {
       this.setStatus(404);
     }
