@@ -32,7 +32,8 @@ export class RegistryCarouselController extends Controller {
     const items = (await getRepository(Carousel).find({
       select: [
         'id', 'order', 'waitAfter',
-        'waitBefore', 'duration', 'animationInDuration',
+        'waitBefore', 'duration',
+        'animationIn', 'animationInDuration',
         'animationOut', 'animationOutDuration', 'showOnlyOncePerStream',
       ],
       order: { order: 'ASC' },
@@ -71,7 +72,8 @@ export class RegistryCarouselController extends Controller {
         ...(await getRepository(Carousel).findOneOrFail({
           select: [
             'id', 'order', 'waitAfter',
-            'waitBefore', 'duration', 'animationInDuration',
+            'waitBefore', 'duration',
+            'animationIn', 'animationInDuration',
             'animationOut', 'animationOutDuration', 'showOnlyOncePerStream',
           ],
           where: { id },

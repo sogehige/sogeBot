@@ -6,13 +6,14 @@
       :id="e.id"
       :key="e.id"
       :ref="e.id"
-      :src="'data:' + e.type + ';base64,' + e.base64"
+      :src="e.imageUrl"
     >
   </div>
 </template>
 
 <script lang="ts">
 import { getSocket } from '@sogebot/ui-helpers/socket';
+import axios from 'axios';
 import gsap from 'gsap';
 import { Component, Vue } from 'vue-property-decorator';
 
@@ -32,15 +33,12 @@ export default class CarouselOverlay extends Vue {
   }
 
   created() {
-    this.socket.emit('generic::getAll', (err: string | null, images: any[]) => {
-      if (err) {
-        return console.error(err);
-      }
-      this.images = images;
+    axios.get('/api/v1/carousel').then(response => {
+      this.images = response.data;
+      this.interval.push(setInterval(() => {
+        this.triggerAnimation();
+      }, 100));
     });
-    this.interval.push(setInterval(() => {
-      this.triggerAnimation();
-    }, 100));
   }
 
   wait (type: string) {
