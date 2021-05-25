@@ -81,6 +81,9 @@
     "tsconfigRootDir": "./",
     "extraFileExtensions": [".vue"]
   },
+  "env": {
+    "node": true
+  },
   "settings": {
     "import/resolver": {
       "node": {
