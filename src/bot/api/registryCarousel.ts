@@ -22,7 +22,7 @@ import { Carousel, CarouselInterface } from '../database/entity/carousel';
 export type CarouselItem = Omit<CarouselInterface, 'base64' | 'type'> & { imageUrl: string };
 
 @Route('/api/v1/carousel')
-@Tags('Registries')
+@Tags('Registries / Carousel')
 export class RegistryCarouselController extends Controller {
   /**
   * Retrieves the quick actions of an authenticated user.

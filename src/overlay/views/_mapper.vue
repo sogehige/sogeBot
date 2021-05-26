@@ -11,6 +11,7 @@ import { getSocket } from '@sogebot/ui-helpers/socket';
 import {
   defineComponent, onMounted, ref,
 } from '@vue/composition-api';
+import axios from 'axios';
 
 import type { OverlayMapperInterface, OverlayMapperOBSWebsocket } from 'src/bot/database/entity/overlay';
 
@@ -32,7 +33,7 @@ export default defineComponent({
     stats:         () => import('./stats.vue'),
     tts:           () => import('./tts.vue'),
   },
-  setup(props, ctx) {
+  setup(_, ctx) {
     const type = ref(null as null | OverlayMapperInterface | OverlayMapperOBSWebsocket);
     onMounted(async () => {
       try {
@@ -41,13 +42,9 @@ export default defineComponent({
         }
 
         type.value = await new Promise((resolve, reject) => {
-          socket.emit('generic::getOne', ctx.root.$route.params.id, (err: string, data: OverlayMapperInterface | OverlayMapperOBSWebsocket) => {
-            if (err || !data) {
-              reject('Unknown overlay link ' + ctx.root.$route.params.id + '!');
-            } else {
-              resolve(data);
-            }
-          });
+          axios.get('/api/v1/overlay/' + ctx.root.$route.params.id)
+            .then(response => resolve(response.data))
+            .catch(() => reject('Unknown overlay link ' + ctx.root.$route.params.id + '!'));
         });
       } catch (e) {
         console.error(e);
