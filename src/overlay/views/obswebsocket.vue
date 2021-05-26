@@ -12,7 +12,7 @@ import { switchScenes } from 'src/bot/helpers/obswebsocket/listeners';
 import { listScenes } from 'src/bot/helpers/obswebsocket/scenes';
 import { getSourcesList, getSourceTypesList } from 'src/bot/helpers/obswebsocket/sources';
 import { taskRunner } from 'src/bot/helpers/obswebsocket/taskrunner';
-import { getCurrentIP } from 'src/panel/helpers/getCurrentIP';
+import { getCurrentIP } from '@sogebot/ui-helpers/getCurrentIP';
 
 type Props = {
   opts: {

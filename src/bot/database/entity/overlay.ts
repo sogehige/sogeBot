@@ -13,10 +13,17 @@ export interface OverlayMapperOBSWebsocket {
     allowedIPs: string[],
   },
 }
+export interface OverlayMapperOBSClipsCarousel {
+  id: string;
+  value: 'clipscarousel';
+  opts: null | {
+    volume: number,
+  },
+}
 
-export type OverlayMappers = OverlayMapperInterface | OverlayMapperOBSWebsocket;
+export type OverlayMappers = OverlayMapperInterface | OverlayMapperOBSWebsocket | OverlayMapperOBSClipsCarousel;
 
-export const OverlayMapper = new EntitySchema<Readonly<Required<OverlayMapperInterface | OverlayMapperOBSWebsocket>>>({
+export const OverlayMapper = new EntitySchema<Readonly<Required<OverlayMappers>>>({
   name:    'overlay_mapper',
   columns: {
     id: {

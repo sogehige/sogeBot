@@ -14,7 +14,9 @@ import {
 } from 'tsoa';
 import { getRepository } from 'typeorm';
 
-import { OverlayMapper, OverlayMappers } from '../database/entity/overlay';
+import {
+  OverlayMapper, OverlayMapperInterface, OverlayMapperOBSClipsCarousel, OverlayMapperOBSWebsocket, OverlayMappers,
+} from '../database/entity/overlay';
 
 @Route('/api/v1/overlay')
 @Tags('Registries / Overlay')
@@ -61,7 +63,7 @@ export class RegistryOverlayController extends Controller {
   @Response('401', 'Unauthorized')
   @Security('bearerAuth', [])
   @Patch('/{id}')
-  public async patch(@Path() id: string, @Body() data: Partial<OverlayMappers>): Promise<void> {
+  public async patch(@Path() id: string, @Body() data: Partial<OverlayMapperInterface> | Partial<OverlayMapperOBSWebsocket> | Partial<OverlayMapperOBSClipsCarousel>): Promise<void> {
     try {
       await getRepository(OverlayMapper).update({ id }, data);
       this.setStatus(200);

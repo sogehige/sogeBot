@@ -1,6 +1,6 @@
 import { EntitySchema } from 'typeorm';
 
-type CommandItem = QuickActions.defaultAttributes & {
+export type CommandItem = QuickActions.defaultAttributes & {
   type: 'command',
   options: QuickActions.defaultOptions & {
     command: string,
