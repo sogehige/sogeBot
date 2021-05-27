@@ -17,7 +17,7 @@ import {
 } from 'tsoa';
 import { getRepository } from 'typeorm';
 
-import { Carousel, CarouselInterface } from '../database/entity/carousel';
+import { Carousel, CarouselInterface } from '../../database/entity/carousel';
 
 export type CarouselItem = Omit<CarouselInterface, 'base64' | 'type'> & { imageUrl: string };
 

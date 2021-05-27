@@ -1,71 +1,22 @@
 'use strict';
 
-import { getRepository, IsNull } from 'typeorm';
+import { getRepository } from 'typeorm';
 
 import currency from '../currency';
-import { Goal, GoalGroup } from '../database/entity/goal';
+import { Goal } from '../database/entity/goal';
 import {
-  onBit, onFollow, onSub, onTip, 
+  onBit, onFollow, onStartup, onSub, onTip,
 } from '../decorators/on';
-import { stats } from '../helpers/api';
 import { mainCurrency } from '../helpers/currency';
-import { adminEndpoint, publicEndpoint } from '../helpers/socket';
 import Overlay from '../overlays/_interface';
 
 class Goals extends Overlay {
   showInUI = false;
 
-  constructor() {
-    super();
+  @onStartup()
+  onStartup() {
     this.addMenu({
-      category: 'registry', name: 'goals', id: 'registry/goals/list', this: null, 
-    });
-  }
-
-  public async sockets() {
-    adminEndpoint(this.nsp, 'goals::remove', async (item, cb) => {
-      try {
-        await getRepository(GoalGroup).remove(item);
-        cb(null);
-      } catch (e) {
-        cb(e.stack);
-      }
-    });
-    adminEndpoint(this.nsp, 'goals::save', async (item, cb) => {
-      try {
-        item = await getRepository(GoalGroup).save(item);
-        // we need to delete id NULL as typeorm is not deleting but flagging as NULL
-        getRepository(Goal).delete({ groupId: IsNull() });
-        cb(null, item);
-      } catch (e) {
-        cb(e.stack, item);
-      }
-    });
-    adminEndpoint(this.nsp, 'generic::getAll', async (cb) => {
-      try {
-        const items = await getRepository(GoalGroup).find({ relations: ['goals'] });
-        cb(null, items);
-      } catch (e) {
-        cb(e.stack, []);
-      }
-    });
-
-    publicEndpoint(this.nsp, 'generic::getOne', async (id, cb) => {
-      try {
-        const item = await getRepository(GoalGroup).findOne({
-          relations: ['goals'],
-          where:     { id },
-        });
-        cb(null, item);
-      } catch (e) {
-        cb(e.stack, null);
-      }
-    });
-    publicEndpoint(this.nsp, 'goals::current', async (cb) => {
-      cb(null, {
-        subscribers: stats.value.currentSubscribers,
-        followers:   stats.value.currentFollowers,
-      });
+      category: 'registry', name: 'goals', id: 'registry/goals', this: null,
     });
   }
 

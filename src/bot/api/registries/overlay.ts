@@ -16,7 +16,7 @@ import { getRepository } from 'typeorm';
 
 import {
   OverlayMapper, OverlayMapperInterface, OverlayMapperOBSClipsCarousel, OverlayMapperOBSWebsocket, OverlayMappers,
-} from '../database/entity/overlay';
+} from '../../database/entity/overlay';
 
 @Route('/api/v1/overlay')
 @Tags('Registries / Overlay')
