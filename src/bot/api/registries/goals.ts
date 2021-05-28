@@ -15,7 +15,7 @@ import {
 import { getRepository, IsNull } from 'typeorm';
 
 import {
-  Goal, GoalGroup, GoalGroupInterface, 
+  Goal, GoalGroup, GoalGroupInterface,
 } from '../../database/entity/goal';
 import { stats } from '../../helpers/api';
 
@@ -71,11 +71,12 @@ export class RegistryGoalsController extends Controller {
   @Response('401', 'Unauthorized')
   @Security('bearerAuth', [])
   @Patch('/{id}')
-  public async patch(@Path() id: string, @Body() data: Partial<GoalGroupInterface>): Promise<void> {
+  public async patch(@Path() id: string, @Body() data: Partial<GoalGroupInterface>): Promise<GoalGroupInterface | void> {
     try {
-      await getRepository(GoalGroup).save({ ...data, id });
+      const item = await getRepository(GoalGroup).save({ ...data, id });
       getRepository(Goal).delete({ groupId: IsNull() });
       this.setStatus(200);
+      return item;
     } catch (e) {
       this.setStatus(400);
     }
