@@ -29,7 +29,7 @@ export interface GoalInterface {
   timestamp?: number;
   goalAmount?: number;
   currentAmount?: number;
-  endAfter: string;
+  endAfter: number;
   endAfterIgnore: boolean;
   customizationBar: {
     color: string;
@@ -62,10 +62,10 @@ export const GoalGroup = new EntitySchema<Readonly<Required<GoalGroupInterface>>
   name:    'goal_group',
   columns: {
     id: {
-      type: 'uuid', primary: true, generated: 'uuid', 
+      type: 'uuid', primary: true, generated: 'uuid',
     },
     createdAt: {
-      type: 'bigint', transformer: new ColumnNumericTransformer(), default: 0, 
+      type: 'bigint', transformer: new ColumnNumericTransformer(), default: 0,
     },
     name:    { type: String },
     display: { type: 'simple-json' },
@@ -84,7 +84,7 @@ export const Goal = new EntitySchema<Readonly<Required<GoalInterface>>>({
   name:    'goal',
   columns: {
     id: {
-      type: 'uuid', primary: true, generated: 'uuid', 
+      type: 'uuid', primary: true, generated: 'uuid',
     },
     name:            { type: String },
     groupId:         { type: String, nullable: true },
@@ -92,13 +92,13 @@ export const Goal = new EntitySchema<Readonly<Required<GoalInterface>>>({
     countBitsAsTips: { type: Boolean },
     display:         { type: 'varchar', length: 20 },
     timestamp:       {
-      type: 'bigint', transformer: new ColumnNumericTransformer(), default: 0, 
+      type: 'bigint', transformer: new ColumnNumericTransformer(), default: 0,
     },
     goalAmount: {
-      type: 'float', transformer: new ColumnNumericTransformer(), default: 0, precision: (process.env.TYPEORM_CONNECTION ?? 'better-sqlite3') === 'mysql' ? 12 : undefined, 
+      type: 'float', transformer: new ColumnNumericTransformer(), default: 0, precision: (process.env.TYPEORM_CONNECTION ?? 'better-sqlite3') === 'mysql' ? 12 : undefined,
     },
     currentAmount: {
-      type: 'float', transformer: new ColumnNumericTransformer(), default: 0, precision: (process.env.TYPEORM_CONNECTION ?? 'better-sqlite3') === 'mysql' ? 12 : undefined, 
+      type: 'float', transformer: new ColumnNumericTransformer(), default: 0, precision: (process.env.TYPEORM_CONNECTION ?? 'better-sqlite3') === 'mysql' ? 12 : undefined,
     },
     endAfter:          { type: String },
     endAfterIgnore:    { type: Boolean },
