@@ -100,7 +100,7 @@ export const Goal = new EntitySchema<Readonly<Required<GoalInterface>>>({
     currentAmount: {
       type: 'float', transformer: new ColumnNumericTransformer(), default: 0, precision: (process.env.TYPEORM_CONNECTION ?? 'better-sqlite3') === 'mysql' ? 12 : undefined,
     },
-    endAfter:          { type: String },
+    endAfter:          { type: 'bigint', transformer: new ColumnNumericTransformer() },
     endAfterIgnore:    { type: Boolean },
     customizationBar:  { type: 'simple-json' },
     customizationFont: { type: 'simple-json' },
