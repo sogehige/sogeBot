@@ -22,7 +22,7 @@ export class goalsUpdate1622378375126 implements MigrationInterface {
     // add shadow if missing
     const goals = await queryRunner.manager.getRepository(`goal`).find();
     for (const goal of goals as any) {
-      goal.endAfter = new Date(origGoals.find(o => o.id === goal.id).endAfter).getTime();
+      goal.endAfter = new Date(origGoals.find((o: { id: any; }) => o.id === goal.id).endAfter).getTime();
       if (!goal.customizationFont.shadow) {
         goal.customizationFont.shadow = [];
       }
