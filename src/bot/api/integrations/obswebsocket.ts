@@ -42,7 +42,7 @@ export class IntegrationOBSWebsocketController extends Controller {
   }
   @Get('/listScene')
   @Security('bearerAuth', [])
-  public async getScene(): Promise<OBSWebSocket.Scene[]> {
+  public async getScene(): Promise<{ data: OBSWebSocket.Scene[] }> {
     const integration = (await import('../../integrations/obswebsocket')).default;
     try {
       const availableScenes = integration.accessBy === 'direct'
@@ -61,14 +61,14 @@ export class IntegrationOBSWebsocketController extends Controller {
           }
           setTimeout(() => resolve([]), 10000);
         });
-      return await availableScenes;
+      return { data: await availableScenes };
     } catch (e) {
-      return [];
+      return { data: [] };
     }
   }
   @Get('/sources')
   @Security('bearerAuth', [])
-  public async getSources(): Promise<{ sources: Source[], types: Type[] }> {
+  public async getSources(): Promise<{ data: { sources: Source[], types: Type[] } }> {
     const integration = (await import('../../integrations/obswebsocket')).default;
     try {
       const availableSources = integration.accessBy === 'direct'
@@ -104,9 +104,9 @@ export class IntegrationOBSWebsocketController extends Controller {
           }
           setTimeout(() => resolve([]), 10000);
         });
-      return { sources: await availableSources, types: await availableTypes };
+      return { data: { sources: await availableSources, types: await availableTypes } };
     } catch (e) {
-      return { sources: [], types: [] };
+      return { data: { sources: [], types: [] } };
     }
   }
   @Response('404', 'Not Found')

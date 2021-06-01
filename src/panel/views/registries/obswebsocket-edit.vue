@@ -1,19 +1,19 @@
 <template>
   <div class="px-3 py-2">
     <b-form>
-      <b-form-group :key="'name' + editationItem.id">
+      <b-form-group :key="'name' + item.id">
         <label-inside>{{ translate('integrations.obswebsocket.name.name') }}</label-inside>
-        <template v-if="editationItem">
+        <template v-if="item">
           <b-input-group>
             <b-form-input
               id="name"
-              v-model="editationItem.name"
+              v-model="item.name"
               type="text"
-              :state="$v.editationItem.name.$invalid && $v.editationItem.name.$dirty ? false : null"
-              @input="$v.editationItem.name.$touch()"
+              :state="$v.item.name.$invalid && $v.item.name.$dirty ? false : null"
+              @input="$v.item.name.$touch()"
             />
           </b-input-group>
-          <b-form-invalid-feedback :state="!($v.editationItem.name.$invalid && $v.editationItem.name.$dirty)">
+          <b-form-invalid-feedback :state="!($v.item.name.$invalid && $v.item.name.$dirty)">
             {{ translate('dialog.errors.required') }}
           </b-form-invalid-feedback>
         </template>
@@ -24,11 +24,11 @@
         />
       </b-form-group>
 
-      <b-form-group :key="'advancedMode' + editationItem.id">
+      <b-form-group :key="'advancedMode' + item.id">
         <b-form-checkbox
-          :id="'advancedMode' + editationItem.id"
-          v-model="editationItem.advancedMode"
-          :name="'advancedMode' + editationItem.id"
+          :id="'advancedMode' + item.id"
+          v-model="item.advancedMode"
+          :name="'advancedMode' + item.id"
           switch
         >
           {{ translate('registry.alerts.enableAdvancedMode') }}
@@ -36,12 +36,12 @@
       </b-form-group>
 
       <div
-        v-if="editationItem.advancedMode"
-        :key="'advancedModeCode' + editationItem.id"
+        v-if="item.advancedMode"
+        :key="'advancedModeCode' + item.id"
         class="col-md-12 p-0 pb-2"
       >
         <codemirror
-          v-model="editationItem.advancedModeCode"
+          v-model="item.advancedModeCode"
           style="font-size: 0.8em"
           class="w-100"
           :options="{
@@ -89,7 +89,7 @@
           </b-col>
         </b-row>
         <b-row
-          v-for="(task, index) of editationItem.simpleModeTasks"
+          v-for="(task, index) of item.simpleModeTasks"
           :key="task.id"
           class="p-2"
         >
@@ -327,7 +327,7 @@ export default defineComponent({
     invalid: Boolean,
     pending: Boolean,
   },
-  validations: { editationItem: { name: { required, minLength: minLength(1) } } },
+  validations: { item: { name: { required, minLength: minLength(1) } } },
   setup(props: Props, ctx) {
     const instance = getCurrentInstance()?.proxy;
     const theme = localStorage.getItem('theme') || get(ctx.root.$store.state, 'configuration.core.ui.theme', 'light');
@@ -343,7 +343,7 @@ export default defineComponent({
         .map(source => ({ value: source.name, text: source.name }));
     });
 
-    const editationItem = ref({
+    const item = ref({
       id:              ctx.root.$route.params.id || shortid.generate(),
       name:            '',
       advancedMode:    false,
@@ -355,13 +355,13 @@ export default defineComponent({
       loading: number;
     });
 
-    watch(editationItem, (val, oldVal) => {
+    watch(item, (val, oldVal) => {
       if (state.value.loading !== ButtonStates.progress) {
         ctx.emit('update:pending', true);
 
         const $v = instance?.$v;
         if ($v) {
-          ctx.emit('update:invalid', $v.editationItem.name?.$error && $v.editationItem.name.$dirty);
+          ctx.emit('update:invalid', $v.item.name?.$error && $v.item.name.$dirty);
         }
       }
     }, { deep: true });
@@ -371,7 +371,7 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      loadEditationItem();
+      loaditem();
       refreshScenes();
       interval = window.setInterval(() => {
         refreshScenes();
@@ -379,17 +379,17 @@ export default defineComponent({
       }, 1000);
 
       ctx.emit('update:pending', false);
-      EventBus.$on('registry::obswebsocket::save::' + editationItem.value.id, () => {
-        console.debug('Save event received - registry::obswebsocket::save::' + editationItem.value.id);
+      EventBus.$on('registry::obswebsocket::save::' + item.value.id, () => {
+        console.debug('Save event received - registry::obswebsocket::save::' + item.value.id);
         save();
       });
-      EventBus.$on('registry::obswebsocket::test::' + editationItem.value.id, () => {
-        console.debug('Test event received - registry::obswebsocket::test::' + editationItem.value.id);
+      EventBus.$on('registry::obswebsocket::test::' + item.value.id, () => {
+        console.debug('Test event received - registry::obswebsocket::test::' + item.value.id);
         ctx.emit('update:testState', ButtonStates.progress);
         socket.emit('integration::obswebsocket::test',
-          editationItem.value.advancedMode
-            ? editationItem.value.advancedModeCode
-            : editationItem.value.simpleModeTasks, (err: string | null) => {
+          item.value.advancedMode
+            ? item.value.advancedModeCode
+            : item.value.simpleModeTasks, (err: string | null) => {
             if (err) {
               ctx.emit('update:testState', ButtonStates.fail);
               error(err);
@@ -403,9 +403,9 @@ export default defineComponent({
       });
     });
     onUnmounted(() => {
-      EventBus.$off('registry::obswebsocket::save::' + editationItem.value.id);
+      EventBus.$off('registry::obswebsocket::save::' + item.value.id);
     });
-    const loadEditationItem = async () => {
+    const loaditem = async () => {
       state.value.loading = ButtonStates.progress;
       await Promise.all([
         new Promise<void>((resolve, reject) => {
@@ -415,7 +415,7 @@ export default defineComponent({
                 reject(error(err));
               }
               if (!itemGetAll) {
-                editationItem.value = {
+                item.value = {
                   id:              ctx.root.$route.params.id,
                   name:            '',
                   advancedMode:    false,
@@ -426,7 +426,7 @@ export default defineComponent({
                 return;
               }
 
-              editationItem.value = cloneDeep(itemGetAll);
+              item.value = cloneDeep(itemGetAll);
 
               console.debug('Loaded', itemGetAll);
               ctx.root.$nextTick(() => {
@@ -468,7 +468,7 @@ export default defineComponent({
         }
         return { [cur]: value, ...prev };
       }, {});
-      editationItem.value.simpleModeTasks.push({
+      item.value.simpleModeTasks.push({
         id:    shortid.generate(),
         event: actionKey,
         args:  args as any,
@@ -476,6 +476,7 @@ export default defineComponent({
     };
 
     const refreshSources = () => {
+      
       socket.emit('integration::obswebsocket::listSources', (err: string | null, sources: any, types: any) => {
         if (err) {
           console.error(err);
@@ -507,7 +508,7 @@ export default defineComponent({
       ctx.emit('update:invalid', (!!$v?.$error));
       if (!$v?.$error) {
         ctx.emit('update:saveState', ButtonStates.progress);
-        socket.emit('generic::setById', { id: editationItem.value.id, item: editationItem.value }, (err: string | null, data: OBSWebsocketInterface) => {
+        socket.emit('generic::setById', { id: item.value.id, item: item.value }, (err: string | null, data: OBSWebsocketInterface) => {
           if (err) {
             ctx.emit('update:saveState', ButtonStates.fail);
             error(err);
@@ -527,8 +528,8 @@ export default defineComponent({
     };
 
     const deleteAction = (idx: number) => {
-      if (editationItem.value) {
-        editationItem.value.simpleModeTasks.splice(idx, 1);
+      if (item.value) {
+        item.value.simpleModeTasks.splice(idx, 1);
       }
     };
 
@@ -538,7 +539,7 @@ export default defineComponent({
       addAction,
       deleteAction,
 
-      editationItem,
+      item,
 
       translate,
       capitalize,
