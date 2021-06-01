@@ -18,6 +18,7 @@
     "authenticationModule": "./src/bot/helpers/api/authenticate.ts"
   },
   "ignore": [
-    "**/node_modules/@types/lodash/**"
+    "**/node_modules/@types/lodash/**",
+    "**/node_modules/@types/webpack-sources/**"
   ]
 }

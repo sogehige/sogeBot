@@ -47,5 +47,5 @@ const getSourceTypesList = (obs: OBSWebSocket) => {
 };
 
 export {
-  getSourcesList, getSourceTypesList, Type, Source, 
+  getSourcesList, getSourceTypesList, Type, Source,
 };

@@ -4,9 +4,7 @@ import { EntitySchema } from 'typeorm';
 export type simpleModeTask<K extends keyof RequestMethodsArgsMap> = {
   id: string,
   event: K,
-  args: RequestMethodsArgsMap[K] extends Record<string, unknown>
-    ? RequestMethodsArgsMap[K]
-    : null,
+  args: Record<K, RequestMethodsArgsMap[K]>
 };
 
 export type simpleModeTaskWaitMS = {

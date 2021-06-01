@@ -70,6 +70,7 @@ export default defineComponent({
           await taskRunner(obs, tasks);
         } catch (e) {
           console.error(e);
+
         }
       });
 

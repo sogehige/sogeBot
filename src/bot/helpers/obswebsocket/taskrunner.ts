@@ -4,6 +4,7 @@ import type ObsWebSocket from 'obs-websocket-js';
 import safeEval from 'safe-eval';
 
 import { OBSWebsocketInterface, simpleModeTaskWaitMS } from '../../database/entity/obswebsocket';
+import { error } from '../log';
 import { setImmediateAwait } from '../setImmediateAwait';
 import { availableActions } from './actions';
 
@@ -62,6 +63,7 @@ const taskRunner = async (obs: ObsWebSocket, tasks: OBSWebsocketInterface['simpl
       }
     }
   } catch (e) {
+    error(e);
     throw e;
   } finally {
     runningTasks.splice(runningTasks.indexOf(hash), 1);
