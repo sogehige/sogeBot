@@ -16,6 +16,7 @@ import {
 import { getRepository } from 'typeorm';
 
 import { OBSWebsocket as OBSWebsocketEntity, OBSWebsocketInterface } from '../../database/entity/obswebsocket';
+import { error } from '../../helpers/log';
 import { obs } from '../../helpers/obswebsocket/client';
 import { listScenes } from '../../helpers/obswebsocket/scenes';
 import {
@@ -33,6 +34,20 @@ export class IntegrationOBSWebsocketController extends Controller {
       data:   items,
       paging: null,
     };
+  }
+  @Response('401', 'Unauthorized')
+  @Security('bearerAuth', [])
+  @Post('/trigger')
+  public async triggerTask(@Body() tasks: any): Promise<void> {
+    const integration = (await import('../../integrations/obswebsocket')).default;
+    try {
+      await integration.triggerTask(tasks);
+      this.setStatus(201);
+    } catch (e) {
+      this.setStatus(400);
+      error(e);
+    }
+    return;
   }
   @Get('/command')
   @Security('bearerAuth', [])

@@ -21,7 +21,7 @@ import { taskRunner } from '../helpers/obswebsocket/taskrunner';
 import { app, ioServer } from '../helpers/panel';
 import { ParameterError } from '../helpers/parameterError';
 import { defaultPermissions } from '../helpers/permissions';
-import { adminEndpoint, publicEndpoint } from '../helpers/socket';
+import { publicEndpoint } from '../helpers/socket';
 import { translate } from '../translate';
 import Integration from './_interface';
 
@@ -163,15 +163,6 @@ class OBSWebsocket extends Integration {
         isDirect:   false,
         linkFilter: opts.location,
       });
-    });
-
-    adminEndpoint(this.nsp, 'integration::obswebsocket::test', async (tasks, cb) => {
-      try {
-        await this.triggerTask(tasks);
-        cb(null);
-      } catch (e) {
-        cb(e.stack);
-      }
     });
   }
 
