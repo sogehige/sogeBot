@@ -165,7 +165,7 @@ const main = async () => {
         path: '/registry/overlays/list', name: 'overlaysList', component: () => import('./views/registries/overlays/overlays.vue'),
       },
       {
-        path: '/registry/randomizer/list', name: 'RandomizerRegistryList', component: () => import('./views/registries/randomizer/randomizer-list.vue'),
+        path: '/registry/randomizer/', name: 'RandomizerRegistryList', component: () => import('./views/registries/randomizer/randomizer-list.vue'),
       },
       {
         path: '/registry/randomizer/edit/:id?', name: 'RandomizerRegistryEdit', component: () => import('./views/registries/randomizer/randomizer-edit.vue'),

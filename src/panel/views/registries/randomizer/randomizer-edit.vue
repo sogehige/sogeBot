@@ -16,7 +16,7 @@
 
     panel
       template(v-slot:left)
-        button-with-icon(icon="caret-left" href="#/registry/randomizer/list").btn-secondary.btn-reverse {{ translate('commons.back') }}
+        button-with-icon(icon="caret-left" href="#/registry/randomizer/").btn-secondary.btn-reverse {{ translate('commons.back') }}
         hold-button(v-if="$route.params.id" @trigger="del()" icon="trash").btn-danger
           template(slot="title") {{translate('dialog.buttons.delete')}}
           template(slot="onHoldTitle") {{translate('dialog.buttons.hold-to-delete')}}

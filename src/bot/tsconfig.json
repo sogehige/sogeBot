@@ -28,7 +28,7 @@
   "include": [
     "./",
     "../../d.ts/types.d.ts",
-    "../../d.ts/*"
+    "../../d.ts/*",
   ],
   "exclude": [
     "node_modules"
