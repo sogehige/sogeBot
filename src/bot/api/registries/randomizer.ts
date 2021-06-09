@@ -63,7 +63,6 @@ export class RegistryRegistryController extends Controller {
     try {
       await getRepository(Randomizer).save(requestBody);
       this.setStatus(201);
-
     } catch (e) {
       this.setStatus(400);
     }
@@ -92,6 +91,14 @@ export class RegistryRegistryController extends Controller {
   public async patch(@Path() id: string, @Body() data: Partial<RandomizerInterface>): Promise<RandomizerInterface | void> {
     try {
       const item = await getRepository(Randomizer).save({ ...data, id });
+      if (data.items) {
+        await getRepository(RandomizerItem).delete({ randomizerId: id });
+        for (const value of (data.items ?? [])) {
+          value.randomizerId = id;
+          delete value.id;
+          await getRepository(RandomizerItem).insert(value);
+        }
+      }
       await getRepository(RandomizerItem).delete({ randomizerId: IsNull() });
       this.setStatus(200);
       return item;
