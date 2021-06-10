@@ -14,6 +14,16 @@ export interface EmitData {
   message: string;
 }
 
+type Filter = {
+  operator: string;
+  items: (Filter | {
+    comparator: string;
+    value: string;
+    type: string;
+    typeof: string;
+  })[]
+} | null;
+
 export interface CommonSettingsInterface {
   id?: string;
   alertId?: string;
@@ -22,15 +32,7 @@ export interface CommonSettingsInterface {
   variantAmount: number;
   messageTemplate: string;
   layout: '1' | '2' | '3' | '4' | '5';
-  filter: {
-    operator: string;
-    items: (CommonSettingsInterface['filter'] | {
-      comparator: string;
-      value: string;
-      type: string;
-      typeof: string;
-    })[]
-  } | null;
+  filter: Filter;
   animationInDuration: number;
   animationIn: 'fadeIn' | 'fadeInDown' | 'fadeInLeft' | 'fadeInRight'
   | 'fadeInUp' | 'fadeInDownBig' | 'fadeInLeftBig' | 'fadeInRightBig'

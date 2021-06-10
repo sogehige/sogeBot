@@ -7,8 +7,7 @@ import {
 } from '../database/entity/alert';
 import { persistent } from '../decorators';
 import { getLocalizedName } from '../helpers/getLocalized';
-import { debug } from '../helpers/log';
-import { app, ioServer } from '../helpers/panel';
+import { ioServer } from '../helpers/panel';
 import { adminEndpoint, publicEndpoint } from '../helpers/socket';
 import { translate } from '../translate';
 import Registry from './_interface';
@@ -24,33 +23,8 @@ class Alerts extends Registry {
   constructor() {
     super();
     this.addMenu({
-      category: 'registry', name: 'alerts', id: 'registry/alerts/list', this: null,
+      category: 'registry', name: 'alerts', id: 'registry/alerts/', this: null,
     });
-    const init = (retry = 0) => {
-      if (retry === 10000) {
-        throw new Error('Registry alert media endpoint failed.');
-      } else if (!app) {
-        setTimeout(() => init(retry++), 100);
-      } else {
-        debug('ui', 'Registry alert media endpoint OK.');
-        app.get('/registry/alerts/:mediaid', async (req, res) => {
-          const media = await getRepository(AlertMedia).find({ id: req.params.mediaid });
-          const b64data = media.sort((a,b) => a.chunkNo - b.chunkNo).map(o => o.b64data).join('');
-          if (b64data.trim().length === 0) {
-            res.sendStatus(404);
-          } else {
-            const match = (b64data.match(/^data:\w+\/\w+;base64,/) || [ 'data:image/gif;base64,' ])[0];
-            const data = Buffer.from(b64data.replace(/^data:\w+\/\w+;base64,/, ''), 'base64');
-            res.writeHead(200, {
-              'Content-Type':   match.replace('data:', '').replace(';base64,', ''),
-              'Content-Length': data.length,
-            });
-            res.end(data);
-          }
-        });
-      }
-    };
-    init();
   }
 
   sockets () {
@@ -65,25 +39,6 @@ class Alerts extends Registry {
       } catch (e) {
         cb(e.stack, false, 0);
       }
-    });
-
-    adminEndpoint(this.nsp, 'alerts::areAlertsMuted', (areAlertsMuted: boolean | null, cb) => {
-      if (areAlertsMuted !== null) {
-        this.areAlertsMuted = areAlertsMuted;
-      }
-      typeof cb === 'function' ? cb(null, this.areAlertsMuted) : null;
-    });
-    adminEndpoint(this.nsp, 'alerts::isSoundMuted', (isSoundMuted: boolean | null, cb) => {
-      if (isSoundMuted !== null) {
-        this.isSoundMuted = isSoundMuted;
-      }
-      typeof cb === 'function' ? cb(null, this.isSoundMuted) : null;
-    });
-    adminEndpoint(this.nsp, 'alerts::isTTSMuted', (isTTSMuted: boolean | null, cb) => {
-      if (isTTSMuted !== null) {
-        this.isTTSMuted = isTTSMuted;
-      }
-      typeof cb === 'function' ? cb(null, this.isTTSMuted) : null;
     });
     adminEndpoint(this.nsp, 'alerts::deleteMedia', async (id, cb) => {
       cb(
@@ -148,16 +103,6 @@ class Alerts extends Registry {
         );
       } catch (e) {
         cb(e.stack);
-      }
-    });
-    adminEndpoint(this.nsp, 'generic::getAll', async (cb) => {
-      try {
-        cb(
-          null,
-          await getRepository(Alert).find({ relations: ['rewardredeems', 'cmdredeems', 'cheers', 'follows', 'hosts', 'raids', 'resubs', 'subcommunitygifts', 'subgifts', 'subs', 'tips'] }),
-        );
-      } catch (e) {
-        cb (e, []);
       }
     });
     adminEndpoint(this.nsp, 'alerts::delete', async (item: Required<AlertInterface>, cb) => {
