@@ -1,7 +1,7 @@
+import { sample } from '@sogebot/ui-helpers/array';
 import { getRepository } from 'typeorm';
 
 import { User } from '../database/entity/user';
-import { sample } from '../helpers/array/sample';
 import { isIgnored } from '../helpers/user/isIgnored';
 import oauth from '../oauth';
 

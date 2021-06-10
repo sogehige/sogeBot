@@ -1,5 +1,7 @@
 import { setTimeout } from 'timers'; // tslint workaround
 
+import { sample } from '@sogebot/ui-helpers/array';
+import { generateUsername } from '@sogebot/ui-helpers/generateUsername';
 import axios from 'axios';
 import _ from 'lodash';
 import safeEval from 'safe-eval';
@@ -17,7 +19,6 @@ import events from './events';
 import {
   calls, isStreamOnline, rawStatus, setRateLimit, stats, streamStatusChangeSince,
 } from './helpers/api';
-import { sample } from './helpers/array/sample';
 import { attributesReplace } from './helpers/attributesReplace';
 import {
   announce, getOwner, getUserSender, prepare,
@@ -31,7 +32,6 @@ import { isDbConnected } from './helpers/database';
 import { dayjs } from './helpers/dayjs';
 import { eventEmitter } from './helpers/events/emitter';
 import { flatten } from './helpers/flatten';
-import { generateUsername } from './helpers/generateUsername';
 import { getLocalizedName } from './helpers/getLocalized';
 import {
   debug, error, info, warning,

@@ -17,7 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "@sogebot/ui-admin": "^0.0.26",
-    "@sogebot/ui-helpers": "^2.0.0",
+    "@sogebot/ui-helpers": "^2.3.0",
     "@sogebot/ui-oauth": "^1.2.1",
     "@sogebot/ui-public": "^1.0.16",
     "axios": "0.21.1",

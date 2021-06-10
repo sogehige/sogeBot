@@ -1,20 +1,23 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Hidden,
   Path,
   Post,
   Query,
   Request,
+  Response,
   Route,
   Security,
+  SuccessResponse,
   Tags,
 } from 'tsoa';
 import { getRepository } from 'typeorm';
 
 import {
-  Alert, AlertInterface, AlertMedia, 
+  Alert, AlertInterface, AlertMedia,
 } from '../../database/entity/alert';
 
 @Route('/api/v1/alerts')
@@ -44,13 +47,60 @@ export class RegistryAlertsController extends Controller {
     return;
   }
 
-  @Get('/')
+  @Get()
   @Security('bearerAuth', [])
   public async getAll(): Promise<{ data: AlertInterface[], paging: null}> {
     return {
       data:   await getRepository(Alert).find({ relations: ['rewardredeems', 'cmdredeems', 'cheers', 'follows', 'hosts', 'raids', 'resubs', 'subcommunitygifts', 'subgifts', 'subs', 'tips'] }),
       paging: null,
     };
+  }
+
+  @SuccessResponse('201', 'Created')
+  @Response('401', 'Unauthorized')
+  @Security('bearerAuth', [])
+  @Post()
+  public async post(@Body() requestBody: AlertInterface): Promise<void> {
+    try {
+      await getRepository(Alert).save(requestBody);
+      this.setStatus(201);
+
+    } catch (e) {
+      this.setStatus(400);
+    }
+    return;
+  }
+
+  @SuccessResponse('201', 'Created')
+  @Response('401', 'Unauthorized')
+  @Security('bearerAuth', [])
+  @Post('/media/?_action=clone')
+  public async cloneMedia(@Body() toClone: { '0': string, '1': string }): Promise<void> {
+    try {
+      const { primaryId, ...item } = await getRepository(AlertMedia).findOneOrFail({ id: toClone['0'] });
+      await getRepository(AlertMedia).save({
+        ...item,
+        id: toClone['1'],
+      });
+      this.setStatus(201);
+
+    } catch (e) {
+      this.setStatus(400);
+    }
+    return;
+  }
+
+  @Security('bearerAuth', [])
+  @Delete('/media/{id}')
+  public async deleteMedia(@Path() id: string): Promise<void> {
+    try {
+      await getRepository(AlertMedia).delete({ id: String(id) }),
+      this.setStatus(201);
+
+    } catch (e) {
+      this.setStatus(400);
+    }
+    return;
   }
 
   @Get('/settings')

@@ -3,7 +3,7 @@ import {
 } from 'typeorm';
 
 import {
-  Alert, AlertCheer, AlertCommandRedeem, AlertFollow, AlertHost, AlertInterface, AlertMedia, AlertMediaInterface, AlertRaid, AlertResub, AlertSub, AlertSubcommunitygift, AlertSubgift, AlertTip, EmitData,
+  Alert, AlertCheer, AlertCommandRedeem, AlertFollow, AlertHost, AlertInterface, AlertMedia, AlertRaid, AlertResub, AlertSub, AlertSubcommunitygift, AlertSubgift, AlertTip, EmitData,
 } from '../database/entity/alert';
 import { persistent } from '../decorators';
 import { getLocalizedName } from '../helpers/getLocalized';
@@ -38,37 +38,6 @@ class Alerts extends Registry {
         }
       } catch (e) {
         cb(e.stack, false, 0);
-      }
-    });
-    adminEndpoint(this.nsp, 'alerts::deleteMedia', async (id, cb) => {
-      cb(
-        null,
-        await getRepository(AlertMedia).delete({ id: String(id) }),
-      );
-    });
-    adminEndpoint(this.nsp, 'alerts::cloneMedia', async (toClone: [string, string], cb) => {
-      try {
-        const { primaryId, ...item } = await getRepository(AlertMedia).findOneOrFail({ id: toClone[0] });
-        cb(
-          null,
-          await getRepository(AlertMedia).save({
-            ...item,
-            id: toClone[1],
-          }),
-        );
-      } catch (e) {
-        cb(e.stack, null);
-      }
-    });
-    adminEndpoint(this.nsp, 'alerts::saveMedia', async (items: AlertMediaInterface, cb) => {
-      try {
-        const item = await getRepository(AlertMedia).save(items);
-        cb(
-          null,
-          item,
-        );
-      } catch (e) {
-        cb(e.stack, null);
       }
     });
     adminEndpoint(this.nsp, 'alerts::getOneMedia', async (id, cb) => {
