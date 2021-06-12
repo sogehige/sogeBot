@@ -61,19 +61,6 @@ class Alerts extends Registry {
         cb(e.stack, null);
       }
     });
-    publicEndpoint(this.nsp, 'generic::getOne', async (id: string, cb) => {
-      try {
-        cb(
-          null,
-          await getRepository(Alert).findOne({
-            where:     { id },
-            relations: ['rewardredeems', 'cmdredeems', 'cheers', 'follows', 'hosts', 'raids', 'resubs', 'subcommunitygifts', 'subgifts', 'subs', 'tips'],
-          }),
-        );
-      } catch (e) {
-        cb(e.stack);
-      }
-    });
     adminEndpoint(this.nsp, 'alerts::delete', async (item: Required<AlertInterface>, cb) => {
       try {
         await getRepository(Alert).remove(item);

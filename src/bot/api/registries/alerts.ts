@@ -20,9 +20,46 @@ import {
   Alert, AlertInterface, AlertMedia,
 } from '../../database/entity/alert';
 
-@Route('/api/v1/alerts')
+@Route('/api/v1/registry/alerts')
 @Tags('Registries / Alerts')
 export class RegistryAlertsController extends Controller {
+  @Get('/settings')
+  public async getSettings(
+    @Query() name: 'areAlertsMuted' | 'isSoundMuted' | 'isTTSMuted',
+  ): Promise<boolean> {
+    const alerts = (await import('../../registries/alerts')).default;
+    switch(name) {
+      case 'areAlertsMuted':
+        return alerts.areAlertsMuted;
+      case 'isSoundMuted':
+        return alerts.isSoundMuted;
+      case 'isTTSMuted':
+        return alerts.isTTSMuted;
+    }
+  }
+
+  @Post('/settings')
+  @Security('bearerAuth', [])
+  public async postSettings(
+    @Query() name: 'areAlertsMuted' | 'isSoundMuted' | 'isTTSMuted',
+      @Body() body: { value: boolean },
+  ): Promise<void> {
+    const alerts = (await import('../../registries/alerts')).default;
+    switch(name) {
+      case 'areAlertsMuted':
+        alerts.areAlertsMuted = body.value;
+        break;
+      case 'isSoundMuted':
+        alerts.isSoundMuted = body.value;
+        break;
+      case 'isTTSMuted':
+        alerts.isTTSMuted = body.value;
+        break;
+    }
+    this.setStatus(201);
+    return;
+  }
+
   @Hidden()
   @Get('/image/{id}')
   public async getImage(@Request() request: any, @Path() id: string) {
@@ -47,13 +84,24 @@ export class RegistryAlertsController extends Controller {
     return;
   }
 
-  @Get()
-  @Security('bearerAuth', [])
+  @Get('/')
   public async getAll(): Promise<{ data: AlertInterface[], paging: null}> {
     return {
       data:   await getRepository(Alert).find({ relations: ['rewardredeems', 'cmdredeems', 'cheers', 'follows', 'hosts', 'raids', 'resubs', 'subcommunitygifts', 'subgifts', 'subs', 'tips'] }),
       paging: null,
     };
+  }
+
+  @Response('404', 'Not Found')
+  @Get('/{id}')
+  public async getOne(@Path() id: string): Promise<AlertInterface | void> {
+    try {
+      const item = await getRepository(Alert).findOneOrFail({ where: { id }, relations: ['rewardredeems', 'cmdredeems', 'cheers', 'follows', 'hosts', 'raids', 'resubs', 'subcommunitygifts', 'subgifts', 'subs', 'tips'] });
+      return item;
+    } catch (e) {
+      this.setStatus(404);
+    }
+    return;
   }
 
   @SuccessResponse('201', 'Created')
@@ -100,43 +148,6 @@ export class RegistryAlertsController extends Controller {
     } catch (e) {
       this.setStatus(400);
     }
-    return;
-  }
-
-  @Get('/settings')
-  public async getSettings(
-    @Query() name: 'areAlertsMuted' | 'isSoundMuted' | 'isTTSMuted',
-  ): Promise<boolean> {
-    const alerts = (await import('../../registries/alerts')).default;
-    switch(name) {
-      case 'areAlertsMuted':
-        return alerts.areAlertsMuted;
-      case 'isSoundMuted':
-        return alerts.isSoundMuted;
-      case 'isTTSMuted':
-        return alerts.isTTSMuted;
-    }
-  }
-
-  @Post('/settings')
-  @Security('bearerAuth', [])
-  public async postSettings(
-    @Query() name: 'areAlertsMuted' | 'isSoundMuted' | 'isTTSMuted',
-      @Body() body: { value: boolean },
-  ): Promise<void> {
-    const alerts = (await import('../../registries/alerts')).default;
-    switch(name) {
-      case 'areAlertsMuted':
-        alerts.areAlertsMuted = body.value;
-        break;
-      case 'isSoundMuted':
-        alerts.isSoundMuted = body.value;
-        break;
-      case 'isTTSMuted':
-        alerts.isTTSMuted = body.value;
-        break;
-    }
-    this.setStatus(201);
     return;
   }
 }

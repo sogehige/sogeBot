@@ -89,79 +89,7 @@
     </b-modal>
 
     <loading v-if="state.loaded !== $state.success" />
-    <b-form v-else>
-      <b-form-group
-        :label="translate('registry.alerts.name.name')"
-        label-for="name"
-      >
-        <b-form-input
-          id="name"
-          v-model="item.name"
-          type="text"
-          :placeholder="translate('registry.alerts.name.placeholder')"
-          :state="$v.item.name.$invalid && $v.item.name.$dirty ? false : null"
-          @input="$v.item.name.$touch()"
-        />
-        <b-form-invalid-feedback :state="!($v.item.name.$invalid && $v.item.name.$dirty)">
-          {{ translate('dialog.errors.required') }}
-        </b-form-invalid-feedback>
-      </b-form-group>
 
-      <b-form-group
-        :label="translate('registry.alerts.alertDelayInMs.name')"
-        label-for="alertDelayInMs"
-      >
-        <b-input-group class="mb-2 mr-sm-2 mb-sm-0">
-          <b-form-input
-            id="alertDelayInMs"
-            v-model.number="item.alertDelayInMs"
-            type="range"
-            min="0"
-            max="30000"
-            step="500"
-            :placeholder="translate('AlertDelayInMs.placeholder')"
-          />
-          <b-input-group-text
-            slot="append"
-            class="pr-3 pl-3"
-          >
-            <div style="width: 3rem;">
-              {{ String(item.alertDelayInMs / 1000) + 's' }}
-            </div>
-          </b-input-group-text>
-        </b-input-group>
-      </b-form-group>
-
-      <b-form-group
-        :label="translate('registry.alerts.profanityFilterType.name')"
-        label-for="profanityFilterType"
-      >
-        <b-form-select
-          v-model="item.profanityFilterType"
-          :options="profanityFilterTypeOptions"
-          plain
-        />
-      </b-form-group>
-
-      <b-form-group
-        :label="translate('registry.alerts.loadStandardProfanityList')"
-        label-for="profanityFilterType"
-      >
-        <b-row>
-          <b-col
-            v-for="lang of Object.keys(item.loadStandardProfanityList)"
-            :key="lang"
-            sm="auto"
-          >
-            <b-form-checkbox
-              v-model="item.loadStandardProfanityList[lang]"
-              class="mt-2 ml-2 normalLabel"
-            >
-              {{ lang }}
-            </b-form-checkbox>
-          </b-col>
-        </b-row>
-      </b-form-group>
       <b-form-group
         :label="translate('registry.alerts.customProfanityList.name')"
         label-for="customProfanityList"
