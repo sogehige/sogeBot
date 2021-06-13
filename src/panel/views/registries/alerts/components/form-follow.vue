@@ -1,18 +1,6 @@
 <template>
   <div>
 
-    <b-form-group
-      label-cols-sm="4"
-      label-cols-lg="3"
-      :label="translate('registry.alerts.filter.name')"
-      :label-for="'filter' + data.id"
-    >
-      <query-filter
-        :key="'filter-' + data.id"
-        :filter.sync="data.filter"
-        :rules="rules"
-      />
-    </b-form-group>
 
     <b-form-group
       label-cols-sm="4"
