@@ -6,6 +6,7 @@ import {
   Hidden,
   Path,
   Post,
+  Put,
   Query,
   Request,
   Response,
@@ -13,12 +14,49 @@ import {
   Security,
   SuccessResponse,
   Tags,
+  UploadedFile,
 } from 'tsoa';
-import { getRepository } from 'typeorm';
+import {
+  getRepository, In, Not, 
+} from 'typeorm';
+import { v4 } from 'uuid';
 
 import {
-  Alert, AlertInterface, AlertMedia,
+  Alert, AlertInterface, AlertMedia, AlertMediaInterface,
 } from '../../database/entity/alert';
+import { error } from '../../helpers/log';
+
+async function clearMedia(): Promise<void> {
+  try {
+    const alerts = await getRepository(Alert).find({ relations: ['rewardredeems', 'cmdredeems', 'cheers', 'follows', 'hosts', 'raids', 'resubs', 'subcommunitygifts', 'subgifts', 'subs', 'tips'] });
+    const mediaIds: string[] = [];
+    for (const alert of alerts) {
+      for (const event of [
+        ...alert.cheers,
+        ...alert.follows,
+        ...alert.hosts,
+        ...alert.raids,
+        ...alert.resubs,
+        ...alert.subgifts,
+        ...alert.subcommunitygifts,
+        ...alert.subs,
+        ...alert.tips,
+        ...alert.cmdredeems,
+        ...alert.rewardredeems,
+      ]) {
+        mediaIds.push(event.imageId);
+        mediaIds.push(event.soundId);
+      }
+    }
+    if (mediaIds.length > 0) {
+      await getRepository(AlertMedia).delete({ id: Not(In(mediaIds)) });
+    }
+  } catch (e) {
+    console.error();
+    (e);
+  }
+  return;
+}
 
 @Route('/api/v1/registry/alerts')
 @Tags('Registries / Alerts')
@@ -61,7 +99,7 @@ export class RegistryAlertsController extends Controller {
   }
 
   @Hidden()
-  @Get('/image/{id}')
+  @Get('/media/{id}')
   public async getImage(@Request() request: any, @Path() id: string) {
     try {
       const res = (<any>request).res;
@@ -92,6 +130,73 @@ export class RegistryAlertsController extends Controller {
     };
   }
 
+  @SuccessResponse('201', 'Created')
+  @Response('401', 'Unauthorized')
+  @Security('bearerAuth', [])
+  @Post('/')
+  public async post(@Body() requestBody: AlertInterface): Promise<void> {
+    try {
+      await getRepository(Alert).save(requestBody);
+      await clearMedia();
+      this.setStatus(201);
+
+    } catch (e) {
+      this.setStatus(400);
+    }
+    return;
+  }
+
+  @SuccessResponse('201', 'Created')
+  @Response('401', 'Unauthorized')
+  @Security('bearerAuth', [])
+  @Post('/media/')
+  public async upload(@UploadedFile() file: any): Promise<AlertMediaInterface | string> {
+    try {
+      const item = await getRepository(AlertMedia).save({
+        id:      v4(),
+        b64data: file.buffer.toString('base64'),
+        chunkNo: 0,
+      });
+      this.setStatus(201);
+      return item;
+    } catch (e) {
+      this.setStatus(400);
+    }
+    return 'Something went wrong';
+  }
+
+  @SuccessResponse('201', 'Created')
+  @Response('401', 'Unauthorized')
+  @Security('bearerAuth', [])
+  @Put('/media/{id}')
+  public async uploadPut(@Path() id: string, @UploadedFile() file: any): Promise<AlertMediaInterface | string> {
+    try {
+      const item = await getRepository(AlertMedia).save({
+        id,
+        b64data: file.buffer.toString('base64'),
+        chunkNo: 0,
+      });
+      this.setStatus(201);
+      return item;
+    } catch (e) {
+      this.setStatus(400);
+    }
+    return 'Something went wrong';
+  }
+
+  @Security('bearerAuth', [])
+  @Delete('/media/{id}')
+  public async deleteMedia(@Path() id: string): Promise<void> {
+    try {
+      await getRepository(AlertMedia).delete({ id }),
+      this.setStatus(201);
+
+    } catch (e) {
+      this.setStatus(400);
+    }
+    return;
+  }
+
   @Response('404', 'Not Found')
   @Get('/{id}')
   public async getOne(@Path() id: string): Promise<AlertInterface | void> {
@@ -104,50 +209,17 @@ export class RegistryAlertsController extends Controller {
     return;
   }
 
-  @SuccessResponse('201', 'Created')
-  @Response('401', 'Unauthorized')
-  @Security('bearerAuth', [])
-  @Post()
-  public async post(@Body() requestBody: AlertInterface): Promise<void> {
+  @SuccessResponse('404', 'Not Found')
+  @Response('404', 'Not Found')
+  @Delete('/{id}')
+  public async deleteOne(@Path() id: string): Promise<void> {
     try {
-      await getRepository(Alert).save(requestBody);
-      this.setStatus(201);
-
+      await getRepository(Alert).delete(id);
+      await clearMedia();
     } catch (e) {
-      this.setStatus(400);
+      error(e);
     }
-    return;
-  }
-
-  @SuccessResponse('201', 'Created')
-  @Response('401', 'Unauthorized')
-  @Security('bearerAuth', [])
-  @Post('/media/?_action=clone')
-  public async cloneMedia(@Body() toClone: { '0': string, '1': string }): Promise<void> {
-    try {
-      const { primaryId, ...item } = await getRepository(AlertMedia).findOneOrFail({ id: toClone['0'] });
-      await getRepository(AlertMedia).save({
-        ...item,
-        id: toClone['1'],
-      });
-      this.setStatus(201);
-
-    } catch (e) {
-      this.setStatus(400);
-    }
-    return;
-  }
-
-  @Security('bearerAuth', [])
-  @Delete('/media/{id}')
-  public async deleteMedia(@Path() id: string): Promise<void> {
-    try {
-      await getRepository(AlertMedia).delete({ id: String(id) }),
-      this.setStatus(201);
-
-    } catch (e) {
-      this.setStatus(400);
-    }
+    this.setStatus(404);
     return;
   }
 }

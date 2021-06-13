@@ -141,6 +141,30 @@ export const init = () => {
   app?.use('/dist', express.static(path.join(__dirname, '..', 'public', 'dist')));
 
   const nuxtCache = new Map<string, string>();
+  app?.get(['/_static/*', '/credentials/_static/*'], (req, res) => {
+    if (!nuxtCache.get(req.url)) {
+      // search through node_modules to find correct nuxt file
+      const paths = [
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'static', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'static', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'static', '_static'),
+      ];
+      for (const dir of paths) {
+        const pathToFile = path.join(dir, req.url.replace('_static', ''));
+        console.log({ pathToFile });
+        if (fs.existsSync(pathToFile)) {
+          nuxtCache.set(req.url, pathToFile);
+        }
+      }
+    }
+
+    const filepath = nuxtCache.get(req.url) as string;
+    if (fs.existsSync(filepath)) {
+      res.sendFile(filepath);
+    } else {
+      res.sendStatus(404);
+    }
+  });
   app?.get(['/_nuxt/*', '/credentials/_nuxt/*'], (req, res) => {
     if (!nuxtCache.get(req.url)) {
       // search through node_modules to find correct nuxt file

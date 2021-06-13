@@ -1,34 +1,5 @@
 <template>
   <div>
-    <b-form-group
-      label-cols-sm="4"
-      label-cols-lg="3"
-      :label-for="'enabled' + data.id"
-      :label="translate('registry.alerts.enabled')"
-    >
-      <b-form-checkbox
-        :id="'enabled' + data.id"
-        :key="'enabled' + data.id"
-        v-model="data.enabled"
-        :name="'enabled' + data.id"
-        switch
-      />
-    </b-form-group>
-
-    <b-form-group
-      label-cols-sm="4"
-      label-cols-lg="3"
-      :label="translate('registry.alerts.title.name')"
-      :label-for="'title' + data.id"
-    >
-      <b-form-input
-        :id="'title' + data.id"
-        v-model="data.title"
-        type="text"
-        :placeholder="translate('registry.alerts.title.placeholder')"
-        @input="$v.data.$touch()"
-      />
-    </b-form-group>
 
     <b-form-group
       label-cols-sm="4"

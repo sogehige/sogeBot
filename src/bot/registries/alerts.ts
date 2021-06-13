@@ -1,9 +1,7 @@
-import {
-  getRepository, In, IsNull, Not,
-} from 'typeorm';
+import { getRepository, IsNull } from 'typeorm';
 
 import {
-  Alert, AlertCheer, AlertCommandRedeem, AlertFollow, AlertHost, AlertInterface, AlertMedia, AlertRaid, AlertResub, AlertSub, AlertSubcommunitygift, AlertSubgift, AlertTip, EmitData,
+  Alert, AlertCheer, AlertCommandRedeem, AlertFollow, AlertHost, AlertInterface, AlertRaid, AlertResub, AlertSub, AlertSubcommunitygift, AlertSubgift, AlertTip, EmitData,
 } from '../database/entity/alert';
 import { persistent } from '../decorators';
 import { getLocalizedName } from '../helpers/getLocalized';
@@ -40,17 +38,6 @@ class Alerts extends Registry {
         cb(e.stack, false, 0);
       }
     });
-    adminEndpoint(this.nsp, 'alerts::getOneMedia', async (id, cb) => {
-      try {
-        cb(
-          null,
-          await getRepository(AlertMedia).find({ id: String(id) }),
-        );
-
-      } catch (e) {
-        cb(e.stack, []);
-      }
-    });
     adminEndpoint(this.nsp, 'alerts::save', async (item, cb) => {
       try {
         cb(
@@ -79,31 +66,6 @@ class Alerts extends Registry {
         }
       } catch (e) {
         cb(e.stack);
-      }
-    });
-    adminEndpoint(this.nsp, 'clear-media', async () => {
-      const alerts = await getRepository(Alert).find({ relations: ['rewardredeems', 'cmdredeems', 'cheers', 'follows', 'hosts', 'raids', 'resubs', 'subcommunitygifts', 'subgifts', 'subs', 'tips'] });
-      const mediaIds: string[] = [];
-      for (const alert of alerts) {
-        for (const event of [
-          ...alert.cheers,
-          ...alert.follows,
-          ...alert.hosts,
-          ...alert.raids,
-          ...alert.resubs,
-          ...alert.subgifts,
-          ...alert.subcommunitygifts,
-          ...alert.subs,
-          ...alert.tips,
-          ...alert.cmdredeems,
-          ...alert.rewardredeems,
-        ]) {
-          mediaIds.push(event.imageId);
-          mediaIds.push(event.soundId);
-        }
-      }
-      if (mediaIds.length > 0) {
-        await getRepository(AlertMedia).delete({ id: Not(In(mediaIds)) });
       }
     });
     publicEndpoint(this.nsp, 'test', async (data: EmitData) => {
