@@ -5,49 +5,6 @@
     <b-form-group
       label-cols-sm="4"
       label-cols-lg="3"
-      :label="translate('registry.alerts.variant.name')"
-      :label-for="'variant' + data.id"
-    >
-      <variant
-        :key="'variant-' + data.id"
-        :amount.sync="data.variantAmount"
-        :state="$v.data.variantAmount.$invalid && $v.data.variantAmount.$dirty ? false : null"
-      />
-    </b-form-group>
-
-    <b-form-group
-      label-cols-sm="4"
-      label-cols-lg="3"
-      :label="translate('registry.alerts.messageTemplate.name')"
-      :label-for="'messageTemplate' + data.id"
-      :description="translate('registry.alerts.messageTemplate.help')"
-    >
-      <b-form-input
-        :id="'messageTemplate' + data.id"
-        v-model="data.messageTemplate"
-        type="text"
-        :placeholder="translate('registry.alerts.messageTemplate.placeholder')"
-        :state="$v.data.messageTemplate.$invalid && $v.data.messageTemplate.$dirty ? false : null"
-        @input="$v.data.$touch()"
-      />
-    </b-form-group>
-
-    <b-form-group
-      label-cols-sm="4"
-      label-cols-lg="3"
-      :label="translate('registry.alerts.animationText.name')"
-      :label-for="'animationText' + data.id"
-    >
-      <text-animation
-        :id="'animationText' + data.id"
-        :animation.sync="data.animationText"
-        :animation-options.sync="data.animationTextOptions"
-      />
-    </b-form-group>
-
-    <b-form-group
-      label-cols-sm="4"
-      label-cols-lg="3"
       :label="translate('registry.alerts.animationIn.name')"
       :label-for="'animationIn' + data.id"
     >
