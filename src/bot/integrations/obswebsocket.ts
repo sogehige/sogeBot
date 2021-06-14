@@ -1,5 +1,3 @@
-import path from 'path';
-
 import { SECOND } from '@sogebot/ui-helpers/constants';
 import { getRepository } from 'typeorm';
 
@@ -18,7 +16,7 @@ import {
 import { obs } from '../helpers/obswebsocket/client';
 import { switchScenes } from '../helpers/obswebsocket/listeners';
 import { taskRunner } from '../helpers/obswebsocket/taskrunner';
-import { app, ioServer } from '../helpers/panel';
+import { ioServer } from '../helpers/panel';
 import { ParameterError } from '../helpers/parameterError';
 import { defaultPermissions } from '../helpers/permissions';
 import { publicEndpoint } from '../helpers/socket';
@@ -126,16 +124,6 @@ class OBSWebsocket extends Integration {
     this.addMenu({
       category: 'registry', name: 'obswebsocket', id: 'registry/obswebsocket', this: null,
     });
-
-    (function initEndpoint() {
-      if (!app) {
-        setTimeout(() => initEndpoint(), 1000);
-      } else {
-        app.get('/assets/obswebsocket-code.txt', async (req, res) => {
-          res.sendFile(path.join(__dirname, '..', '..', 'assets', 'obswebsocket-code.txt'));
-        });
-      }
-    })();
   }
 
   @onStartup()

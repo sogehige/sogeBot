@@ -1,4 +1,3 @@
-import path from 'path';
 import { setTimeout } from 'timers';
 
 import { isNil } from 'lodash';
@@ -12,7 +11,6 @@ import { onStartup } from './decorators/on';
 import { getBot } from './helpers/commons';
 import { runScript, updateWidgetAndTitle } from './helpers/customvariables';
 import { isDbConnected } from './helpers/database';
-import { app } from './helpers/panel';
 import { adminEndpoint } from './helpers/socket';
 
 class CustomVariables extends Core {
@@ -26,16 +24,6 @@ class CustomVariables extends Core {
       category: 'registry', name: 'custom-variables', id: 'registry.customvariables', this: null,
     });
     this.checkIfCacheOrRefresh();
-
-    (function initEndpoint() {
-      if (!app) {
-        setTimeout(() => initEndpoint(), 1000);
-      } else {
-        app.get('/assets/custom-variables-code.txt', async (req, res) => {
-          res.sendFile(path.join(__dirname, '..', 'assets', 'custom-variables-code.txt'));
-        });
-      }
-    })();
   }
 
   sockets () {

@@ -206,6 +206,9 @@ export const init = () => {
   app?.get('/overlays/:overlay/:id', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'overlays.html'));
   });
+  app?.get('/assets/:asset', function (req, res) {
+    res.sendFile(path.join(__dirname, '..', 'assets', sanitize(req.params.asset)));
+  });
   app?.get('/custom/:custom', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'custom', sanitize(req.params.custom) + '.html'));
   });
