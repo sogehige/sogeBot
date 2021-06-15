@@ -1,24 +1,6 @@
 <template>
   <div>
 
-      <b-btn
-        variant="primary"
-        class="mt-2 mb-2"
-        @click="revertCode"
-      >
-        {{ translate('registry.alerts.revertcode') }}
-      </b-btn>
-    </div>
-
-    <b-form-group
-      v-if="!data.enableAdvancedMode"
-      label-cols-sm="4"
-      label-cols-lg="3"
-      :label="translate('registry.alerts.layoutPicker.name')"
-    >
-      <layout-picker :layout.sync="data.layout" />
-    </b-form-group>
-
     <b-card no-body>
       <b-card-header
         header-tag="header"
