@@ -1,3 +1,4 @@
+import FileType from 'file-type';
 import {
   Body,
   Controller,
@@ -17,7 +18,7 @@ import {
   UploadedFile,
 } from 'tsoa';
 import {
-  getRepository, In, Not, 
+  getRepository, In, Not,
 } from 'typeorm';
 import { v4 } from 'uuid';
 
@@ -108,11 +109,11 @@ export class RegistryAlertsController extends Controller {
       if (b64data.trim().length === 0) {
         throw new Error();
       } else {
-        const match = (b64data.match(/^data:\w+\/\w+;base64,/) || [ 'data:image/gif;base64,' ])[0];
-        const data = Buffer.from(b64data.replace(/^data:\w+\/\w+;base64,/, ''), 'base64');
+        const data = Buffer.from(b64data, 'base64');
         res.writeHead(200, {
-          'Content-Type':   match.replace('data:', '').replace(';base64,', ''),
-          'Content-Length': data.length,
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type':                (await FileType.fromBuffer(data))?.mime,
+          'Content-Length':              data.length,
         });
         res.end(data);
       }
