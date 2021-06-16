@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Hidden,
+  Patch,
   Path,
   Post,
   Put,
@@ -109,7 +110,7 @@ export class RegistryAlertsController extends Controller {
       if (b64data.trim().length === 0) {
         throw new Error();
       } else {
-        const data = Buffer.from(b64data, 'base64');
+        const data = Buffer.from(b64data.replace(/(data:.*base64,)/g, ''), 'base64');
         res.writeHead(200, {
           'Access-Control-Allow-Origin': '*',
           'Content-Type':                (await FileType.fromBuffer(data))?.mime,
@@ -221,6 +222,23 @@ export class RegistryAlertsController extends Controller {
       error(e);
     }
     this.setStatus(404);
+    return;
+  }
+
+  @SuccessResponse('201', 'Created')
+  @Response('401', 'Unauthorized')
+  @Security('bearerAuth', [])
+  @Patch('/{id}')
+  public async patch(@Path() id: string, @Body() requestBody: AlertInterface): Promise<AlertInterface | void> {
+    try {
+      const item = await getRepository(Alert).save({ ...requestBody, id });
+      await clearMedia();
+      this.setStatus(201);
+      return item;
+
+    } catch (e) {
+      this.setStatus(400);
+    }
     return;
   }
 }
