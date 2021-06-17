@@ -14,7 +14,6 @@ export class removeTTSkeys1622378375127 implements MigrationInterface {
       alerts[type]  = await queryRunner.manager.getRepository(`alert_${type}`).find();
     }
 
-    console.log(await queryRunner.manager.getRepository(`alert_media`).find());
     // resave all alerts
     for (const type of [
       'follow', 'sub', 'subcommunitygift',
@@ -37,7 +36,6 @@ export class removeTTSkeys1622378375127 implements MigrationInterface {
         await queryRunner.manager.getRepository(`alert_${type}`).save(alert);
       }
     }
-    console.log(await queryRunner.manager.getRepository(`alert_media`).find());
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

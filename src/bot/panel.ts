@@ -151,7 +151,6 @@ export const init = () => {
       ];
       for (const dir of paths) {
         const pathToFile = path.join(dir, req.url.replace('_static', ''));
-        console.log({ pathToFile });
         if (fs.existsSync(pathToFile)) {
           nuxtCache.set(req.url, pathToFile);
         }
