@@ -1,17 +1,6 @@
 <template>
   <div>
 
-          <div
-            v-if="!item.isCorePermission"
-            class="form-group col-md-12"
-          >
-            <label>{{ translate('core.permissions.filters') }}</label>
-            <filters
-              :filters="item.filters"
-              @update="item.filters = $event; "
-            />
-          </div>
-
           <div class="form-group col-md-12">
             <label>{{ translate('core.permissions.testUser') }}</label>
             <test :key="'test' + item.id" />
