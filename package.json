@@ -7,6 +7,9 @@
     "*.css",
     "*.vue"
   ],
+  "engines": {
+    "npm": "~7.18.0"
+  },
   "simple-git-hooks": {
     "pre-commit": "npx simple-git-hooks && npx lint-staged",
     "commit-msg": "node ./tools/pre-commit-message.js $1 $2 $3",

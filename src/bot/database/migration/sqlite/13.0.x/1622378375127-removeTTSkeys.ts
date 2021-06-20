@@ -25,10 +25,10 @@ export class removeTTSkeys1622378375127 implements MigrationInterface {
         delete alert.tts.rate;
         delete alert.tts.volume;
         delete alert.tts.voice;
-        if (!alert.font.shadow) {
+        if (alert.font && !alert.font.shadow) {
           alert.font.shadow = [];
         }
-        if (typeof alert.message !== 'undefined' && typeof alert.message.font !== 'undefined') {
+        if (alert.message && alert.message.font) {
           if (!alert.message.font.shadow) {
             alert.message.font.shadow = [];
           }
