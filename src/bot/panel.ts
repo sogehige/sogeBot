@@ -456,7 +456,7 @@ export const init = () => {
     });
     socket.on('core', async (cb: (err: string | null, toEmit: { name: string }[]) => void) => {
       const toEmit: { name: string }[] = [];
-      for (const system of ['oauth', 'tmi', 'currency', 'ui', 'general', 'twitch', 'socket', 'permissions']) {
+      for (const system of ['oauth', 'tmi', 'currency', 'ui', 'general', 'twitch', 'socket']) {
         toEmit.push({ name: system.toLowerCase() });
       }
       cb(null, toEmit);

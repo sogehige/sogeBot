@@ -1,3 +1,4 @@
+import { DAY } from '@sogebot/ui-helpers/constants';
 import axios from 'axios';
 import { NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
@@ -6,7 +7,6 @@ import { getRepository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
 import Core from './_interface';
-import { DAY } from '@sogebot/ui-helpers/constants';
 import { User } from './database/entity/user';
 import {
   persistent, settings, ui,
@@ -99,13 +99,6 @@ class Socket extends Core {
   @settings('connection')
   @ui({ type: 'uuid-generator' }, 'connection')
   socketToken = '';
-
-  @ui({
-    type:  'btn-emit',
-    class: 'btn btn-danger btn-block mt-1 mb-1',
-    emit:  'purgeAllConnections',
-  }, 'connection')
-  purgeAllConnections = null;
 
   @onLoad('JWTKey')
   JWTKeyGenerator() {

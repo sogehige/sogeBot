@@ -1,6 +1,9 @@
-import { globalIgnoreList } from '../../data/globalIgnoreList';
+import { readFileSync } from 'fs';
+
 import { globalIgnoreListExclude, ignorelist } from '../tmi/ignoreList';
 import { isBroadcaster } from './isBroadcaster';
+
+const globalIgnoreList = JSON.parse(readFileSync('./assets/globalIgnoreList.json', 'utf8'));
 
 export function isIgnored(sender: { username: string | null; userId?: string }) {
   if (sender.username === null) {

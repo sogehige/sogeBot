@@ -172,10 +172,10 @@
   },
   "lint-staged": {
     "*.js": [
-      "npx eslint --fix"
+      "npx eslint --fix --quiet"
     ],
     "*.ts": [
-      "npx eslint --fix"
+      "npx eslint --fix --quiet"
     ],
     "*.json": [
       "npx jsonlint"

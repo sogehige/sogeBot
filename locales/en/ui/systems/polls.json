@@ -20,6 +20,7 @@
   },
   "title": "Title",
   "totalVotes": "Total votes",
+  "copy": "Copy",
   "cannotCopyIfInProgress": "Cannot copy, if another poll is in progress",
   "closedAt": "Closed at",
   "activeFor": "Active for",

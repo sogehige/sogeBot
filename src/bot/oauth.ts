@@ -1,9 +1,9 @@
+import * as constants from '@sogebot/ui-helpers/constants';
 import axios from 'axios';
 
 import Core from './_interface';
-import * as constants from '@sogebot/ui-helpers/constants';
 import {
-  areDecoratorsLoaded, persistent, settings, ui,
+  areDecoratorsLoaded, persistent, settings,
 } from './decorators';
 import {
   onChange, onLoad, onStartup,
@@ -52,19 +52,15 @@ class OAuth extends Core {
   public generalOwners: string[] = [];
 
   @settings('broadcaster')
-  @ui({ type: 'text-input', secret: true })
   public broadcasterAccessToken = '';
 
   @settings('broadcaster')
-  @ui({ type: 'text-input', secret: true })
   public broadcasterRefreshToken = '';
 
   @settings('broadcaster')
-  @ui({ readOnly: true, type: 'text-input' })
   public broadcasterUsername = '';
 
   @settings('broadcaster', true)
-  @ui({ type: 'checklist', current: 'broadcasterCurrentScopes' })
   public broadcasterExpectedScopes: string[] = [
     'channel_editor',
     'chat:read',
@@ -79,32 +75,18 @@ class OAuth extends Core {
   ];
 
   @settings('broadcaster')
-  @ui({ ignore: true })
   public broadcasterCurrentScopes: string[] = [];
 
-  @ui({
-    type:   'link',
-    href:   'https://twitchtokengenerator.com/quick/XH6B7JteDO',
-    class:  'btn btn-primary btn-block',
-    text:   'commons.generate',
-    target: '_blank',
-  }, 'broadcaster')
-  public broadcasterGenerateLink = null;
-
   @settings('bot')
-  @ui({ type: 'text-input', secret: true })
   public botAccessToken = '';
 
   @settings('bot')
-  @ui({ type: 'text-input', secret: true })
   public botRefreshToken = '';
 
   @settings('bot')
-  @ui({ readOnly: true, type: 'text-input' })
   public botUsername = '';
 
   @settings('bot', true)
-  @ui({ type: 'checklist', current: 'botCurrentScopes' })
   public botExpectedScopes: string[] = [
     'clips:edit',
     'user:edit:broadcast',
@@ -118,17 +100,7 @@ class OAuth extends Core {
   ];
 
   @settings('bot')
-  @ui({ ignore: true })
   public botCurrentScopes: string[] = [];
-
-  @ui({
-    type:   'link',
-    href:   'https://twitchtokengenerator.com/quick/jLbq7v1pzF',
-    class:  'btn btn-primary btn-block',
-    text:   'commons.generate',
-    target: '_blank',
-  }, 'bot')
-  public botGenerateLink = null;
 
   @onStartup()
   onStartup() {

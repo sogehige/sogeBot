@@ -16,7 +16,7 @@ import { Price } from './database/entity/price';
 import {
   User, UserBit, UserBitInterface,
 } from './database/entity/user';
-import { settings, ui } from './decorators';
+import { settings } from './decorators';
 import { command, default_permission } from './decorators';
 import {
   getFunctionList, onChange, onLoad, onStreamStart,
@@ -75,7 +75,6 @@ class TMI extends Core {
   ignorelist: any[] = [];
 
   @settings('chat')
-  @ui({ type: 'global-ignorelist-exclude' }, 'chat')
   globalIgnoreListExclude: any[] = [];
 
   @settings('chat')
