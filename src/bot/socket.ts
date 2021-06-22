@@ -91,7 +91,7 @@ class Socket extends Core {
   JWTKey = '';
 
   @settings('connection')
-  accessTokenExpirationTime = 120;
+  accessTokenExpirationTime = DAY;
 
   @settings('connection')
   refreshTokenExpirationTime = DAY * 31;
