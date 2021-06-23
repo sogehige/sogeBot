@@ -27,7 +27,7 @@ class Keywords extends System {
   constructor() {
     super();
     this.addMenu({
-      category: 'commands', name: 'keywords', id: 'manage/keywords', this: this,
+      category: 'commands', name: 'keywords', id: 'commands/keywords', this: this,
     });
   }
 

@@ -1,8 +1,8 @@
+import * as constants from '@sogebot/ui-helpers/constants';
 import _ from 'lodash';
 import { getRepository } from 'typeorm';
 
 import { parserReply } from '../commons';
-import * as constants from '@sogebot/ui-helpers/constants';
 import {
   Commands, CommandsInterface, CommandsResponsesInterface,
 } from '../database/entity/commands';
@@ -50,7 +50,7 @@ class CustomCommands extends System {
   constructor () {
     super();
     this.addMenu({
-      category: 'commands', name: 'customcommands', id: 'manage/commands', this: this,
+      category: 'commands', name: 'customcommands', id: 'commands/customcommands', this: this,
     });
   }
 

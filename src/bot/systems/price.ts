@@ -1,10 +1,10 @@
 'use strict';
 
+import * as constants from '@sogebot/ui-helpers/constants';
 import * as _ from 'lodash';
 import { getRepository } from 'typeorm';
 
 import { parserReply } from '../commons';
-import * as constants from '@sogebot/ui-helpers/constants';
 import { Price as PriceEntity, PriceInterface } from '../database/entity/price';
 import { User } from '../database/entity/user';
 import {
@@ -36,7 +36,7 @@ class Price extends System {
   constructor () {
     super();
     this.addMenu({
-      category: 'commands', name: 'price', id: 'manage/price', this: this,
+      category: 'commands', name: 'price', id: 'commands/price', this: this,
     });
   }
 

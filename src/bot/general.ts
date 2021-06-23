@@ -74,15 +74,15 @@ class General extends Core {
   @onStartup()
   onStartup() {
     this.addMenu({
-      name: 'dashboard', id: '', this: this,
+      name: 'index', id: '', this: this,
     });
     this.addMenu({
-      category: 'commands', name: 'botcommands', id: 'manage/botcommands', this: this,
+      category: 'commands', name: 'botcommands', id: 'commands/botcommands', this: this,
     });
     this.addMenu({
       category: 'settings', name: 'modules', id: 'settings/modules', this: null,
     });
-    this.addMenuPublic({ name: 'dashboard', id: '' });
+    this.addMenuPublic({ name: 'index', id: '' });
     setInterval(gracefulExit, 1000);
   }
 

@@ -1,9 +1,9 @@
+import * as constants from '@sogebot/ui-helpers/constants';
 import _ from 'lodash';
 import { getRepository } from 'typeorm';
 import XRegExp from 'xregexp';
 
 import { parserReply } from '../commons';
-import * as constants from '@sogebot/ui-helpers/constants';
 import {
   Cooldown as CooldownEntity, CooldownInterface, CooldownViewer, CooldownViewerInterface,
 } from '../database/entity/cooldown';
@@ -71,7 +71,7 @@ class Cooldown extends System {
   constructor () {
     super();
     this.addMenu({
-      category: 'commands', name: 'cooldown', id: 'manage/cooldowns', this: this,
+      category: 'commands', name: 'cooldowns', id: 'commands/cooldowns', this: this,
     });
   }
 

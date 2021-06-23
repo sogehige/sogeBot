@@ -1,11 +1,11 @@
 'use strict';
 
+import * as constants from '@sogebot/ui-helpers/constants';
 import * as _ from 'lodash';
 import { getRepository } from 'typeorm';
 
 import { parserReply } from '../commons';
 import { Alias as AliasEntity, AliasInterface } from '../database/entity/alias';
-import * as constants from '@sogebot/ui-helpers/constants';
 import {
   command, default_permission, parser,
 } from '../decorators';
@@ -47,7 +47,7 @@ class Alias extends System {
     super();
 
     this.addMenu({
-      category: 'commands', name: 'alias', id: 'manage/alias', this: this,
+      category: 'commands', name: 'alias', id: 'commands/alias', this: this,
     });
   }
 

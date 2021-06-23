@@ -1,7 +1,7 @@
+import * as constants from '@sogebot/ui-helpers/constants';
 import { HowLongToBeatService } from 'howlongtobeat';
 import { getRepository } from 'typeorm';
 
-import * as constants from '@sogebot/ui-helpers/constants';
 import { HowLongToBeatGame, HowLongToBeatGameItem } from '../database/entity/howLongToBeatGame';
 import { command, default_permission } from '../decorators';
 import { onStartup, onStreamStart } from '../decorators/on';
@@ -26,7 +26,7 @@ class HowLongToBeat extends System {
   @onStartup()
   onStartup() {
     this.addMenu({
-      category: 'manage', name: 'howlongtobeat', id: 'manage/hltb', this: this,
+      category: 'manage', name: 'howlongtobeat', id: 'manage/howlongtobeat', this: this,
     });
 
     this.refreshImageThumbnail();
