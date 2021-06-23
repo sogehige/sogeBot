@@ -104,9 +104,6 @@ class OAuth extends Core {
 
   @onStartup()
   onStartup() {
-    this.addMenu({
-      category: 'settings', name: 'core', id: 'settings/core', this: null,
-    });
     this.validateOAuth('bot');
     this.validateOAuth('broadcaster');
     this.getChannelId();
