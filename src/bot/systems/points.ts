@@ -1,15 +1,15 @@
 'use strict';
 
+import { MINUTE } from '@sogebot/ui-helpers/constants';
 import * as cronparser from 'cron-parser';
 import {
   FindConditions, getConnection, getRepository, LessThanOrEqual,
 } from 'typeorm';
 
-import { MINUTE } from '@sogebot/ui-helpers/constants';
 import { PointsChangelog } from '../database/entity/points';
 import { User, UserInterface } from '../database/entity/user';
 import {
-  command, default_permission, parser, permission_settings, persistent, settings, ui,
+  command, default_permission, parser, permission_settings, persistent, settings,
 } from '../decorators';
 import {
   onChange, onLoad, onStartup,
@@ -40,10 +40,6 @@ class Points extends System {
   @settings('reset')
   isPointResetIntervalEnabled = false;
   @settings('reset')
-  @ui({
-    'type': 'cron',
-    'emit': 'parseCron',
-  })
   resetIntervalCron = '@monthly';
   @persistent()
   lastCronRun = 0;
@@ -148,64 +144,61 @@ class Points extends System {
   }
 
   private async processPoints(username: string, opts: {interval: {[permissionId: string]: any}; offlineInterval: {[permissionId: string]: any}; perInterval: {[permissionId: string]: any}; perOfflineInterval: {[permissionId: string]: any}; isStreamOnline: boolean}): Promise<void> {
-    return new Promise(async (resolve) => {
-      const userId = await users.getIdByName(username);
-      if (!userId) {
-        debug('points.update', `User ${username} missing userId`);
-        return resolve(); // skip without id
-      }
+    const userId = await users.getIdByName(username);
+    if (!userId) {
+      debug('points.update', `User ${username} missing userId`);
+      return; // skip without id
+    }
 
-      // get user max permission
-      const permId = await getUserHighestPermission(userId);
-      if (!permId) {
-        debug('points.update', `User ${username}#${userId} permId not found`);
-        return resolve(); // skip without id
-      }
+    // get user max permission
+    const permId = await getUserHighestPermission(userId);
+    if (!permId) {
+      debug('points.update', `User ${username}#${userId} permId not found`);
+      return; // skip without id
+    }
 
-      const interval_calculated = opts.isStreamOnline ? opts.interval[permId] * 60 * 1000 : opts.offlineInterval[permId]  * 60 * 1000;
-      const ptsPerInterval = opts.isStreamOnline ? opts.perInterval[permId]  : opts.perOfflineInterval[permId] ;
+    const interval_calculated = opts.isStreamOnline ? opts.interval[permId] * 60 * 1000 : opts.offlineInterval[permId]  * 60 * 1000;
+    const ptsPerInterval = opts.isStreamOnline ? opts.perInterval[permId]  : opts.perOfflineInterval[permId] ;
 
-      const user = await getRepository(User).findOne({ username });
-      if (!user) {
-        debug('points.update', `new user in db ${username}#${userId}[${permId}]`);
-        await getRepository(User).save({
-          userId,
-          username,
-          points:               0,
-          pointsOfflineGivenAt: 0,
-          pointsOnlineGivenAt:  0,
-        });
-      } else {
-        const chat = await users.getChatOf(userId, opts.isStreamOnline);
-        const userPointsKey = opts.isStreamOnline ? 'pointsOnlineGivenAt' : 'pointsOfflineGivenAt';
-        if (interval_calculated !== 0 && ptsPerInterval[permId]  !== 0) {
-          const givenAt = user[userPointsKey] + interval_calculated;
-          debug('points.update', `${user.username}#${userId}[${permId}] ${chat} | ${givenAt}`);
+    const user = await getRepository(User).findOne({ username });
+    if (!user) {
+      debug('points.update', `new user in db ${username}#${userId}[${permId}]`);
+      await getRepository(User).save({
+        userId,
+        username,
+        points:               0,
+        pointsOfflineGivenAt: 0,
+        pointsOnlineGivenAt:  0,
+      });
+    } else {
+      const chat = await users.getChatOf(userId, opts.isStreamOnline);
+      const userPointsKey = opts.isStreamOnline ? 'pointsOnlineGivenAt' : 'pointsOfflineGivenAt';
+      if (interval_calculated !== 0 && ptsPerInterval[permId]  !== 0) {
+        const givenAt = user[userPointsKey] + interval_calculated;
+        debug('points.update', `${user.username}#${userId}[${permId}] ${chat} | ${givenAt}`);
 
-          let modifier = 0;
-          let userTimePoints = givenAt + interval_calculated;
-          for (; userTimePoints <= chat; userTimePoints += interval_calculated) {
-            modifier++;
-          }
-          if (modifier > 0) {
-            // add points to user[userPointsKey] + interval to user to not overcalculate (this should ensure recursive add points in time)
-            debug('points.update', `${user.username}#${userId}[${permId}] +${Math.floor(ptsPerInterval * modifier)}`);
-            await getRepository(User).save({
-              ...user,
-              points:          user.points + ptsPerInterval * modifier,
-              [userPointsKey]: userTimePoints,
-            });
-          }
-        } else {
+        let modifier = 0;
+        let userTimePoints = givenAt + interval_calculated;
+        for (; userTimePoints <= chat; userTimePoints += interval_calculated) {
+          modifier++;
+        }
+        if (modifier > 0) {
+          // add points to user[userPointsKey] + interval to user to not overcalculate (this should ensure recursive add points in time)
+          debug('points.update', `${user.username}#${userId}[${permId}] +${Math.floor(ptsPerInterval * modifier)}`);
           await getRepository(User).save({
             ...user,
-            [userPointsKey]: chat,
+            points:          user.points + ptsPerInterval * modifier,
+            [userPointsKey]: userTimePoints,
           });
-          debug('points.update', `${user.username}#${userId}[${permId}] points disabled or interval is 0, settint points time to chat`);
         }
+      } else {
+        await getRepository(User).save({
+          ...user,
+          [userPointsKey]: chat,
+        });
+        debug('points.update', `${user.username}#${userId}[${permId}] points disabled or interval is 0, settint points time to chat`);
       }
-      resolve();
-    });
+    }
   }
 
   @parser({ fireAndForget: true, skippable: true })
@@ -259,8 +252,8 @@ class Points extends System {
           intervals.push(new Date(interval.next().toISOString()).getTime());
         }
         cb(null, intervals);
-      } catch (e) {
-        cb(e.stack, []);
+      } catch (e: any) {
+        cb(e.message, []);
       }
     });
 
