@@ -4,10 +4,10 @@ import api from '../api';
 import { dateDiff } from '../commons';
 import currency from '../currency';
 import {
-  User, UserBit, UserTip, 
+  User, UserBit, UserTip,
 } from '../database/entity/user';
 import {
-  command, default_permission, settings, ui,
+  command, default_permission, settings,
 } from '../decorators';
 import Expects from '../expects';
 import general from '../general';
@@ -39,13 +39,6 @@ import ranks from './ranks';
 
 class UserInfo extends System {
   @settings('me')
-  @ui({
-    type:          'sortable-list',
-    values:        'order',
-    toggle:        '_formatDisabled',
-    toggleOnIcon:  'eye',
-    toggleOffIcon: 'eye-slash',
-  })
   order: string[] = ['$sender', '$level', '$rank', '$role', '$watched', '$points', '$messages', '$tips', '$bits'];
 
   @settings('me')
