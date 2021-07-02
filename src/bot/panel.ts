@@ -440,7 +440,7 @@ export const init = () => {
       });
     });
 
-    type toEmit = { name: string; enabled: boolean; areDependenciesEnabled: boolean; isDisabledByEnv: boolean }[];
+    type toEmit = { name: string; enabled: boolean; areDependenciesEnabled: boolean; isDisabledByEnv: boolean; type: string; }[];
     // send enabled systems
     socket.on('systems', async (cb: (err: string | null, toEmit: toEmit) => void) => {
       const toEmit: toEmit = [];
@@ -450,14 +450,15 @@ export const init = () => {
           enabled:                system.enabled,
           areDependenciesEnabled: await system.areDependenciesEnabled,
           isDisabledByEnv:        system.isDisabledByEnv,
+          type:                   'systems',
         });
       }
       cb(null, toEmit);
     });
-    socket.on('core', async (cb: (err: string | null, toEmit: { name: string }[]) => void) => {
-      const toEmit: { name: string }[] = [];
+    socket.on('core', async (cb: (err: string | null, toEmit: { name: string; type: string; }[]) => void) => {
+      const toEmit: { name: string; type: string; }[] = [];
       for (const system of ['oauth', 'tmi', 'currency', 'ui', 'general', 'twitch', 'socket']) {
-        toEmit.push({ name: system.toLowerCase() });
+        toEmit.push({ name: system.toLowerCase(), type: 'core' });
       }
       cb(null, toEmit);
     });
@@ -472,22 +473,18 @@ export const init = () => {
           enabled:                system.enabled,
           areDependenciesEnabled: await system.areDependenciesEnabled,
           isDisabledByEnv:        system.isDisabledByEnv,
+          type:                   'integrations',
         });
       }
       cb(null, toEmit);
     });
-    socket.on('overlays', async (cb: (err: string | null, toEmit: toEmit) => void) => {
-      const toEmit: toEmit = [];
+    socket.on('overlays', async (cb: (err: string | null, toEmit: { name: string; type: string; }[]) => void) => {
+      const toEmit: { name: string; type: string; }[] = [];
       for (const system of list('overlays')) {
         if (!system.showInUI) {
           continue;
         }
-        toEmit.push({
-          name:                   system.__moduleName__.toLowerCase(),
-          enabled:                system.enabled,
-          areDependenciesEnabled: await system.areDependenciesEnabled,
-          isDisabledByEnv:        system.isDisabledByEnv,
-        });
+        toEmit.push({ name: system.__moduleName__.toLowerCase(), type: 'overlays' });
       }
       cb(null, toEmit);
     });
@@ -502,6 +499,7 @@ export const init = () => {
           enabled:                system.enabled,
           areDependenciesEnabled: await system.areDependenciesEnabled,
           isDisabledByEnv:        system.isDisabledByEnv,
+          type:                   'games',
         });
       }
       cb(null, toEmit);
