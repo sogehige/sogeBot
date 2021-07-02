@@ -56,11 +56,9 @@ class Discord extends Integration {
   embedMessageId = '';
 
   @settings('general')
-  @ui({ type: 'text-input', secret: true })
   clientId = '';
 
   @settings('general')
-  @ui({ type: 'text-input', secret: true })
   token = '';
 
   @ui({
@@ -782,7 +780,7 @@ class Discord extends Integration {
     });
     adminEndpoint(this.nsp, 'discord::authorize', async (cb) => {
       if (this.token === '' || this.clientId === '') {
-        cb('Cannot authorize! Missing clientId or token.', null);
+        cb('Cannot authorize! Missing clientId or token. Please save changes before authorizing.', null);
       } else {
         try {
           cb(null, { do: 'redirect', opts: [`https://discordapp.com/oauth2/authorize?&scope=bot&permissions=8&client_id=${this.clientId}`] });
