@@ -578,7 +578,7 @@ class Songs extends System {
           });
           return this.addSongToQueue(opts, (retry ?? 0) + 1 );
         }
-        if (global.mocha) {
+        if ((global as any).mocha) {
           error('-- TEST ONLY ERROR --');
           error({ category: videoInfo.videoDetails.category });
         }

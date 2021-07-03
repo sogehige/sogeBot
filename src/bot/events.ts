@@ -430,7 +430,7 @@ class Events extends Core {
     }
     command = await new Message(command).parse({ username, sender: getUserSender(String(userId), username) });
 
-    if (global.mocha) {
+    if ((global as any).mocha) {
       parserEmitter.emit('process', {
         sender:  { username, userId: String(userId) },
         message: command,

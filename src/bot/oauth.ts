@@ -122,7 +122,7 @@ class OAuth extends Core {
   }
 
   public async getChannelId() {
-    if (global.mocha) {
+    if ((global as any).mocha) {
       return;
     }
     if (!areDecoratorsLoaded) {
@@ -237,7 +237,7 @@ class OAuth extends Core {
       }
     */
   public async validateOAuth(type: 'bot' | 'broadcaster', retry = 0): Promise<boolean> {
-    if (global.mocha) {
+    if ((global as any).mocha) {
       return true;
     }
 
