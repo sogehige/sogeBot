@@ -7,7 +7,6 @@ import WebSocket from 'ws';
 import currency from '../currency';
 import { UserTip, UserTipInterface } from '../database/entity/user';
 import { settings } from '../decorators';
-import { ui } from '../decorators.js';
 import { onChange, onStartup } from '../decorators/on.js';
 import { isStreamOnline, stats } from '../helpers/api/index.js';
 import { mainCurrency } from '../helpers/currency';
@@ -35,17 +34,7 @@ type DonationAlertsEvent = {
 class Donationalerts extends Integration {
   socketToDonationAlerts: Centrifuge | null = null;
 
-  @ui({
-    type:   'link',
-    href:   'https://www.sogebot.xyz/integrations/#DonationAlerts',
-    class:  'btn btn-primary btn-block',
-    target: '_blank',
-    text:   'integrations.donationalerts.settings.accessTokenBtn',
-  })
-  accessTokenBtn = null;
-
   @settings()
-  @ui({ type: 'text-input', secret: true })
   access_token = '';
 
   @onStartup()

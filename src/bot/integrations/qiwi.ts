@@ -4,7 +4,6 @@ import { getRepository } from 'typeorm';
 import currency from '../currency';
 import { UserTip, UserTipInterface } from '../database/entity/user';
 import { settings } from '../decorators';
-import { ui } from '../decorators.js';
 import { onChange, onStartup } from '../decorators/on.js';
 import { isStreamOnline, stats } from '../helpers/api/index.js';
 import { mainCurrency } from '../helpers/currency';
@@ -20,7 +19,6 @@ class Qiwi extends Integration {
   interval: any = null;
 
   @settings()
-  @ui({ type: 'text-input', secret: true })
   secretToken = '';
 
   @onStartup()

@@ -1,9 +1,9 @@
 // bot libraries
 
+import { HOUR, MINUTE } from '@sogebot/ui-helpers/constants';
 import Axios from 'axios';
 import { escapeRegExp } from 'lodash';
 
-import { HOUR, MINUTE } from '@sogebot/ui-helpers/constants';
 import {
   command, persistent, settings, ui,
 } from '../decorators';
@@ -11,7 +11,7 @@ import { onChange, onStartup } from '../decorators/on';
 import Expects from '../expects';
 import { prepare } from '../helpers/commons';
 import { flatten } from '../helpers/flatten';
-import { error, info } from '../helpers/log';
+import { error } from '../helpers/log';
 import { adminEndpoint } from '../helpers/socket';
 import Message from '../message';
 import Integration from './_interface';
@@ -36,20 +36,16 @@ class PUBG extends Integration {
   _lastSeasonIdFetch = 0;
 
   @settings('customization')
-  @ui({ type: 'pubg-customization' }, 'customization')
   rankedGameModeStatsCustomization = 'Rank: $currentTier.tier $currentTier.subTier ($currentRankPoint) | Wins: $wins ((toPercent|1|$winRatio)%) | Top 10: (toPercent|1|$top10Ratio)% | Avg. Rank: (toFloat|1|$avgRank) | KDA: (toFloat|1|$kda)';
   @settings('customization')
-  @ui({ type: 'pubg-customization' }, 'customization')
   gameModeStatsCustomization = 'Wins: $wins | Top 10: $top10s';
 
   @settings('stats')
-  @ui({ type: 'pubg-stats' }, 'stats')
   rankedGameModeStats: { [x: string]: any } = {};
   @persistent()
   _lastRankedGameModeStats = 0;
 
   @settings('stats')
-  @ui({ type: 'pubg-stats' }, 'stats')
   gameModeStats: { [x: string]: any } = {};
   @persistent()
   _lastGameModeStats = 0;
@@ -85,10 +81,13 @@ class PUBG extends Integration {
           },
         },
       );
+      this.seasonId = 'division.bro.official.pc-2018-11';
       for (const season of request.data.data) {
-        if (season.isCurrentSeason) {
-          this.seasonId = season.id;
-          info(`PUBG: current season set automatically to ${season.id}`);
+        if (season.attributes.isCurrentSeason) {
+          /*this.seasonId = season.id;
+          if (this.seasonId !== season.id) {
+            info(`PUBG: current season set automatically to ${season.id}`);
+          }*/
         }
       }
     }
