@@ -11,7 +11,7 @@ import { onChange, onStartup } from '../decorators/on';
 import Expects from '../expects';
 import { prepare } from '../helpers/commons';
 import { flatten } from '../helpers/flatten';
-import { error } from '../helpers/log';
+import { error, info } from '../helpers/log';
 import { adminEndpoint } from '../helpers/socket';
 import Message from '../message';
 import Integration from './_interface';
@@ -81,13 +81,12 @@ class PUBG extends Integration {
           },
         },
       );
-      this.seasonId = 'division.bro.official.pc-2018-11';
       for (const season of request.data.data) {
         if (season.attributes.isCurrentSeason) {
-          /*this.seasonId = season.id;
+          this.seasonId = season.id;
           if (this.seasonId !== season.id) {
             info(`PUBG: current season set automatically to ${season.id}`);
-          }*/
+          }
         }
       }
     }
