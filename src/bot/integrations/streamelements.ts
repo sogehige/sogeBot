@@ -5,7 +5,7 @@ import { getRepository } from 'typeorm';
 
 import currency from '../currency';
 import { UserTip, UserTipInterface } from '../database/entity/user';
-import { settings, ui } from '../decorators';
+import { settings } from '../decorators';
 import { onChange, onStartup } from '../decorators/on';
 import { isStreamOnline, stats } from '../helpers/api/index.js';
 import { mainCurrency } from '../helpers/currency';
@@ -65,7 +65,6 @@ class StreamElements extends Integration {
   socketToStreamElements: any | null = null;
 
   @settings()
-  @ui({ type: 'streamelements-jwt' })
   jwtToken = '';
 
   @onStartup()

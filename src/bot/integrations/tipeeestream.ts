@@ -6,7 +6,6 @@ import { getRepository } from 'typeorm';
 import currency from '../currency';
 import { UserTip, UserTipInterface } from '../database/entity/user';
 import { settings } from '../decorators';
-import { ui } from '../decorators.js';
 import { onChange, onStartup } from '../decorators/on.js';
 import { isStreamOnline } from '../helpers/api/index.js';
 import { stats } from '../helpers/api/stats.js';
@@ -57,11 +56,9 @@ class TipeeeStream extends Integration {
   socketToTipeeestream: any | null = null;
 
   @settings()
-  @ui({ type: 'text-input', secret: false })
   username = '';
 
   @settings()
-  @ui({ type: 'text-input', secret: true })
   apiKey = '';
 
   @onStartup()

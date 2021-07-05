@@ -5,9 +5,7 @@ import { getRepository } from 'typeorm';
 
 import currency from '../currency';
 import { UserTip, UserTipInterface } from '../database/entity/user';
-import {
-  persistent, settings, ui,
-} from '../decorators';
+import { persistent, settings } from '../decorators';
 import { onChange, onStartup } from '../decorators/on';
 import { isStreamOnline, stats } from '../helpers/api';
 import { mainCurrency } from '../helpers/currency';
@@ -57,20 +55,11 @@ class Streamlabs extends Integration {
   afterDonationId = '';
 
   @settings()
-  @ui({ type: 'text-input', secret: true })
   accessToken = '';
 
-  @ui({
-    type:   'link',
-    href:   'https://www.sogebot.xyz/integrations/#StreamLabs',
-    class:  'btn btn-primary btn-block',
-    target: '_blank',
-    text:   'integrations.streamlabs.settings.accessTokenBtn',
-  })
   accessTokenBtn = null;
 
   @settings()
-  @ui({ type: 'text-input', secret: true })
   socketToken = '';
 
   @onStartup()
