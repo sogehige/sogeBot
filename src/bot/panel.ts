@@ -148,6 +148,7 @@ export const init = () => {
         path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'static', '_static'),
         path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'static', '_static'),
         path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'static', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'static', '_static'),
       ];
       for (const dir of paths) {
         const pathToFile = path.join(dir, req.url.replace('_static', ''));
@@ -164,16 +165,17 @@ export const init = () => {
       res.sendStatus(404);
     }
   });
-  app?.get(['/_nuxt/*', '/credentials/_nuxt/*'], (req, res) => {
+  app?.get(['/_nuxt/*', '/credentials/_nuxt/*', '/overlays/_nuxt/*'], (req, res) => {
     if (!nuxtCache.get(req.url)) {
       // search through node_modules to find correct nuxt file
       const paths = [
         path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', '_nuxt'),
         path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'dist', '_nuxt'),
         path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'dist', '_nuxt'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'dist', '_nuxt'),
       ];
       for (const dir of paths) {
-        const pathToFile = path.join(dir, req.url.replace('_nuxt', '').replace('credentials', ''));
+        const pathToFile = path.join(dir, req.url.replace('_nuxt', '').replace('credentials', '').replace('overlays', ''));
         if (fs.existsSync(pathToFile)) {
           nuxtCache.set(req.url, pathToFile);
         }
@@ -190,6 +192,9 @@ export const init = () => {
   app?.get('/popout/', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'popout.html'));
   });
+  app?.get('/overlays/:id', function (req, res) {
+    res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'dist', '200.html'));
+  });
   app?.get('/public/', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'dist', 'index.html'));
   });
@@ -198,12 +203,6 @@ export const init = () => {
   });
   app?.get('/credentials/login', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', 'login', 'index.html'));
-  });
-  app?.get('/overlays/:overlay', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'public', 'overlays.html'));
-  });
-  app?.get('/overlays/:overlay/:id', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'public', 'overlays.html'));
   });
   app?.get('/assets/:asset', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'assets', sanitize(req.params.asset)));
