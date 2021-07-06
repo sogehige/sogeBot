@@ -8,7 +8,7 @@
     "*.vue"
   ],
   "engines": {
-    "npm": "~7.18.0"
+    "npm": ">7.18.0"
   },
   "simple-git-hooks": {
     "pre-commit": "npx simple-git-hooks && npx lint-staged",
@@ -34,7 +34,7 @@
     "cross-env": "7.0.3",
     "crypto-browserify": "3.12.0",
     "currency-symbol-map": "5.0.1",
-    "dayjs": "1.10.5",
+    "dayjs": "1.10.6",
     "decode-html": "2.0.0",
     "discord.js": "12.5.3",
     "dotenv": "10.0.0",
@@ -81,7 +81,7 @@
     "url-join": "4.0.1",
     "uuid": "8.3.2",
     "velocity-animate": "1.5.2",
-    "ws": "7.5.1",
+    "ws": "7.5.2",
     "xregexp": "5.0.2",
     "yargs": "17.0.1",
     "ytdl-core": "4.8.3",
@@ -139,9 +139,9 @@
     "@types/uuid": "8.3.1",
     "@types/ws": "7.4.6",
     "@types/xregexp": "4.3.0",
-    "@types/yargs": "17.0.1",
-    "@typescript-eslint/eslint-plugin": "4.28.1",
-    "@typescript-eslint/parser": "4.28.1",
+    "@types/yargs": "17.0.2",
+    "@typescript-eslint/eslint-plugin": "4.28.2",
+    "@typescript-eslint/parser": "4.28.2",
     "autoprefixer": "10.2.6",
     "axios-mock-adapter": "1.19.0",
     "bestzip": "2.2.0",
@@ -153,7 +153,7 @@
     "eslint": "7.30.0",
     "eslint-plugin-import": "2.23.4",
     "eslint-plugin-unused-imports": "1.1.2",
-    "eslint-plugin-vue": "7.12.1",
+    "eslint-plugin-vue": "7.13.0",
     "git-semver-tags": "4.1.1",
     "jsonlint-mod": "1.7.6",
     "lint-staged": "11.0.0",
