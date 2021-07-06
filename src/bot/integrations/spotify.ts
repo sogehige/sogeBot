@@ -8,7 +8,7 @@ import { getRepository } from 'typeorm';
 
 import { SpotifySongBan } from '../database/entity/spotify';
 import {
-  command, default_permission, persistent, settings, ui,
+  command, default_permission, persistent, settings,
 } from '../decorators';
 import {
   onChange, onLoad, onStartup,
@@ -45,7 +45,6 @@ class Spotify extends Integration {
   @persistent()
   lastActiveDeviceId = '';
   @settings('connection')
-  @ui({ type: 'spotify-device-input' })
   manualDeviceId = '';
 
   @persistent()
@@ -71,15 +70,12 @@ class Spotify extends Integration {
   format = '$song - $artist';
 
   @settings('connection')
-  @ui({ type: 'text-input', secret: true })
   clientId = '';
   @settings('connection')
-  @ui({ type: 'text-input', secret: true })
   clientSecret = '';
   @settings('connection')
   redirectURI = 'http://localhost:20000/credentials/oauth/spotify';
   @settings('connection')
-  @ui({ type: 'text-input', readOnly: true })
   username = '';
 
   scopes: string[] = [
@@ -94,22 +90,6 @@ class Spotify extends Integration {
     'playlist-read-private',
     'user-modify-playback-state',
   ];
-
-  @ui({
-    type:  'btn-emit',
-    class: 'btn btn-primary btn-block mt-1 mb-1',
-    if:    () => _spotify.username.length === 0,
-    emit:  'spotify::authorize',
-  }, 'connection')
-  authorizeBtn = null;
-
-  @ui({
-    type:  'btn-emit',
-    class: 'btn btn-primary btn-block mt-1 mb-1',
-    if:    () => _spotify.username.length > 0,
-    emit:  'spotify::revoke',
-  }, 'connection')
-  revokeBtn = null;
 
   @onStartup()
   onStartup() {
@@ -504,7 +484,7 @@ class Spotify extends Integration {
         this.clientId === ''
         || this.clientSecret === ''
       ) {
-        cb('Cannot authorize! Missing clientId or clientSecret.', null);
+        cb('Cannot authorize! Missing clientId or clientSecret. Please save before authorizing.', null);
       } else {
         try {
           const authorizeURI = this.authorizeURI();
