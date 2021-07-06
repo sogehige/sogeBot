@@ -1,67 +1,16 @@
 import {
-  command, default_permission, parser, settings, ui, 
+  command, default_permission, parser,
 } from '../decorators';
 import { defaultPermissions } from '../helpers/permissions/';
-import { default as ResponsiveVoice } from '../integrations/responsivevoice';
 import Overlay from './_interface';
 
 class TextToSpeech extends Overlay {
-  @ui({
-    if:      () => ResponsiveVoice.key.trim().length === 0,
-    type:    'helpbox',
-    variant: 'danger',
-  }, 'settings')
-  responsiveVoiceKeyNotSet = null;
-
-  @ui({
-    type: 'voice',
-    if:   () => ResponsiveVoice.key.trim().length > 0,
-  })
-  @settings('settings')
-  voice = 'UK English Female';
-  @ui({
-    type: 'number-input',
-    max:  100,
-    min:  0,
-    step: 1,
-    if:   () => ResponsiveVoice.key.trim().length > 0,
-  })
-  @settings('settings')
-  volume = 50;
-  @ui({
-    type: 'number-input',
-    max:  1.5,
-    min:  0.1,
-    step: 0.1,
-    if:   () => ResponsiveVoice.key.trim().length > 0,
-  })
-  @settings('settings')
-  rate = 1.0;
-  @ui({
-    type: 'number-input',
-    max:  2,
-    min:  0.1,
-    step: 0.1,
-    if:   () => ResponsiveVoice.key.trim().length > 0,
-  })
-  @settings('settings')
-  pitch = 1.0;
-  @ui({
-    type: 'toggle-enable',
-    if:   () => ResponsiveVoice.key.trim().length > 0,
-  })
-  @settings('settings')
-  triggerTTSByHighlightedMessage = false;
-
   @command('!tts')
   @default_permission(defaultPermissions.CASTERS)
   textToSpeech(opts: CommandOptions): CommandResponse[] {
     this.emit('speak', {
-      text:   opts.parameters,
-      rate:   this.rate,
-      volume: this.volume,
-      pitch:  this.pitch,
-      voice:  this.voice,
+      text:      opts.parameters,
+      highlight: opts.attr.highlight,
     });
     return [];
   }
@@ -73,9 +22,9 @@ class TextToSpeech extends Overlay {
    */
   @parser({ fireAndForget: true })
   async checkTriggerTTSByHighlightedMessage(opts: ParserOptions) {
-    if (opts.sender.msgId && opts.sender.msgId === 'highlighted-message' && this.triggerTTSByHighlightedMessage) {
+    if (opts.sender.msgId && opts.sender.msgId === 'highlighted-message') {
       this.textToSpeech({
-        parameters: opts.message, command: '!tts', createdAt: Date.now(), sender: opts.sender, attr: {}, 
+        parameters: opts.message, command: '!tts', createdAt: Date.now(), sender: opts.sender, attr: { highlight: true },
       });
     }
   }

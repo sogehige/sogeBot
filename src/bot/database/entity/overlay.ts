@@ -5,6 +5,17 @@ export interface OverlayMapperInterface {
   value: string | null;
   opts: null
 }
+export interface OverlayMapperTTS {
+  id: string;
+  value: 'tts';
+  opts: null | {
+    voice: string,
+    volume: number,
+    rate: number,
+    pitch: number,
+    triggerTTSByHighlightedMessage: boolean,
+  },
+}
 
 export interface OverlayMapperOBSWebsocket {
   id: string;
@@ -21,7 +32,7 @@ export interface OverlayMapperOBSClipsCarousel {
   },
 }
 
-export type OverlayMappers = OverlayMapperInterface | OverlayMapperOBSWebsocket | OverlayMapperOBSClipsCarousel;
+export type OverlayMappers = OverlayMapperTTS | OverlayMapperInterface | OverlayMapperOBSWebsocket | OverlayMapperOBSClipsCarousel;
 
 export const OverlayMapper = new EntitySchema<Readonly<Required<OverlayMappers>>>({
   name:    'overlay_mapper',
