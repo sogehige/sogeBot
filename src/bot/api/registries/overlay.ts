@@ -36,7 +36,7 @@ export class RegistryOverlayController extends Controller {
   @Get('/{id}')
   public async getOne(@Path() id: string): Promise<OverlayMappers | void> {
     try {
-      const item = await getRepository(OverlayMapper).findOneOrFail();
+      const item = await getRepository(OverlayMapper).findOneOrFail({ id });
       return item;
     } catch (e) {
       this.setStatus(404);
