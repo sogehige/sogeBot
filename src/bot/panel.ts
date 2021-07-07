@@ -186,14 +186,15 @@ export const init = () => {
     if (fs.existsSync(filepath)) {
       res.sendFile(filepath);
     } else {
+      nuxtCache.delete(req.url);
       res.sendStatus(404);
     }
   });
   app?.get('/popout/', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'popout.html'));
   });
-  app?.get('/overlays/:id', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'dist', '200.html'));
+  app?.get(['/overlays/:id', '/overlays/text/:id'], function (req, res) {
+    res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'dist', 'index.html'));
   });
   app?.get('/public/', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'dist', 'index.html'));
