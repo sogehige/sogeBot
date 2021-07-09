@@ -15,7 +15,7 @@ import {
 import { getRepository } from 'typeorm';
 
 import {
-  OverlayMapper, OverlayMapperInterface, OverlayMapperOBSClipsCarousel, OverlayMapperOBSWebsocket, OverlayMappers, OverlayMapperTTS,
+  OverlayMapper, OverlayMapperInterface, OverlayMapperOBSClipsCarousel, OverlayMapperOBSWebsocket, OverlayMapperPolls, OverlayMappers, OverlayMapperTTS,
 } from '../../database/entity/overlay';
 
 @Route('/api/v1/overlay')
@@ -65,7 +65,7 @@ export class RegistryOverlayController extends Controller {
   @Patch('/{id}')
   public async patch(
     @Path() id: string,
-      @Body() data: Partial<OverlayMapperInterface> | Partial<OverlayMapperOBSWebsocket> | Partial<OverlayMapperOBSClipsCarousel> | Partial<OverlayMapperTTS>): Promise<void> {
+      @Body() data: Partial<OverlayMapperPolls> | Partial<OverlayMapperInterface> | Partial<OverlayMapperOBSWebsocket> | Partial<OverlayMapperOBSClipsCarousel> | Partial<OverlayMapperTTS>): Promise<void> {
     try {
       await getRepository(OverlayMapper).update({ id }, data);
       this.setStatus(200);

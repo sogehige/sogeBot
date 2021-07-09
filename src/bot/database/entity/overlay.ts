@@ -17,6 +17,17 @@ export interface OverlayMapperTTS {
   },
 }
 
+export interface OverlayMapperPolls {
+  id: string;
+  value: 'polls';
+  opts: null | {
+    theme: 'light' | 'dark' | 'Soge\'s green',
+    hideAfterInactivity: boolean,
+    inactivityTime: number,
+    align: 'top' | 'bottom',
+  },
+}
+
 export interface OverlayMapperOBSWebsocket {
   id: string;
   value: 'obswebsocket';
@@ -32,7 +43,7 @@ export interface OverlayMapperOBSClipsCarousel {
   },
 }
 
-export type OverlayMappers = OverlayMapperTTS | OverlayMapperInterface | OverlayMapperOBSWebsocket | OverlayMapperOBSClipsCarousel;
+export type OverlayMappers = OverlayMapperPolls | OverlayMapperTTS | OverlayMapperInterface | OverlayMapperOBSWebsocket | OverlayMapperOBSClipsCarousel;
 
 export const OverlayMapper = new EntitySchema<Readonly<Required<OverlayMappers>>>({
   name:    'overlay_mapper',
