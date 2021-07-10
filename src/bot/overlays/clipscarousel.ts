@@ -1,24 +1,13 @@
 import api from '../api';
-import { settings, ui } from '../decorators';
+import type { OverlayMapperClipsCarousel } from '../database/entity/overlay';
 import { publicEndpoint } from '../helpers/socket';
 import Overlay from './_interface';
 
 class ClipsCarousel extends Overlay {
-  @settings('customization')
-  @ui({
-    type: 'number-input', step: '1', min: '1', 
-  })
-  cClipsCustomPeriodInDays = 31;
-  @settings('customization')
-  @ui({
-    type: 'number-input', step: '1', min: '1', 
-  })
-  cClipsNumOfClips = 20;
-
   sockets () {
-    publicEndpoint(this.nsp, 'clips', async (cb) => {
+    publicEndpoint(this.nsp, 'clips', async (data: NonNullable<OverlayMapperClipsCarousel['opts']>, cb) => {
       const clips = await api.getTopClips({
-        period: 'custom', days: this.cClipsCustomPeriodInDays, first: this.cClipsNumOfClips, 
+        period: 'custom', days: data.customPeriod, first: data.numOfClips,
       });
       cb(null, { clips });
     });

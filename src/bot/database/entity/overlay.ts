@@ -5,6 +5,17 @@ export interface OverlayMapperInterface {
   value: string | null;
   opts: null
 }
+
+export interface OverlayMapperClipsCarousel {
+  id: string;
+  value: 'clipscarousel';
+  opts: null | {
+    customPeriod: number,
+    numOfClips: number,
+    volume: number,
+  },
+}
+
 export interface OverlayMapperTTS {
   id: string;
   value: 'tts';
@@ -35,15 +46,8 @@ export interface OverlayMapperOBSWebsocket {
     allowedIPs: string[],
   },
 }
-export interface OverlayMapperOBSClipsCarousel {
-  id: string;
-  value: 'clipscarousel';
-  opts: null | {
-    volume: number,
-  },
-}
 
-export type OverlayMappers = OverlayMapperPolls | OverlayMapperTTS | OverlayMapperInterface | OverlayMapperOBSWebsocket | OverlayMapperOBSClipsCarousel;
+export type OverlayMappers = OverlayMapperPolls | OverlayMapperTTS | OverlayMapperInterface | OverlayMapperOBSWebsocket | OverlayMapperClipsCarousel;
 
 export const OverlayMapper = new EntitySchema<Readonly<Required<OverlayMappers>>>({
   name:    'overlay_mapper',
