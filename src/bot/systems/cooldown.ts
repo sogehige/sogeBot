@@ -1,9 +1,9 @@
+import * as constants from '@sogebot/ui-helpers/constants';
 import _ from 'lodash';
 import { getRepository } from 'typeorm';
 import XRegExp from 'xregexp';
 
 import { parserReply } from '../commons';
-import * as constants from '../constants';
 import {
   Cooldown as CooldownEntity, CooldownInterface, CooldownViewer, CooldownViewerInterface,
 } from '../database/entity/cooldown';
@@ -53,7 +53,7 @@ class Cooldown extends System {
   cooldownNotifyAsChat = true;
 
   @onChange('defaultCooldownOfKeywordsInSeconds')
-  resetDefaultCooldownsKeyword() {
+  resetDefaultCooldownsKeyword() {
     let idx: number;
     while ((idx = defaultCooldowns.findIndex(o => !o.name.startsWith('!'))) !== -1) {
       defaultCooldowns.splice(idx, 1);
@@ -61,7 +61,7 @@ class Cooldown extends System {
   }
 
   @onChange('defaultCooldownOfCommandsInSeconds')
-  resetCooldownOfCommandsInSeconds(val: number) {
+  resetCooldownOfCommandsInSeconds(val: number) {
     let idx: number;
     while ((idx = defaultCooldowns.findIndex(o => o.name.startsWith('!'))) !== -1) {
       defaultCooldowns.splice(idx, 1);
@@ -71,7 +71,7 @@ class Cooldown extends System {
   constructor () {
     super();
     this.addMenu({
-      category: 'manage', name: 'cooldown', id: 'manage/cooldowns/list', this: this,
+      category: 'commands', name: 'cooldowns', id: 'commands/cooldowns', this: this,
     });
   }
 
@@ -108,7 +108,7 @@ class Cooldown extends System {
     });
   }
 
-  async help (opts: CommandOptions): Promise<CommandResponse[]> {
+  async help (opts: CommandOptions): Promise<CommandResponse[]> {
     let url = 'http://sogehige.github.io/sogeBot/#/systems/cooldown';
     if ((process.env?.npm_package_version ?? 'x.y.z-SNAPSHOT').includes('SNAPSHOT')) {
       url = 'http://sogehige.github.io/sogeBot/#/_master/systems/cooldown';

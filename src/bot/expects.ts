@@ -5,7 +5,7 @@ import XRegExp from 'xregexp';
 
 import {
   DAY, HOUR, MINUTE, SECOND,
-} from './constants';
+} from '@sogebot/ui-helpers/constants';
 import { debug } from './helpers/log';
 import { ParameterError } from './helpers/parameterError';
 
@@ -484,7 +484,7 @@ class Expects {
     return this;
   }
 
-  duration ({ optional = false, exec = false }: { optional?: boolean, exec?: boolean }) {
+  duration ({ optional = false, exec = false }: { optional?: boolean, exec?: boolean }) {
     if (!optional) {
       this.checkText({
         expects: 'duration',
@@ -492,7 +492,7 @@ class Expects {
       });
     }
     if (!exec) {
-      this.toExec.push({ fnc: 'duration', opts: { optional } });
+      this.toExec.push({ fnc: 'duration', opts: { optional } });
       return this;
     }
 
@@ -521,7 +521,7 @@ class Expects {
     return this;
   }
 
-  oneOf ({ optional = false, values, exec = false, name }: { exec?: boolean, name?: string, optional?: boolean, values: string[] | Readonly<string[]> }) {
+  oneOf ({ optional = false, values, exec = false, name }: { exec?: boolean, name?: string, optional?: boolean, values: string[] | Readonly<string[]> }) {
     if (!optional) {
       this.checkText({
         expects: 'oneOf',
@@ -532,8 +532,8 @@ class Expects {
     if (!exec) {
       this.toExec.push({
         fnc:  'oneOf', opts: {
-          optional, values, name, 
-        }, 
+          optional, values, name,
+        },
       });
       return this;
     }

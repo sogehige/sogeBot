@@ -34,12 +34,6 @@ class Queue extends System {
 
   pickedUsers: QueueInterface[] = [];
 
-  constructor () {
-    super();
-
-    this.addWidget('queue', 'widget-title-queue', 'fas fa-users');
-  }
-
   sockets () {
     adminEndpoint(this.nsp, 'queue::getAllPicked', async(cb) => {
       try {
@@ -213,7 +207,7 @@ class Queue extends System {
     return (await this.pickUsers(opts, false)).responses;
   }
 
-  async pickUsers (opts: CommandOptions & { users?: QueueInterface[] }, random: boolean): Promise<{ users: QueueInterface[]; responses: CommandResponse[]}> {
+  async pickUsers (opts: CommandOptions & { users?: QueueInterface[] }, random: boolean): Promise<{ users: QueueInterface[]; responses: CommandResponse[]}> {
     let users: QueueInterface[] = [];
     if (!opts.users) {
       const match = opts.parameters.match(/^(\d+)?/);

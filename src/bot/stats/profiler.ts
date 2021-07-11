@@ -1,4 +1,4 @@
-import { avgTime } from '../helpers/profiler';
+import { avgTime } from '../helpers/profiler';
 import { adminEndpoint } from '../helpers/socket';
 import Stats from './_interface';
 
@@ -6,7 +6,7 @@ class Profiler extends Stats {
   constructor() {
     super();
     this.addMenu({
-      category: 'stats', name: 'profiler', id: 'stats/profiler', this: null, 
+      category: 'stats', name: 'profiler', id: 'stats/profiler', this: null,
     });
   }
   public sockets() {

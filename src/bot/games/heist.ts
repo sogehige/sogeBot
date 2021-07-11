@@ -3,9 +3,7 @@ import { getRepository } from 'typeorm';
 
 import { HeistUser } from '../database/entity/heist';
 import { User } from '../database/entity/user';
-import {
-  command, settings, ui,
-} from '../decorators';
+import { command, settings } from '../decorators';
 import { onStartup } from '../decorators/on';
 import Expects from '../expects.js';
 import { announce, prepare } from '../helpers/commons';
@@ -54,7 +52,6 @@ class Heist extends Game {
   @settings('results')
   noUser: string = translate('games.heist.noUser');
   @settings('results')
-  @ui({ type: 'heist-results' }, 'results')
   resultsValues: Result[] = [
     { percentage: 0, message: translate('games.heist.result.0') },
     { percentage: 33, message: translate('games.heist.result.33') },
@@ -64,7 +61,6 @@ class Heist extends Game {
   ];
 
   @settings('levels')
-  @ui({ type: 'heist-levels' }, 'levels')
   levelsValues: Level[] = [
     {
       'name':             translate('games.heist.levels.bankVan'),

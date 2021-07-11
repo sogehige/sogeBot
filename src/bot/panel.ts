@@ -3,21 +3,22 @@
 import fs from 'fs';
 import path from 'path';
 
-import bodyParser from 'body-parser';
+import cors from 'cors';
 import express from 'express';
 import RateLimit from 'express-rate-limit';
 import gitCommitInfo from 'git-commit-info';
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import _, { isEqual } from 'lodash';
 import sanitize from 'sanitize-filename';
+import swaggerUi from 'swagger-ui-express';
+import { ValidateError } from 'tsoa';
 import {
-  getConnection, getManager, getRepository, IsNull,
+  getConnection, getManager, getRepository,
 } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 
-import { CacheTitles, CacheTitlesInterface } from './database/entity/cacheTitles';
-import {
-  Dashboard, DashboardInterface, Widget,
-} from './database/entity/dashboard';
+import { RegisterRoutes } from './.cache/routes';
+import * as swaggerJSON from './.cache/swagger.json';
+import { CacheTitles } from './database/entity/cacheTitles';
 import { Translation } from './database/entity/translation';
 import { TwitchTag, TwitchTagInterface } from './database/entity/twitch';
 import { User } from './database/entity/user';
@@ -29,14 +30,16 @@ import {
   getURL, getValueOf, isVariableSet, postURL,
 } from './helpers/customvariables';
 import { getIsBotStarted } from './helpers/database';
+import { UnauthorizedError } from './helpers/errors';
 import { flatten } from './helpers/flatten';
 import { setValue } from './helpers/general';
 import { getLang } from './helpers/locales';
 import {
+  error,
   getDEBUG, info, setDEBUG,
 } from './helpers/log';
 import {
-  app, ioServer, menu, menuPublic, server, serverSecure, setApp, setServer, widgets,
+  app, ioServer, menu, menuPublic, server, serverSecure, setApp, setServer,
 } from './helpers/panel';
 import { socketsConnectedDec, socketsConnectedInc } from './helpers/panel/';
 import { errors, warns } from './helpers/panel/alerts';
@@ -60,10 +63,13 @@ const port = process.env.PORT ?? '20000';
 const secureport = process.env.SECUREPORT ?? '20443';
 
 const limiter = RateLimit({
-  windowMs:     5 * 60 * 1000,
-  max:          100,
+  windowMs: 60 * 1000,
+  max:      1000,
+  skip:     (req) => {
+    return req.url.includes('/socket/refresh');
+  },
   message:      'Too many requests from this IP, please try again after several minutes.',
-  keyGenerator: (req, res) => {
+  keyGenerator: (req) => {
     return req.ip + req.url;
   },
 });
@@ -71,8 +77,43 @@ const limiter = RateLimit({
 export const init = () => {
   setApp(express());
   app?.use(limiter);
-  app?.use(bodyParser.json());
-  app?.use(bodyParser.urlencoded({ extended: true }));
+  app?.use(cors());
+  app?.use(express.json({ limit: '500mb' }));
+  app?.use(express.urlencoded({ extended: true, limit: '500mb' }));
+  app?.use('/frame-api-explorer', swaggerUi.serve, swaggerUi.setup({
+    ...swaggerJSON,
+    info: {
+      ...swaggerJSON.info,
+      title:       'API Explorer',
+      description: {},
+      contact:     {},
+      license:     {},
+    },
+  }));
+  RegisterRoutes(app as any);
+  app?.use(function errorHandler(
+    err: UnauthorizedError | Error,
+    _req: any,
+    res: any,
+    next: () => void,
+  ): Express.Response | void {
+    if (err instanceof ValidateError) {
+      return res.status(400).json({
+        message: 'Validation Failed',
+        details: err?.fields,
+      });
+    }
+    if (err instanceof UnauthorizedError || err instanceof TokenExpiredError || err instanceof JsonWebTokenError) {
+      return res.status(401).send(err.message);
+    }
+    if (err instanceof Error) {
+      error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    next();
+  });
+
   setServer();
 
   // highlights system
@@ -80,7 +121,6 @@ export const init = () => {
     highlights.url(req, res);
   });
 
-  // customvariables system
   app?.get('/health', (req, res) => {
     if (getIsBotStarted()) {
       res.status(200).send('OK');
@@ -101,68 +141,75 @@ export const init = () => {
   app?.use('/dist', express.static(path.join(__dirname, '..', 'public', 'dist')));
 
   const nuxtCache = new Map<string, string>();
-  app?.get('/_nuxt/*', (req, res) => {
+  app?.get(['/_static/*', '/credentials/_static/*'], (req, res) => {
     if (!nuxtCache.get(req.url)) {
       // search through node_modules to find correct nuxt file
       const paths = [
-        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', '_nuxt'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'static', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'static', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'static', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'static', '_static'),
       ];
       for (const dir of paths) {
-        const pathToFile = path.join(dir, req.url.replace('_nuxt', ''));
+        const pathToFile = path.join(dir, req.url.replace('_static', ''));
         if (fs.existsSync(pathToFile)) {
           nuxtCache.set(req.url, pathToFile);
         }
       }
     }
-    res.sendFile(nuxtCache.get(req.url) as string);
+
+    const filepath = nuxtCache.get(req.url) as string;
+    if (fs.existsSync(filepath)) {
+      res.sendFile(filepath);
+    } else {
+      res.sendStatus(404);
+    }
   });
-  app?.get('/dist/*/*.js', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', (req.url + '.gz').split('/').map(o => sanitize(o)).join('/')), {
-      headers: {
-        'Content-Type':     'text/javascript',
-        'Content-Encoding': 'gzip',
-        'Cache-Control':    'public',
-      },
-    });
-  });
-  app?.get('/dist/*/*.map', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', (req.url + '.gz').split('/').map(o => sanitize(o)).join('/')), {
-      headers: {
-        'Content-Type':     'text/javascript',
-        'Content-Encoding': 'gzip',
-        'Cache-Control':    'public',
-      },
-    });
-  });
-  app?.get('/dist/*/*.css', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', (req.url + '.gz').split('/').map(o => sanitize(o)).join('/')), {
-      headers: {
-        'Content-Type':     'text/css',
-        'Content-Encoding': 'gzip',
-        'Cache-Control':    'public',
-      },
-    });
+  app?.get(['/_nuxt/*', '/credentials/_nuxt/*', '/overlays/_nuxt/*'], (req, res) => {
+    if (!nuxtCache.get(req.url)) {
+      // search through node_modules to find correct nuxt file
+      const paths = [
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', '_nuxt'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'dist', '_nuxt'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'dist', '_nuxt'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'dist', '_nuxt'),
+      ];
+      for (const dir of paths) {
+        const pathToFile = path.join(dir, req.url.replace('_nuxt', '').replace('credentials', '').replace('overlays', ''));
+        if (fs.existsSync(pathToFile)) {
+          nuxtCache.set(req.url, pathToFile);
+        }
+      }
+    }
+
+    const filepath = nuxtCache.get(req.url) as string;
+    if (fs.existsSync(filepath)) {
+      res.sendFile(filepath);
+    } else {
+      nuxtCache.delete(req.url);
+      res.sendStatus(404);
+    }
   });
   app?.get('/popout/', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'popout.html'));
   });
-  app?.get('/oauth/:page?', function (req, res) {
+  app?.get(['/overlays/:id', '/overlays/text/:id'], function (req, res) {
+    res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'dist', 'index.html'));
+  });
+  app?.get('/public/', function (req, res) {
+    res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'dist', 'index.html'));
+  });
+  app?.get('/credentials/oauth/:page?', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', 'oauth', 'index.html'));
   });
-  app?.get('/login', function (req, res) {
+  app?.get('/credentials/login', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', 'login', 'index.html'));
   });
-  app?.get('/overlays/:overlay', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'public', 'overlays.html'));
-  });
-  app?.get('/overlays/:overlay/:id', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'public', 'overlays.html'));
+  app?.get('/assets/:asset', function (req, res) {
+    res.sendFile(path.join(__dirname, '..', 'assets', sanitize(req.params.asset)));
   });
   app?.get('/custom/:custom', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'custom', sanitize(req.params.custom) + '.html'));
-  });
-  app?.get('/public/', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'public', 'public.html'));
   });
   app?.get('/fonts', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'fonts.json'));
@@ -170,12 +217,16 @@ export const init = () => {
   app?.get('/favicon.ico', function (req, res) {
     res.sendFile(path.join(__dirname, '..', 'public', 'favicon.ico'));
   });
-  app?.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  app?.get('/:page?', function (req, res) {
+    res.sendFile(path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'dist', 'index.html'));
   });
 
   menu.push({
     category: 'main', name: 'dashboard', id: 'dashboard', this: null,
+  });
+
+  menu.push({
+    category: 'stats', name: 'api-explorer', id: 'stats/api-explorer', this: null,
   });
 
   setTimeout(() => {
@@ -190,7 +241,7 @@ export const init = () => {
     });
     socketsConnectedInc();
 
-    socket.on('getCachedTags', async (cb: (results: TwitchTagInterface[]) => void) => {
+    socket.on('getCachedTags', async (cb: (results: TwitchTagInterface[]) => void) => {
       const connection = await getConnection();
       const joinQuery = connection.options.type === 'postgres' ? '"names"."tagId" = "tag_id" AND "names"."locale"' : 'names.tagId = tag_id AND names.locale';
       let query = getRepository(TwitchTag)
@@ -222,24 +273,14 @@ export const init = () => {
       cb(results);
     });
     // twitch game and title change
-    socket.on('getGameFromTwitch', function (game: string) {
-      sendGameFromTwitch(socket, game);
+    socket.on('getGameFromTwitch', function (game: string, cb) {
+      sendGameFromTwitch(game).then((data) => cb(data));
     });
-    socket.on('getUserTwitchGames', async () => {
+    socket.on('getUserTwitchGames', async (cb) => {
       const titles = await getRepository(CacheTitles).find();
-      socket.emit('sendUserTwitchGamesAndTitles', titles) ;
+      cb(titles);
     });
-    socket.on('deleteUserTwitchGame', async (game: string) => {
-      await getManager()
-        .createQueryBuilder()
-        .delete()
-        .from(CacheTitles, 'titles')
-        .where('game = :game', { game })
-        .execute();
-      const titles = await getRepository(CacheTitles).find();
-      socket.emit('sendUserTwitchGamesAndTitles', titles);
-    });
-    socket.on('cleanupGameAndTitle', async (data: { titles: { title: string, game: string; id: string }[], game: string, title: string }, cb: (err: string|null, titles: Readonly<Required<CacheTitlesInterface>>[]) => void) => {
+    socket.on('cleanupGameAndTitle', async () => {
       // remove empty titles
       await getManager()
         .createQueryBuilder()
@@ -248,49 +289,12 @@ export const init = () => {
         .where('title = :title', { title: '' })
         .execute();
 
-      // update titles
-      const updateTitles = data.titles.filter(o => o.title.trim().length > 0);
-      for (const t of updateTitles) {
-        if (t.title === data.title && t.game === data.game) {
-          await getManager()
-            .createQueryBuilder()
-            .update(CacheTitles)
-            .set({ timestamp: Date.now(), title: t.title })
-            .where('id = :id', { id: t.id })
-            .execute();
-        } else {
-          await getManager()
-            .createQueryBuilder()
-            .update(CacheTitles)
-            .set({ title: t.title })
-            .where('id = :id', { id: t.id })
-            .execute();
-        }
-      }
-
-      // remove removed titles
-      let allTitles = await getRepository(CacheTitles).find();
-      for (const t of allTitles) {
-        const titles = updateTitles.filter(o => o.game === t.game && o.title === t.title);
-        if (titles.length === 0) {
-          if (t.game !== data.game || t.title !== data.title) { // don't remove current/new title
-            await getManager()
-              .createQueryBuilder()
-              .delete()
-              .from(CacheTitles, 'titles')
-              .where('id = :id', { id: t.id })
-              .execute();
-          }
-        }
-      }
-
       // remove duplicates
-      allTitles = await getRepository(CacheTitles).find();
+      const allTitles = await getRepository(CacheTitles).find();
       for (const t of allTitles) {
         const titles = allTitles.filter(o => o.game === t.game && o.title === t.title);
         if (titles.length > 1) {
           // remove title if we have more than one title
-          allTitles = allTitles.filter(o => String(o.id) !== String(t.id));
           await getManager()
             .createQueryBuilder()
             .delete()
@@ -299,9 +303,8 @@ export const init = () => {
             .execute();
         }
       }
-      cb(null, allTitles);
     });
-    socket.on('updateGameAndTitle', async (data: { game: string, title: string, tags: string[] }, cb: (status: boolean | null) => void) => {
+    socket.on('updateGameAndTitle', async (data: { game: string, title: string, tags: string[] }, cb: (status: boolean | null) => void) => {
       const status = await setTitleAndGame(data);
       await setTags(data.tags);
 
@@ -328,6 +331,9 @@ export const init = () => {
             },
           ])
           .execute();
+      } else {
+        // update timestamp
+        await getRepository(CacheTitles).save({ ...item, timestamp: Date.now() });
       }
       cb(null);
     });
@@ -350,7 +356,7 @@ export const init = () => {
       cb(null, value);
     });
 
-    socket.on('responses.get', async function (at: string | null, callback: (responses: Record<string, string>) => void) {
+    socket.on('responses.get', async function (at: string | null, callback: (responses: Record<string, string>) => void) {
       const responses = flatten(!_.isNil(at) ? translateLib.translations[getLang()][at] : translateLib.translations[getLang()]);
       _.each(responses, function (value, key) {
         const _at = !_.isNil(at) ? at + '.' + key : key;
@@ -375,7 +381,7 @@ export const init = () => {
       );
       socket.emit('lang', lang);
     });
-    socket.on('responses.revert', async function (data: { name: string }, callback: (translation: string) => void) {
+    socket.on('responses.revert', async function (data: { name: string }, callback: (translation: string) => void) {
       _.remove(translateLib.custom, function (o: any) {
         return o.name === data.name;
       });
@@ -394,15 +400,15 @@ export const init = () => {
     adminEndpoint('/', 'panel::alerts', (cb) => {
       const toShow: { errors: typeof errors, warns: typeof warns }  = { errors: [], warns: [] };
       do {
-        const error = errors.shift();
-        if (!error) {
+        const err = errors.shift();
+        if (!err) {
           break;
         }
 
         if (!toShow.errors.find((o) => {
-          return o.name === error.name && o.message === error.message;
+          return o.name === err.name && o.message === err.message;
         })) {
-          toShow.errors.push(error);
+          toShow.errors.push(err);
         }
       } while (errors.length > 0);
       do {
@@ -420,90 +426,6 @@ export const init = () => {
       cb(null, toShow);
     });
 
-    adminEndpoint('/', 'panel::availableWidgets', async (opts, cb) => {
-      const dashboards = await getRepository(Dashboard).find({
-        where:     { userId: opts.userId, type: opts.type },
-        relations: ['widgets'],
-        order:     { createdAt: 'ASC' },
-      });
-
-      const sendWidgets: typeof widgets = [];
-      const dashWidgets = dashboards.map(o => o.widgets).flat();
-      for(const widget of widgets) {
-        if (!dashWidgets.find(o => o.name === widget.id)) {
-          sendWidgets.push(widget);
-        }
-      }
-      cb(null, sendWidgets);
-    });
-
-    adminEndpoint('/', 'panel::dashboards', async (opts, cb) => {
-      const userId = opts.userId;
-      const dashboards = async () => {
-        getRepository(Widget).delete({ dashboardId: IsNull() });
-        return getRepository(Dashboard).find({
-          where:     { userId: opts.userId, type: opts.type },
-          relations: ['widgets'],
-          order:     { createdAt: 'ASC' },
-        });
-      };
-
-      if ((await dashboards()).length === 0) {
-        const mainDashboard = await getRepository(Dashboard).findOne({
-          userId, name: 'Main', type: 'admin',
-        });
-        if (!mainDashboard) {
-          await getRepository(Dashboard).save({
-            name: 'Main', createdAt: 0, userId, type: 'admin',
-          });
-        }
-      }
-      cb(null, await dashboards());
-    });
-
-    adminEndpoint('/', 'panel::dashboards::remove', async (opts, cb) => {
-      await getRepository(Dashboard).delete({
-        userId: opts.userId, type: opts.type, id: opts.id,
-      });
-      await getRepository(Widget).delete({ dashboardId: IsNull() });
-      cb(null);
-    });
-
-    adminEndpoint('/', 'panel::dashboards::create', async (opts, cb) => {
-      cb(null, await getRepository(Dashboard).save({
-        name: opts.name, createdAt: Date.now(), id: uuid(), userId: opts.userId, type: 'admin',
-      }));
-    });
-
-    socket.on('addWidget', async function (widgetName: string, id: string, cb: (dashboard?: DashboardInterface) => void) {
-      // add widget to bottom left
-      const dashboard = await getRepository(Dashboard).findOne({
-        relations: ['widgets'],
-        where:     { id } ,
-      });
-      if (dashboard) {
-        let y = 0;
-        for (const w of dashboard.widgets) {
-          y = Math.max(y, w.positionY + w.height);
-        }
-        dashboard.widgets.push({
-          name:      widgetName,
-          positionX: 0,
-          positionY: y,
-          width:     4,
-          height:    3,
-        });
-        cb(await getRepository(Dashboard).save(dashboard));
-      } else {
-        cb(undefined);
-      }
-    });
-
-    adminEndpoint('/', 'panel::dashboards::save', async (dashboards) => {
-      await getRepository(Dashboard).save(dashboards);
-      await getRepository(Widget).delete({ dashboardId: IsNull() });
-    });
-
     socket.on('connection_status', (cb: (status: typeof statusObj) => void) => {
       cb(statusObj);
     });
@@ -518,7 +440,7 @@ export const init = () => {
       });
     });
 
-    type toEmit = { name: string; enabled: boolean; areDependenciesEnabled: boolean; isDisabledByEnv: boolean }[];
+    type toEmit = { name: string; enabled: boolean; areDependenciesEnabled: boolean; isDisabledByEnv: boolean; type: string; }[];
     // send enabled systems
     socket.on('systems', async (cb: (err: string | null, toEmit: toEmit) => void) => {
       const toEmit: toEmit = [];
@@ -528,14 +450,15 @@ export const init = () => {
           enabled:                system.enabled,
           areDependenciesEnabled: await system.areDependenciesEnabled,
           isDisabledByEnv:        system.isDisabledByEnv,
+          type:                   'systems',
         });
       }
       cb(null, toEmit);
     });
-    socket.on('core', async (cb: (err: string | null, toEmit: { name: string }[]) => void) => {
-      const toEmit: { name: string }[] = [];
-      for (const system of ['oauth', 'tmi', 'currency', 'ui', 'general', 'twitch', 'socket', 'permissions']) {
-        toEmit.push({ name: system.toLowerCase() });
+    socket.on('core', async (cb: (err: string | null, toEmit: { name: string; type: string; }[]) => void) => {
+      const toEmit: { name: string; type: string; }[] = [];
+      for (const system of ['oauth', 'tmi', 'currency', 'ui', 'general', 'twitch', 'socket']) {
+        toEmit.push({ name: system.toLowerCase(), type: 'core' });
       }
       cb(null, toEmit);
     });
@@ -550,22 +473,18 @@ export const init = () => {
           enabled:                system.enabled,
           areDependenciesEnabled: await system.areDependenciesEnabled,
           isDisabledByEnv:        system.isDisabledByEnv,
+          type:                   'integrations',
         });
       }
       cb(null, toEmit);
     });
-    socket.on('overlays', async (cb: (err: string | null, toEmit: toEmit) => void) => {
-      const toEmit: toEmit = [];
+    socket.on('overlays', async (cb: (err: string | null, toEmit: { name: string; type: string; }[]) => void) => {
+      const toEmit: { name: string; type: string; }[] = [];
       for (const system of list('overlays')) {
         if (!system.showInUI) {
           continue;
         }
-        toEmit.push({
-          name:                   system.__moduleName__.toLowerCase(),
-          enabled:                system.enabled,
-          areDependenciesEnabled: await system.areDependenciesEnabled,
-          isDisabledByEnv:        system.isDisabledByEnv,
-        });
+        toEmit.push({ name: system.__moduleName__.toLowerCase(), type: 'overlays' });
       }
       cb(null, toEmit);
     });
@@ -580,23 +499,24 @@ export const init = () => {
           enabled:                system.enabled,
           areDependenciesEnabled: await system.areDependenciesEnabled,
           isDisabledByEnv:        system.isDisabledByEnv,
+          type:                   'games',
         });
       }
       cb(null, toEmit);
     });
 
-    socket.on('name', function (cb: (botUsername: string) => void) {
+    socket.on('name', function (cb: (botUsername: string) => void) {
       cb(oauth.botUsername);
     });
-    socket.on('channelName', function (cb: (currentChannel: string) => void) {
+    socket.on('channelName', function (cb: (currentChannel: string) => void) {
       cb(oauth.currentChannel);
     });
-    socket.on('version', function (cb: (version: string) => void) {
+    socket.on('version', function (cb: (version: string) => void) {
       const version = _.get(process, 'env.npm_package_version', 'x.y.z');
       cb(version.replace('SNAPSHOT', gitCommitInfo().shortHash || 'SNAPSHOT'));
     });
 
-    socket.on('parser.isRegistered', function (data: { emit: string, command: string }) {
+    socket.on('parser.isRegistered', function (data: { emit: string, command: string }) {
       socket.emit(data.emit, { isRegistered: new Parser().find(data.command) });
     });
 
@@ -616,7 +536,7 @@ export const init = () => {
         lang,
         translate({ root: 'webpanel' }),
         translate({ root: 'ui' }), // add ui root -> slowly refactoring to new name
-        { bot: translate({ root: 'core' }) },
+        { bot: translate({ root: 'core' }) },
       );
       cb(lang);
     });
@@ -627,7 +547,7 @@ export const init = () => {
       lang,
       translate({ root: 'webpanel' }),
       translate({ root: 'ui' }), // add ui root -> slowly refactoring to new name,
-      { bot: translate({ root: 'core' }) },
+      { bot: translate({ root: 'core' }) },
     );
     socket.emit('lang', lang);
   });
@@ -654,7 +574,7 @@ let lastDataSent: null | Record<string, unknown> = null;
 const sendStreamData = async () => {
   try {
     if (!translateLib.isLoaded) {
-      throw new Error('Translation not yet loaded');
+      throw new Error('Translation not yet loaded');
     }
 
     const ytCurrentSong = Object.values(songs.isPlaying).find(o => o) ? _.get(JSON.parse(songs.currentSong), 'title', null) : null;
@@ -686,7 +606,11 @@ const sendStreamData = async () => {
       ioServer?.emit('panel::stats', data);
     }
     lastDataSent = data;
-  } catch (e) {}
+  } catch (e) {
+    if (e.message !== 'Translation not yet loaded') {
+      error(e);
+    }
+  }
   setTimeout(async () => await sendStreamData(), 5000);
 };
 

@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { xor } from 'lodash';
 
 import type { Module } from './_interface';
-import * as constants from './constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import { isDbConnected } from './helpers/database';
 import { debug, error } from './helpers/log';
 import { defaultPermissions } from './helpers/permissions/defaultPermissions';

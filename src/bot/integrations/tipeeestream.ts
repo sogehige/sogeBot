@@ -6,7 +6,6 @@ import { getRepository } from 'typeorm';
 import currency from '../currency';
 import { UserTip, UserTipInterface } from '../database/entity/user';
 import { settings } from '../decorators';
-import { ui } from '../decorators.js';
 import { onChange, onStartup } from '../decorators/on.js';
 import { isStreamOnline } from '../helpers/api/index.js';
 import { stats } from '../helpers/api/stats.js';
@@ -57,11 +56,9 @@ class TipeeeStream extends Integration {
   socketToTipeeestream: any | null = null;
 
   @settings()
-  @ui({ type: 'text-input', secret: false })
   username = '';
 
   @settings()
-  @ui({ type: 'text-input', secret: true })
   apiKey = '';
 
   @onStartup()
@@ -130,7 +127,7 @@ class TipeeeStream extends Integration {
           }
         });
 
-        this.socketToTipeeestream.on('new-event', async (data: TipeeestreamEvent) => {
+        this.socketToTipeeestream.on('new-event', async (data: TipeeestreamEvent) => {
           this.parse(data);
         });
       }
@@ -139,7 +136,7 @@ class TipeeeStream extends Integration {
     }
   }
 
-  async parse(data: TipeeestreamEvent) {
+  async parse(data: TipeeestreamEvent) {
     if (data.event.type !== 'donation') {
       return;
     }
@@ -153,6 +150,7 @@ class TipeeeStream extends Integration {
       }
 
       let isAnonymous = false;
+      const timestamp = Date.now();
       users.getUserByUsername(username)
         .then(async(user) => {
           const newTip: UserTipInterface = {
@@ -161,30 +159,30 @@ class TipeeeStream extends Integration {
             sortAmount:    currency.exchange(Number(amount), donationCurrency, mainCurrency.value),
             message,
             exchangeRates: currency.rates,
-            tippedAt:      Date.now(),
+            tippedAt:      timestamp,
             userId:        user.userId,
           };
           getRepository(UserTip).save(newTip);
           tip(`${username.toLowerCase()}${user.userId ? '#' + user.userId : ''}, amount: ${Number(amount).toFixed(2)}${donationCurrency}, message: ${message}`);
           eventlist.add({
-            event:     'tip',
+            event:    'tip',
             amount,
-            currency:  donationCurrency,
-            userId:    user.userId,
+            currency: donationCurrency,
+            userId:   user.userId,
             message,
-            timestamp: Date.now(),
+            timestamp,
           });
         })
         .catch(() => {
           // user not found on Twitch
           tip(`${username.toLowerCase()}#__anonymous__, amount: ${Number(amount).toFixed(2)}${donationCurrency}, message: ${message}`);
           eventlist.add({
-            event:     'tip',
+            event:    'tip',
             amount,
-            currency:  donationCurrency,
-            userId:    `${username}#__anonymous__`,
+            currency: donationCurrency,
+            userId:   `${username}#__anonymous__`,
             message,
-            timestamp: Date.now(),
+            timestamp,
           });
           isAnonymous = true;
         }).finally(() => {
@@ -208,11 +206,11 @@ class TipeeeStream extends Integration {
           });
 
           triggerInterfaceOnTip({
-            username:  username.toLowerCase(),
+            username: username.toLowerCase(),
             amount,
             message,
-            currency:  donationCurrency,
-            timestamp: Date.now(),
+            currency: donationCurrency,
+            timestamp,
           });
         });
     } catch (e) {

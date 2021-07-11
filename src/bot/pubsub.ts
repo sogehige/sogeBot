@@ -2,7 +2,7 @@ import { setInterval } from 'timers';
 
 import WebSocket from 'ws';
 
-import { MINUTE, SECOND } from './constants';
+import { MINUTE, SECOND } from '@sogebot/ui-helpers/constants';
 import { isStreamOnline } from './helpers/api';
 import { eventEmitter } from './helpers/events';
 import {
@@ -14,12 +14,12 @@ import oauth from './oauth';
 import alerts from './registries/alerts';
 
 const pubsubEndpoint: Readonly<string> = 'wss://pubsub-edge.twitch.tv';
-const heartbeatInterval: Readonly<number> = 2 * 60 * SECOND;
-const reconnectInterval: Readonly<number> = 3 * SECOND;
+const heartbeatInterval: Readonly<number> = 2 * 60 * SECOND;
+const reconnectInterval: Readonly<number> = 3 * SECOND;
 
 let ws: WebSocket | null = null;
 
-let heartbeatHandle: NodeJS.Timeout | undefined;
+let heartbeatHandle: NodeJS.Timeout | undefined;
 let connectionHash = '';
 
 let ERR_BADAUTH = false;
@@ -66,7 +66,7 @@ const heartbeat = () => {
   }
 };
 
-const connect = () => {
+const connect = () => {
   ws = new WebSocket(pubsubEndpoint);
   ws.onopen = function() {
     info('PUBSUB: Socket Opened');
@@ -184,7 +184,7 @@ const connect = () => {
   };
 };
 
-const listen = (topic: string) => {
+const listen = (topic: string) => {
   const message = {
     type:  'LISTEN',
     nonce: nonce(15),

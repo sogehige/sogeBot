@@ -1,6 +1,6 @@
 import { getRepository } from 'typeorm';
 
-import { HOUR, MINUTE } from '../../constants';
+import { HOUR, MINUTE } from '@sogebot/ui-helpers/constants';
 import { User } from '../../database/entity/user';
 import { debug } from '../log';
 import { logAvgTime } from '../profiler';

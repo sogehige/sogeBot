@@ -7,7 +7,7 @@ import _ from 'lodash';
 import { getRepository } from 'typeorm';
 
 import Core from './_interface';
-import * as constants from './constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import { UserTip } from './database/entity/user';
 import { settings, ui } from './decorators';
 import {

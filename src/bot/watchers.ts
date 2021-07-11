@@ -1,9 +1,9 @@
+import { SECOND } from '@sogebot/ui-helpers/constants';
 import {
   cloneDeep, get, isEqual, set,
 } from 'lodash';
 import { getRepository } from 'typeorm';
 
-import { SECOND } from './constants';
 import { Settings } from './database/entity/settings';
 import { getFunctionList } from './decorators/on';
 import { isDbConnected } from './helpers/database';

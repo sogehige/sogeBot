@@ -1,6 +1,7 @@
 import { setInterval } from 'timers';
 import util from 'util';
 
+import * as constants from '@sogebot/ui-helpers/constants';
 import { isNil } from 'lodash';
 import TwitchJs, {
   BaseMessage, HostTargetMessage, Message, PrivateMessages, UserNoticeMessages, UserStateTags,
@@ -10,13 +11,12 @@ import { getRepository } from 'typeorm';
 import Core from './_interface';
 import api from './api';
 import { parserReply } from './commons';
-import * as constants from './constants';
 import type { EmitData } from './database/entity/alert';
 import { Price } from './database/entity/price';
 import {
-  User, UserBit, UserBitInterface, 
+  User, UserBit, UserBitInterface,
 } from './database/entity/user';
-import { settings, ui } from './decorators';
+import { settings } from './decorators';
 import { command, default_permission } from './decorators';
 import {
   getFunctionList, onChange, onLoad, onStreamStart,
@@ -75,7 +75,6 @@ class TMI extends Core {
   ignorelist: any[] = [];
 
   @settings('chat')
-  @ui({ type: 'global-ignorelist-exclude' }, 'chat')
   globalIgnoreListExclude: any[] = [];
 
   @settings('chat')
@@ -97,6 +96,7 @@ class TMI extends Core {
     broadcaster: null,
   };
   broadcasterWarning = false;
+  botWarning = false;
 
   ignoreGiftsFromUser = new Map<string, number>();
 
@@ -226,6 +226,9 @@ class TMI extends Core {
         error('Broadcaster oauth is not properly set - hosts will not be loaded');
         error('Broadcaster oauth is not properly set - subscribers will not be loaded');
         this.broadcasterWarning = true;
+      } else if (!this.botWarning) {
+        error('Bot oauth is not properly set');
+        this.botWarning = true;
       }
       this.timeouts[`initClient.${type}`] = setTimeout(() => this.initClient(type), 10000);
     }
@@ -362,7 +365,7 @@ class TMI extends Core {
     const client = this.client[type];
     if (!client) {
       error('Cannot init listeners for TMI ' + type + 'client');
-      error(new Error().stack || '');
+      error(new Error().stack || '');
       return;
     }
     client.chat.removeAllListeners();
@@ -861,7 +864,7 @@ class TMI extends Core {
       let redeemTriggered = false;
       if (messageFromUser.trim().startsWith('!')) {
         try {
-          const price = await getRepository(Price).findOneOrFail({ where: { command: messageFromUser.trim().toLowerCase(), enabled: true } });
+          const price = await getRepository(Price).findOneOrFail({ where: { command: messageFromUser.trim().toLowerCase(), enabled: true } });
           if (price.priceBits <= Number(userstate.bits)) {
             if (customcommands.enabled) {
               await customcommands.run({

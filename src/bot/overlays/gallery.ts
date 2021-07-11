@@ -12,7 +12,7 @@ class Gallery extends Overlay {
   constructor () {
     super();
     this.addMenu({
-      category: 'registry', name: 'gallery', id: 'registry.gallery/list', this: null, 
+      category: 'registry', name: 'gallery', id: 'registry.gallery', this: null,
     });
 
     const init = (retry = 0) => {
@@ -55,7 +55,7 @@ class Gallery extends Overlay {
       try {
         const item = await getRepository(GalleryEntity).findOne({
           where:  { id },
-          select: ['id', 'name', 'type'],
+          select: ['id', 'name', 'type', 'folder'],
         });
         cb(null, item);
       } catch (e) {
@@ -64,7 +64,7 @@ class Gallery extends Overlay {
     });
     adminEndpoint(this.nsp, 'generic::getAll', async (cb) => {
       try {
-        const items = await getRepository(GalleryEntity).find({ select: ['id', 'name', 'type'] });
+        const items = await getRepository(GalleryEntity).find({ select: ['id', 'name', 'type', 'folder'] });
         cb(null, items);
       } catch (e) {
         cb(e.stack, []);
@@ -73,6 +73,17 @@ class Gallery extends Overlay {
     adminEndpoint(this.nsp, 'generic::deleteById', async (id, cb) => {
       try {
         await getRepository(GalleryEntity).delete({ id: String(id) });
+        cb(null);
+      } catch (e) {
+        cb(e.stack);
+      }
+    });
+    adminEndpoint(this.nsp, 'generic::setById', async (opts, cb) => {
+      try {
+        cb(null, await getRepository(GalleryEntity).save({
+          ...(await getRepository(GalleryEntity).findOne({ id: String(opts.id) })),
+          ...opts.item,
+        }));
         cb(null);
       } catch (e) {
         cb(e.stack);
@@ -96,7 +107,7 @@ class Gallery extends Overlay {
           // new entity
           const type = matches[1];
           await getRepository(GalleryEntity).save({
-            id: filedata.id, type, data: filedata.b64data, name: filename, 
+            id: filedata.id, type, data: filedata.b64data, name: filename,
           });
         }
         if (cb) {

@@ -1,7 +1,7 @@
 // bot libraries
 import Axios from 'axios';
 
-import { settings, ui } from '../decorators';
+import { settings } from '../decorators';
 import { onChange, onStartup } from '../decorators/on';
 import {  error } from '../helpers/log';
 import Integration from './_interface';
@@ -10,7 +10,6 @@ let canSendRequests = true;
 
 class LastFM extends Integration {
   @settings()
-  @ui({ type: 'text-input', secret: true })
   apiKey = '';
 
   @settings()

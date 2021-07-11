@@ -1,5 +1,7 @@
 import { setTimeout } from 'timers'; // tslint workaround
 
+import { sample } from '@sogebot/ui-helpers/array';
+import { generateUsername } from '@sogebot/ui-helpers/generateUsername';
 import axios from 'axios';
 import _ from 'lodash';
 import safeEval from 'safe-eval';
@@ -8,14 +10,15 @@ import { getRepository } from 'typeorm';
 import Core from './_interface';
 import api from './api';
 import { parserReply } from './commons';
-import { Event, EventInterface } from './database/entity/event';
+import {
+  Event, EventInterface, Events,
+} from './database/entity/event';
 import { User } from './database/entity/user';
 import { onStreamEnd } from './decorators/on';
 import events from './events';
 import {
   calls, isStreamOnline, rawStatus, setRateLimit, stats, streamStatusChangeSince,
 } from './helpers/api';
-import { sample } from './helpers/array/sample';
 import { attributesReplace } from './helpers/attributesReplace';
 import {
   announce, getOwner, getUserSender, prepare,
@@ -29,7 +32,6 @@ import { isDbConnected } from './helpers/database';
 import { dayjs } from './helpers/dayjs';
 import { eventEmitter } from './helpers/events/emitter';
 import { flatten } from './helpers/flatten';
-import { generateUsername } from './helpers/generateUsername';
 import { getLocalizedName } from './helpers/getLocalized';
 import {
   debug, error, info, warning,
@@ -123,7 +125,7 @@ class Events extends Core {
       },
       { id: 'game-changed', variables: [ 'oldGame', 'game' ] },
       {
-        id: 'reward-redeemed', definitions: { titleOfReward: '' }, variables: [ 'username', 'is.moderator', 'is.subscriber', 'is.vip', 'is.follower', 'is.broadcaster', 'is.bot', 'is.owner', 'userInput' ], check: this.isCorrectReward,
+        id: 'reward-redeemed', definitions: { titleOfReward: '' }, variables: [ 'username', 'is.moderator', 'is.subscriber', 'is.vip', 'is.follower', 'is.broadcaster', 'is.bot', 'is.owner', 'userInput' ], check: this.isCorrectReward,
       },
     ];
 
@@ -170,7 +172,7 @@ class Events extends Core {
     ];
 
     this.addMenu({
-      category: 'manage', name: 'event-listeners', id: 'manage/events/list', this: null,
+      category: 'manage', name: 'events', id: 'manage/events', this: null,
     });
     this.fadeOut();
 
@@ -403,13 +405,13 @@ class Events extends Core {
 
   public async fireEmoteExplosion(operation: Events.OperationDefinitions) {
     // we must require emotes as it is triggering translations in mocha
-    const emotes: typeof import('./overlays/emotes') = require('./overlays/emotes');
+    const emotes: typeof import('./emotes') = require('./overlays/emotes');
     emotes.default.explode(String(operation.emotesToExplode).split(' '));
   }
 
   public async fireEmoteFirework(operation: Events.OperationDefinitions) {
     // we must require emotes as it is triggering translations in mocha
-    const emotes: typeof import('./overlays/emotes') = require('./overlays/emotes');
+    const emotes: typeof import('./emotes') = require('./overlays/emotes');
     emotes.default.firework(String(operation.emotesToFirework).split(' '));
   }
 
@@ -428,7 +430,7 @@ class Events extends Core {
     }
     command = await new Message(command).parse({ username, sender: getUserSender(String(userId), username) });
 
-    if (global.mocha) {
+    if ((global as any).mocha) {
       parserEmitter.emit('process', {
         sender:  { username, userId: String(userId) },
         message: command,

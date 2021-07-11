@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { sortBy } from 'lodash';
 import { getRepository } from 'typeorm';
 
-import { SECOND } from '../constants';
+import { SECOND } from '@sogebot/ui-helpers/constants';
 import {
   Timer, TimerResponse, TimerResponseInterface,
 } from '../database/entity/timer';
@@ -36,7 +36,7 @@ class Timers extends System {
     super();
 
     this.addMenu({
-      category: 'manage', name: 'timers', id: 'manage/timers/list', this: this,
+      category: 'manage', name: 'timers', id: 'manage/timers', this: this,
     });
     this.init();
   }
@@ -72,11 +72,12 @@ class Timers extends System {
         callback(e);
       }
     });
-    adminEndpoint(this.nsp, 'timers::save', async (data, callback) => {
+    adminEndpoint(this.nsp, 'generic::setById', async (opts, cb) => {
       try {
-        callback(null, await getRepository(Timer).save(data));
+        const item = await getRepository(Timer).save({ ...(await getRepository(Timer).findOne({ id: String(opts.id) })), ...opts.item });
+        cb(null, item);
       } catch (e) {
-        callback(e);
+        cb(e.stack, null);
       }
     });
   }
@@ -109,7 +110,7 @@ class Timers extends System {
     clearTimeout(this.timeouts.timersCheck);
 
     if (!isStreamOnline.value) {
-      await getRepository(Timer).update({ tickOffline: false }, { triggeredAtMessages: linesParsed, triggeredAtTimestamp: Date.now() });
+      await getRepository(Timer).update({ tickOffline: false }, { triggeredAtMessages: linesParsed, triggeredAtTimestamp: Date.now() });
     }
 
     const timers = await getRepository(Timer).find({

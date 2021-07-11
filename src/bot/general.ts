@@ -1,14 +1,15 @@
 import { readdirSync, writeFileSync } from 'fs';
 
+import { HOUR, MINUTE } from '@sogebot/ui-helpers/constants';
 import gitCommitInfo from 'git-commit-info';
 import {
-  get, isNil, map,
+  capitalize,
+  get, isNil,
 } from 'lodash';
 import { getConnection, getRepository } from 'typeorm';
 
 import Core from './_interface';
-import { HOUR, MINUTE } from './constants';
-import { Widget } from './database/entity/dashboard';
+import { PermissionCommands } from './database/entity/permissions';
 import {
   command, default_permission, settings, ui,
 } from './decorators';
@@ -16,6 +17,7 @@ import {
   onChange, onLoad, onStartup,
 } from './decorators/on';
 import { isStreamOnline } from './helpers/api';
+import { refreshCachedCommandPermissions } from './helpers/cache';
 import { setLocale } from './helpers/dayjs';
 import { setValue } from './helpers/general';
 import { setLang } from './helpers/locales';
@@ -27,6 +29,7 @@ import { socketsConnected } from './helpers/panel/';
 import { addUIWarn } from './helpers/panel/';
 import { defaultPermissions } from './helpers/permissions/';
 import { list } from './helpers/register';
+import { adminEndpoint } from './helpers/socket';
 import { getMuteStatus } from './helpers/tmi/muteStatus';
 import translateLib, { translate } from './translate';
 
@@ -70,8 +73,96 @@ class General extends Core {
 
   @onStartup()
   onStartup() {
-    this.addMenuPublic({ name: 'dashboard', id: '' });
+    this.addMenu({
+      name: 'index', id: '', this: this,
+    });
+    this.addMenu({
+      category: 'commands', name: 'botcommands', id: 'commands/botcommands', this: this,
+    });
+    this.addMenu({
+      category: 'settings', name: 'modules', id: 'settings/modules', this: null,
+    });
+    this.addMenuPublic({ name: 'index', id: '' });
     setInterval(gracefulExit, 1000);
+  }
+
+  sockets() {
+    type Command = {
+      id: string,
+      defaultValue: string,
+      type: string,
+      name: string,
+      command: string,
+      permission: string | null,
+    };
+
+    adminEndpoint(this.nsp, 'removeCache', (cb) => {
+      const emotes = require('./emotes').default;
+      emotes.removeCache();
+      cb(null, null);
+    });
+
+    adminEndpoint(this.nsp, 'generic::getCoreCommands', async (cb: any) => {
+      try {
+        const commands: Command[] = [];
+
+        for (const type of ['overlays', 'integrations', 'core', 'systems', 'games']) {
+          for (const system of list(type)) {
+            for (const cmd of system._commands) {
+              const name = typeof cmd === 'string' ? cmd : cmd.name;
+              commands.push({
+                id:           cmd.id,
+                defaultValue: name,
+                command:      cmd.command ?? name,
+                type:         capitalize(type),
+                name:         system.__moduleName__,
+                permission:   await new Promise((resolve: (value: string | null) => void) => {
+                  getRepository(PermissionCommands).findOneOrFail({ name })
+                    .then(data => {
+                      resolve(data.permission);
+                    })
+                    .catch(() => {
+                      resolve(cmd.permission ?? null);
+                    });
+                }),
+              });
+            }
+          }
+        }
+        cb(null, commands);
+      } catch (e) {
+        cb(e, []);
+      }
+    });
+
+    adminEndpoint(this.nsp, 'generic::setCoreCommand', async (commandToSet: Command, cb: any) => {
+      // get module
+      const module = list(commandToSet.type.toLowerCase()).find(item => item.__moduleName__ === commandToSet.name);
+      if (!module) {
+        throw new Error(`Module ${commandToSet.name} not found`);
+      }
+
+      const moduleCommand = module._commands.find((o) => o.name === commandToSet.defaultValue);
+      if (!moduleCommand) {
+        throw new Error(`Command ${commandToSet.defaultValue} not found in module ${commandToSet.name}`);
+      }
+
+      // handle permission
+      if (commandToSet.permission === moduleCommand.permission) {
+        await getRepository(PermissionCommands).delete({ name: moduleCommand.name });
+      } else {
+        await getRepository(PermissionCommands).save({
+          ...(await getRepository(PermissionCommands).findOne({ name: moduleCommand.name })),
+          name:       moduleCommand.name,
+          permission: commandToSet.permission,
+        });
+      }
+
+      // handle new command value
+      module.setCommand(commandToSet.defaultValue, commandToSet.command);
+      refreshCachedCommandPermissions();
+      cb();
+    });
   }
 
   @command('!enable')
@@ -96,7 +187,7 @@ class General extends Core {
     if (!(await translateLib.check(this.lang))) {
       warning(`Language ${this.lang} not found - fallback to en`);
       this.lang = 'en';
-    } else {
+    } else {
       setLocale(this.lang);
       setLang(this.lang);
       warning(translate('core.lang-selected'));
@@ -114,7 +205,6 @@ class General extends Core {
   @command('!_debug')
   @default_permission(defaultPermissions.CASTERS)
   public async debug(opts: CommandOptions): Promise<CommandResponse[]> {
-    const widgets = await getRepository(Widget).find();
     const connection = await getConnection();
 
     const lang = this.lang;
@@ -156,7 +246,6 @@ class General extends Core {
     debug('*', `SYSTEMS      | ${enabledSystems.systems.join(', ')}`);
     debug('*', `GAMES        | ${enabledSystems.games.join(', ')}`);
     debug('*', `INTEGRATIONS | ${enabledSystems.integrations.join(', ')}`);
-    debug('*', `WIDGETS      | ${map(widgets, 'name').join(', ')}`);
     debug('*', `OAUTH        | BOT ${getOAuthStatus('bot')} | BROADCASTER ${getOAuthStatus('broadcaster')}`);
     debug('*', '======= END OF DEBUG MESSAGE =======');
     return [];

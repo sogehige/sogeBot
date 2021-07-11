@@ -9,11 +9,6 @@ import OAuth from '../oauth';
 import Widget from './_interface';
 
 class Chat extends Widget {
-  constructor() {
-    super();
-    this.addWidget('chat', 'widget-title-chat', 'fas fa-comments');
-  }
-
   public sockets() {
     adminEndpoint(this.nsp, 'chat.message.send', async (message) => {
       sendMessage(message, {

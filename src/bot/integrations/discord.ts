@@ -2,6 +2,7 @@
 
 // bot libraries
 
+import { HOUR, MINUTE } from '@sogebot/ui-helpers/constants';
 import chalk from 'chalk';
 import * as DiscordJs from 'discord.js';
 import { get } from 'lodash';
@@ -10,12 +11,12 @@ import {
 } from 'typeorm';
 import { v5 as uuidv5 } from 'uuid';
 
-import { HOUR, MINUTE } from '../constants';
 import { DiscordLink } from '../database/entity/discord';
+import { Events } from '../database/entity/event';
 import { Permissions as PermissionsEntity } from '../database/entity/permissions';
 import { User } from '../database/entity/user';
 import {
-  command, persistent, settings, ui,
+  command, persistent, settings,
 } from '../decorators';
 import {
   onChange, onStartup, onStreamEnd, onStreamStart,
@@ -55,61 +56,21 @@ class Discord extends Integration {
   embedMessageId = '';
 
   @settings('general')
-  @ui({ type: 'text-input', secret: true })
   clientId = '';
 
   @settings('general')
-  @ui({ type: 'text-input', secret: true })
   token = '';
 
-  @ui({
-    type:  'btn-emit',
-    class: 'btn btn-primary btn-block mt-1 mb-1',
-    if:    () => self.clientId.length > 0 && self.token.length > 0,
-    emit:  'discord::authorize',
-  }, 'general')
-  joinToServerBtn = null;
-
-  @ui({
-    type:  'btn-emit',
-    class: 'btn btn-primary btn-block mt-1 mb-1',
-    if:    () => self.clientId.length === 0 || self.token.length === 0,
-  }, 'general')
-  cannotJoinToServerBtn = null;
-
   @settings('bot')
-  @ui({
-    type: 'discord-guild',
-    if:   () => self.clientId.length > 0 && self.token.length > 0,
-  })
   guild = '';
 
-  @ui({
-    if:      () => self.clientId.length > 0 && self.guild.length === 0,
-    type:    'helpbox',
-    variant: 'info',
-  }, 'bot')
-  noGuildSelectedBox = null;
-
   @settings('bot')
-  @ui({
-    type: 'discord-channel',
-    if:   () => self.guild.length > 0,
-  })
   listenAtChannels: string | string[] = '';
 
   @settings('bot')
-  @ui({
-    type: 'discord-channel',
-    if:   () => self.guild.length > 0,
-  })
   sendOnlineAnnounceToChannel = '';
 
   @settings('bot')
-  @ui({
-    type: 'discord-channel',
-    if:   () => self.guild.length > 0,
-  })
   sendAnnouncesToChannel: { [key in typeof announceTypes[number]]: string } = {
     bets:    '',
     duel:    '',
@@ -126,47 +87,21 @@ class Discord extends Integration {
   ignorelist: string[] = [];
 
   @settings('status')
-  @ui({
-    type:   'selector', values: ['online', 'idle', 'invisible', 'dnd'],
-    if:     () => self.guild.length > 0,
-  })
   onlinePresenceStatusDefault: 'online' | 'idle' | 'invisible' | 'dnd' = 'online';
 
   @settings('status')
-  @ui({
-    type:   'text-input',
-    secret: false,
-    if:     () => self.guild.length > 0,
-  })
   onlinePresenceStatusDefaultName = '';
 
   @settings('status')
-  @ui({
-    type:   'selector', values: ['streaming', 'online', 'idle', 'invisible', 'dnd'],
-    if:     () => self.guild.length > 0,
-  })
   onlinePresenceStatusOnStream: 'streaming' | 'online' | 'idle' | 'invisible' | 'dnd' = 'online';
 
   @settings('status')
-  @ui({
-    type:   'text-input',
-    secret: false,
-    if:     () => self.guild.length > 0,
-  })
   onlinePresenceStatusOnStreamName = '$title';
 
   @settings('mapping')
-  @ui({
-    type: 'discord-mapping',
-    if:   () => self.guild.length > 0,
-  })
   rolesMapping: { [permissionId: string]: string } = {};
 
   @settings('bot')
-  @ui({
-    type: 'toggle-enable',
-    if:   () => self.guild.length > 0,
-  })
   deleteMessagesAfterWhile = false;
 
   @onStartup()
@@ -357,7 +292,7 @@ class Discord extends Integration {
         if (e.message !== String(errors.NOT_UUID)) {
           warning(e.stack);
         }
-        return [{ response: prepare('integrations.discord.invalid-or-expired-token', { sender: opts.sender }), ...opts }];
+        return [{ response: prepare('integrations.discord.invalid-or-expired-token', { sender: opts.sender }), ...opts }];
       }
     }
   }
@@ -720,7 +655,7 @@ class Discord extends Integration {
               // names must be equal
               return 0;
             })
-            .map(o => ({ html: `<strong>${o.name}</strong> &lt;${o.id}&gt;`, value: o.id })),
+            .map(o => ({ text: `<strong>${o.name}</strong> <small class="font-italic">${o.id}</small>`, value: o.id })),
           );
         } else {
           cb(null, []);
@@ -745,7 +680,7 @@ class Discord extends Integration {
               // names must be equal
               return 0;
             })
-            .map(o => ({ html: `<strong>${o.name}</strong> &lt;${o.id}&gt;`, value: o.id })));
+            .map(o => ({ text: `<strong>${o.name}</strong> <small class="font-italic">${o.id}</small>`, value: o.id })));
         } else {
           cb(null, []);
         }
@@ -770,7 +705,7 @@ class Discord extends Integration {
               // names must be equal
               return 0;
             })
-            .map(o => ({ html: `<strong>#${(o as DiscordJs.TextChannel).name}</strong> &lt;${o.id}&gt;`, value: o.id })),
+            .map(o => ({ text: `<strong>#${(o as DiscordJs.TextChannel).name}</strong> <small class="font-italic">${o.id}</small>`, value: o.id })),
           );
         } else {
           cb(null, []);
@@ -781,7 +716,7 @@ class Discord extends Integration {
     });
     adminEndpoint(this.nsp, 'discord::authorize', async (cb) => {
       if (this.token === '' || this.clientId === '') {
-        cb('Cannot authorize! Missing clientId or token.', null);
+        cb('Cannot authorize! Missing clientId or token. Please save changes before authorizing.', null);
       } else {
         try {
           cb(null, { do: 'redirect', opts: [`https://discordapp.com/oauth2/authorize?&scope=bot&permissions=8&client_id=${this.clientId}`] });

@@ -1,6 +1,6 @@
 import { getRepository } from 'typeorm';
 
-import * as constants from '../constants';
+import * as constants from '@sogebot/ui-helpers/constants';
 import { ScrimMatchId } from '../database/entity/scrimMatchId';
 import {
   command, default_permission, settings,

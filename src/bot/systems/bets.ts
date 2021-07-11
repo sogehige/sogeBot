@@ -51,11 +51,6 @@ class Bets extends System {
   })
   public betPercentGain = 20;
 
-  constructor() {
-    super();
-    this.addWidget('bets', 'widget-title-bets', 'far fa-money-bill-alt');
-  }
-
   @onStartup()
   public async checkIfBetExpired() {
     if (!isDbConnected) {
@@ -111,11 +106,11 @@ class Bets extends System {
     });
 
     adminEndpoint(this.nsp, 'bets::close', async (option) => {
-      let responses: CommandResponse[];
+      let responses: CommandResponse[];
       if (option === 'refund') {
         responses = await bets.refund({
           sender:     getBotSender(),
-          createdAt:  Date.now(),
+          createdAt:  Date.now(),
           parameters: '',
           command:    bets.getCommand('!bet refund'),
           attr:       {},
@@ -123,7 +118,7 @@ class Bets extends System {
       } else {
         responses = await bets.close({
           sender:     getBotSender(),
-          createdAt:  Date.now(),
+          createdAt:  Date.now(),
           parameters: `${option}`,
           command:    bets.getCommand('!bet close'),
           attr:       {},
@@ -131,7 +126,7 @@ class Bets extends System {
       }
       for (let i = 0; i < responses.length; i++) {
         setTimeout(async () => {
-          parserReply(await responses[i].response, { sender: responses[i].sender });
+          parserReply(await responses[i].response, { sender: responses[i].sender });
         }, i * 500);
       }
     });
@@ -197,7 +192,7 @@ class Bets extends System {
     }
   }
 
-  public async info(opts: CommandOptions) {
+  public async info(opts: CommandOptions) {
     const currentBet = await getRepository(BetsEntity).findOne({
       relations: ['participations'],
       order:     { createdAt: 'DESC' },
@@ -217,7 +212,7 @@ class Bets extends System {
     }
   }
 
-  public async participate(opts: CommandOptions): Promise<CommandResponse[]> {
+  public async participate(opts: CommandOptions): Promise<CommandResponse[]> {
     const currentBet = await getRepository(BetsEntity).findOne({
       relations: ['participations'],
       order:     { createdAt: 'DESC' },
@@ -280,9 +275,10 @@ class Bets extends System {
           return [{ response: prepare('bets.undefinedBet', { command: opts.command }), ...opts }];
         case ERROR_IS_LOCKED:
           return [{ response: prepare('bets.timeUpBet'), ...opts } ];
-        case ERROR_DIFF_BET:
+        case ERROR_DIFF_BET: {
           const result = (currentBet as Required<BetsInterface>).participations.find(o => String(o.userId) === String(opts.sender.userId));
-          return [{ response: prepare('bets.diffBet').replace(/\$option/g, String((result?.optionIdx || 0) + 1)), ...opts } ];
+          return [{ response: prepare('bets.diffBet').replace(/\$option/g, String((result?.optionIdx || 0) + 1)), ...opts } ];
+        }
         default:
           warning(e.stack);
           return [{ response: prepare('bets.error', { command: opts.command }).replace(/\$maxIndex/g, String((currentBet as BetsInterface).options.length)), ...opts }];
@@ -292,7 +288,7 @@ class Bets extends System {
 
   @command('!bet refund')
   @default_permission(defaultPermissions.MODERATORS)
-  public async refund(opts: CommandOptions): Promise<CommandResponse[]> {
+  public async refund(opts: CommandOptions): Promise<CommandResponse[]> {
     const currentBet = await getRepository(BetsEntity).findOne({
       relations: ['participations'],
       order:     { createdAt: 'DESC' },
@@ -323,7 +319,7 @@ class Bets extends System {
 
   @command('!bet close')
   @default_permission(defaultPermissions.MODERATORS)
-  public async close(opts: CommandOptions): Promise<CommandResponse[]> {
+  public async close(opts: CommandOptions): Promise<CommandResponse[]> {
     const currentBet = await getRepository(BetsEntity).findOne({
       relations: ['participations'],
       order:     { createdAt: 'DESC' },
@@ -376,7 +372,7 @@ class Bets extends System {
   @command('!bet')
   @default_permission(defaultPermissions.VIEWERS)
   @helper()
-  async main(opts: CommandOptions): Promise<CommandResponse[]> {
+  async main(opts: CommandOptions): Promise<CommandResponse[]> {
     if (opts.parameters.length === 0) {
       return this.info(opts);
     } else {

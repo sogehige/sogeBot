@@ -13,7 +13,7 @@ class Text extends Registry {
   constructor () {
     super();
     this.addMenu({
-      category: 'registry', name: 'textoverlay', id: 'registry.textoverlay/list', this: null,
+      category: 'registry', name: 'textoverlay', id: 'registry.textoverlay', this: null,
     });
   }
 

@@ -45,17 +45,6 @@ class Permissions extends Core {
         cb(null);
       }
     });
-    adminEndpoint(this.nsp, 'permissions', async (cb) => {
-      cleanViewersCache();
-      cb(null,
-        await getRepository(PermissionsEntity).find({
-          relations: ['filters'],
-          order:     { order: 'ASC' },
-        }));
-    });
-    adminEndpoint(this.nsp, 'generic::getOne', async (id, cb) => {
-      cb(null, await getRepository(PermissionsEntity).findOne({ id: String(id) }, { relations: ['filters'] }));
-    });
     adminEndpoint(this.nsp, 'test.user', async (opts, cb) => {
       if (!(await getRepository(PermissionsEntity).findOne({ id: String(opts.pid) }))) {
         cb('permissionNotFoundInDatabase');

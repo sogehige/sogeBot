@@ -3,7 +3,8 @@ import { createHash } from 'crypto';
 import type ObsWebSocket from 'obs-websocket-js';
 import safeEval from 'safe-eval';
 
-import { OBSWebsocketInterface, simpleModeTaskWaitMS } from '../../database/entity/obswebsocket';
+import { OBSWebsocketInterface, simpleModeTasks } from '../../database/entity/obswebsocket';
+import { error } from '../log';
 import { setImmediateAwait } from '../setImmediateAwait';
 import { availableActions } from './actions';
 
@@ -37,23 +38,23 @@ const taskRunner = async (obs: ObsWebSocket, tasks: OBSWebsocketInterface['simpl
         const event = task.event as keyof typeof availableActions;
         switch(event) {
           case 'Log':
-            args = task.args as any;
+            args = task.args as simpleModeTasks.TaskLog['args'];
             await availableActions[event](obs, args.logMessage);
             break;
           case 'WaitMs':
-            args = task.args as simpleModeTaskWaitMS['args'];
+            args = task.args as simpleModeTasks.WaitMS['args'];
             await availableActions[event](obs, args.miliseconds);
             break;
           case 'SetCurrentScene':
-            args = task.args as any;
+            args = task.args as simpleModeTasks.SetCurrentScene['args'];
             await availableActions[event](obs, args.sceneName);
             break;
           case 'SetMute':
-            args = task.args as any;
+            args = task.args as simpleModeTasks.SetMute['args'];
             await availableActions[event](obs, args.source, args.mute);
             break;
           case 'SetVolume':
-            args = task.args as any;
+            args = task.args as simpleModeTasks.SetVolume['args'];
             await availableActions[event](obs, args.source, args.volume);
             break;
           default:
@@ -62,6 +63,7 @@ const taskRunner = async (obs: ObsWebSocket, tasks: OBSWebsocketInterface['simpl
       }
     }
   } catch (e) {
+    error(e);
     throw e;
   } finally {
     runningTasks.splice(runningTasks.indexOf(hash), 1);

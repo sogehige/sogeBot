@@ -5,7 +5,7 @@ import { AlertInterface } from './alert';
 
 export interface RandomizerInterface {
   id?: string;
-  items?: Required<RandomizerItemInterface>[];
+  items: RandomizerItemInterface[];
   createdAt?: number;
   command: string;
   permissionId: string;
@@ -37,8 +37,8 @@ export interface RandomizerInterface {
 
 export interface RandomizerItemInterface {
   id?: string;
-  randomizer: RandomizerInterface | undefined;
-  randomizerId: string | null | undefined;
+  randomizer?: RandomizerInterface;
+  randomizerId?: string | null;
   /*
    * This should hlp with grouping things like Bancrupcy, WIN, Bancrupcy, to always appear beside
    */

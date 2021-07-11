@@ -3,7 +3,7 @@
 import { evaluate as mathJsEvaluate, round } from 'mathjs';
 import { getRepository } from 'typeorm';
 
-import { MINUTE, SECOND } from '../constants';
+import { MINUTE, SECOND } from '@sogebot/ui-helpers/constants';
 import { User, UserInterface } from '../database/entity/user';
 import {
   command, default_permission, parser, permission_settings, settings, ui,

@@ -1,10 +1,10 @@
 'use strict';
 
+import * as constants from '@sogebot/ui-helpers/constants';
 import * as _ from 'lodash';
 import { getRepository } from 'typeorm';
 
 import { parserReply } from '../commons';
-import * as constants from '../constants';
 import { Alias as AliasEntity, AliasInterface } from '../database/entity/alias';
 import {
   command, default_permission, parser,
@@ -47,7 +47,7 @@ class Alias extends System {
     super();
 
     this.addMenu({
-      category: 'manage', name: 'alias', id: 'manage/alias', this: this,
+      category: 'commands', name: 'alias', id: 'commands/alias', this: this,
     });
   }
 
@@ -170,7 +170,7 @@ class Alias extends System {
 
   @command('!alias')
   @default_permission(defaultPermissions.CASTERS)
-  main (opts: CommandOptions): CommandResponse[] {
+  main (opts: CommandOptions): CommandResponse[] {
     let url = 'http://sogehige.github.io/sogeBot/#/systems/alias';
     if ((process.env?.npm_package_version ?? 'x.y.z-SNAPSHOT').includes('SNAPSHOT')) {
       url = 'http://sogehige.github.io/sogeBot/#/_master/systems/alias';
@@ -263,7 +263,7 @@ class Alias extends System {
 
   @command('!alias edit')
   @default_permission(defaultPermissions.CASTERS)
-  async edit (opts: CommandOptions) {
+  async edit (opts: CommandOptions) {
     try {
       const [perm, alias, cmd] = new Expects(opts.parameters)
         .permission({ optional: true, default: defaultPermissions.VIEWERS })
@@ -302,7 +302,7 @@ class Alias extends System {
 
   @command('!alias add')
   @default_permission(defaultPermissions.CASTERS)
-  async add (opts: CommandOptions) {
+  async add (opts: CommandOptions) {
     try {
       const [perm, alias, cmd] = new Expects(opts.parameters)
         .permission({ optional: true, default: defaultPermissions.VIEWERS })
@@ -340,7 +340,7 @@ class Alias extends System {
 
   @command('!alias list')
   @default_permission(defaultPermissions.CASTERS)
-  async list (opts: CommandOptions) {
+  async list (opts: CommandOptions) {
     const alias = await getRepository(AliasEntity).find({ visible: true, enabled: true });
     const response
       = (alias.length === 0
@@ -352,7 +352,7 @@ class Alias extends System {
 
   @command('!alias toggle')
   @default_permission(defaultPermissions.CASTERS)
-  async toggle (opts: CommandOptions) {
+  async toggle (opts: CommandOptions) {
     try {
       const [alias] = new Expects(opts.parameters)
         .everything()
@@ -378,7 +378,7 @@ class Alias extends System {
 
   @command('!alias toggle-visibility')
   @default_permission(defaultPermissions.CASTERS)
-  async toggleVisibility (opts: CommandOptions) {
+  async toggleVisibility (opts: CommandOptions) {
     try {
       const [alias] = new Expects(opts.parameters)
         .everything()
@@ -404,7 +404,7 @@ class Alias extends System {
 
   @command('!alias remove')
   @default_permission(defaultPermissions.CASTERS)
-  async remove (opts: CommandOptions) {
+  async remove (opts: CommandOptions) {
     try {
       const [alias] = new Expects(opts.parameters)
         .everything()

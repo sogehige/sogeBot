@@ -1,17 +1,17 @@
+import { getTime } from '@sogebot/ui-helpers/getTime';
 import { getRepository } from 'typeorm';
 
 import Core from './_interface';
 import { EventList } from './database/entity/eventList';
 import { User } from './database/entity/user';
 import {
-  command, default_permission, settings, 
+  command, default_permission, settings,
 } from './decorators';
 import {
-  isStreamOnline, stats, streamStatusChangeSince, 
+  isStreamOnline, stats, streamStatusChangeSince,
 } from './helpers/api';
 import { prepare } from './helpers/commons/prepare';
 import { dayjs, timezone } from './helpers/dayjs';
-import { getTime } from './helpers/getTime';
 import { defaultPermissions } from './helpers/permissions/';
 import { adminEndpoint } from './helpers/socket';
 import { isIgnored } from './helpers/user/isIgnored';
@@ -24,13 +24,7 @@ import users from './users';
 class Twitch extends Core {
   @settings('general')
   isTitleForced = false;
-
-  constructor () {
-    super();
-
-    this.addWidget('twitch', 'widget-title-twitch', 'fab fa-twitch');
-  }
-
+  
   sockets() {
     adminEndpoint(this.nsp, 'broadcaster', (cb) => {
       try {
@@ -155,7 +149,7 @@ class Twitch extends Core {
     if (opts.parameters.length === 0) {
       return [ { response: translate('game.current').replace(/\$title/g, stats.value.currentGame || 'n/a'), ...opts }];
     }
-    const games = await sendGameFromTwitch(null, opts.parameters);
+    const games = await sendGameFromTwitch(opts.parameters);
     if (Array.isArray(games) && games.length > 0) {
       const exactMatchIdx = games.findIndex(name => name.toLowerCase() === opts.parameters.toLowerCase());
       const status = await setTitleAndGame({ game: games[exactMatchIdx !== -1 ? exactMatchIdx : 0] });

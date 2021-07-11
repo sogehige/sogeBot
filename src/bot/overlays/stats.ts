@@ -1,7 +1,8 @@
+import { getTime } from '@sogebot/ui-helpers/getTime';
+
 import {
-  isStreamOnline, stats, streamStatusChangeSince, 
+  isStreamOnline, stats, streamStatusChangeSince,
 } from '../helpers/api';
-import { getTime } from '../helpers/getTime';
 import { publicEndpoint } from '../helpers/socket';
 import Overlay from './_interface';
 

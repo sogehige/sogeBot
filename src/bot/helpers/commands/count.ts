@@ -12,7 +12,7 @@ export async function incrementCountOfCommandUsage (command: string): Promise<nu
 }
 
 export async function resetCountOfCommandUsage (command: string): Promise<void> {
-  return getRepository(CommandsCount).clear();
+  getRepository(CommandsCount).delete({ command });
 }
 
 export async function getAllCountOfCommandUsage (): Promise<{ command: string; count: number }[]> {

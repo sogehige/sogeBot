@@ -1,7 +1,7 @@
-import OBSWebSocket from 'obs-websocket-js';
+import { SECOND } from '@sogebot/ui-helpers/constants';
 import { getRepository } from 'typeorm';
 
-import { SECOND } from '../constants';
+import { Events } from '../database/entity/event';
 import { OBSWebsocket as OBSWebsocketEntity, OBSWebsocketInterface } from '../database/entity/obswebsocket';
 import {
   command, default_permission, settings, ui,
@@ -13,20 +13,15 @@ import { eventEmitter } from '../helpers/events';
 import {
   error, info, warning,
 } from '../helpers/log';
+import { obs } from '../helpers/obswebsocket/client';
 import { switchScenes } from '../helpers/obswebsocket/listeners';
-import { listScenes } from '../helpers/obswebsocket/scenes';
-import {
-  getSourcesList, getSourceTypesList, Source, Type,
-} from '../helpers/obswebsocket/sources';
 import { taskRunner } from '../helpers/obswebsocket/taskrunner';
 import { ioServer } from '../helpers/panel';
 import { ParameterError } from '../helpers/parameterError';
 import { defaultPermissions } from '../helpers/permissions';
-import { adminEndpoint, publicEndpoint } from '../helpers/socket';
+import { publicEndpoint } from '../helpers/socket';
 import { translate } from '../translate';
 import Integration from './_interface';
-
-const obs = new OBSWebSocket();
 
 let reconnectingTimeout: null | NodeJS.Timeout = null;
 
@@ -40,7 +35,6 @@ class OBSWebsocket extends Integration {
   @settings('connection')
   address = 'localhost:4444';
   @settings('connection')
-  @ui({ type: 'text-input', secret: true })
   password = '';
 
   @onStartup()
@@ -127,7 +121,7 @@ class OBSWebsocket extends Integration {
   @onStartup()
   initialize() {
     this.addMenu({
-      category: 'registry', name: 'obswebsocket', id: 'registry/obswebsocket/list', this: null,
+      category: 'registry', name: 'obswebsocket', id: 'registry/obswebsocket', this: null,
     });
   }
 
@@ -156,115 +150,6 @@ class OBSWebsocket extends Integration {
         isDirect:   false,
         linkFilter: opts.location,
       });
-    });
-
-    adminEndpoint(this.nsp, 'generic::getAll', async (cb) => {
-      try {
-        cb(null, await getRepository(OBSWebsocketEntity).find());
-      } catch (e) {
-        cb(e.stack, []);
-      }
-    });
-    adminEndpoint(this.nsp, 'generic::setById', async (opts, cb) => {
-      try {
-        const item = await getRepository(OBSWebsocketEntity).save({
-          ...(await getRepository(OBSWebsocketEntity).findOne({ id: String(opts.id) })),
-          ...opts.item,
-        });
-        cb(null, item);
-      } catch (e) {
-        cb(e.stack, null);
-      }
-    });
-
-    adminEndpoint(this.nsp, 'generic::getOne', async (id, cb) => {
-      try {
-        cb(null, await getRepository(OBSWebsocketEntity).findOne({ id: String(id) }));
-      } catch (e) {
-        cb(e.stack);
-      }
-    });
-
-    adminEndpoint(this.nsp, 'generic::deleteById', async (id, cb) => {
-      await getRepository(OBSWebsocketEntity).delete({ id: String(id) });
-      cb(null);
-    });
-
-    adminEndpoint(this.nsp, 'integration::obswebsocket::listSources', async (cb) => {
-      try {
-        const availableSources = this.accessBy === 'direct'
-          ? await getSourcesList(obs)
-          : new Promise((resolve: (value: Source[]) => void) => {
-            const resolveSources = (sources: Source[]) => {
-              resolve(sources);
-            };
-
-            // we need to send on all sockets on /integrations/obswebsocket
-            const sockets = ioServer?.of('/integrations/obswebsocket').sockets;
-            if (sockets) {
-              for (const socket of sockets.values()) {
-                socket.emit('integration::obswebsocket::function', 'getSourcesList', resolveSources);
-              }
-            }
-            setTimeout(() => resolve([]), 10000);
-          });
-
-        const availableTypes = this.accessBy === 'direct'
-          ? await getSourceTypesList(obs)
-          : new Promise((resolve: (value: Type[]) => void) => {
-            const resolveTypes = (type: Type[]) => {
-              resolve(type);
-            };
-
-            // we need to send on all sockets on /integrations/obswebsocket
-            const sockets = ioServer?.of('/integrations/obswebsocket').sockets;
-            if (sockets) {
-              for (const socket of sockets.values()) {
-                socket.emit('integration::obswebsocket::function', 'getTypesList', resolveTypes);
-              }
-            }
-            setTimeout(() => resolve([]), 10000);
-          });
-        cb(null, await availableSources, await availableTypes);
-      } catch (e) {
-        cb(e.message, [], []);
-      }
-    });
-
-    adminEndpoint(this.nsp, 'integration::obswebsocket::listScene', async (cb) => {
-      try {
-        const availableScenes = this.accessBy === 'direct'
-          ? await listScenes(obs)
-          : new Promise((resolve: (value: OBSWebSocket.Scene[]) => void) => {
-            const resolveScenes = (scenes: OBSWebSocket.Scene[]) => {
-              resolve(scenes);
-            };
-
-            // we need to send on all sockets on /integrations/obswebsocket
-            const sockets = ioServer?.of('/integrations/obswebsocket').sockets;
-            if (sockets) {
-              for (const socket of sockets.values()) {
-                socket.emit('integration::obswebsocket::function', 'listScenes', resolveScenes);
-              }
-            }
-            setTimeout(() => resolve([]), 10000);
-          });
-        cb(null, await availableScenes);
-      } catch (e) {
-        cb(e.message, []);
-      }
-    });
-    adminEndpoint(this.nsp, 'integration::obswebsocket::getCommand', (cb) => {
-      cb(obsws.getCommand('!obsws run'));
-    });
-
-    adminEndpoint(this.nsp, 'integration::obswebsocket::test', async (tasks, cb) => {
-      try {
-        await this.triggerTask(tasks);
-        cb(null);
-      } catch (e) {
-        cb(e.stack);
-      }
     });
   }
 
@@ -301,7 +186,7 @@ class OBSWebsocket extends Integration {
       const isParameterError = (err instanceof ParameterError);
 
       if (isEntityNotFound) {
-        const match = new RegExp('matching: \"(.*)\"').exec(err.message);
+        const match = new RegExp('matching: "(.*)"').exec(err.message);
         return [{ response: translate('integrations.obswebsocket.runTask.EntityNotFound').replace('$id', match ? match[1] : 'n/a'), ...opts }];
       } else if (isParameterError) {
         return [{ response: translate('integrations.obswebsocket.runTask.ParameterError'), ...opts }];

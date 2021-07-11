@@ -1,9 +1,9 @@
+import * as constants from '@sogebot/ui-helpers/constants';
 import axios from 'axios';
 
 import Core from './_interface';
-import * as constants from './constants';
 import {
-  areDecoratorsLoaded, persistent, settings, ui,
+  areDecoratorsLoaded, persistent, settings,
 } from './decorators';
 import {
   onChange, onLoad, onStartup,
@@ -15,6 +15,7 @@ import {
 } from './helpers/log';
 import { channelId, loadedTokens } from './helpers/oauth';
 import { botId } from './helpers/oauth/botId';
+import { botProfileUrl } from './helpers/oauth/botProfileUrl';
 import { botUsername } from './helpers/oauth/botUsername';
 import { broadcasterId } from './helpers/oauth/broadcasterId';
 import { broadcasterUsername } from './helpers/oauth/broadcasterUsername';
@@ -25,6 +26,7 @@ import { setStatus } from './helpers/parser';
 import { cleanViewersCache } from './helpers/permissions';
 import { tmiEmitter } from './helpers/tmi';
 import { getIdFromTwitch } from './microservices/getIdFromTwitch';
+import { getUserFromTwitch } from './microservices/getUserFromTwitch';
 
 let botTokenErrorSent = false;
 let broadcasterTokenErrorSent = false;
@@ -50,19 +52,15 @@ class OAuth extends Core {
   public generalOwners: string[] = [];
 
   @settings('broadcaster')
-  @ui({ type: 'text-input', secret: true })
   public broadcasterAccessToken = '';
 
   @settings('broadcaster')
-  @ui({ type: 'text-input', secret: true })
   public broadcasterRefreshToken = '';
 
   @settings('broadcaster')
-  @ui({ readOnly: true, type: 'text-input' })
   public broadcasterUsername = '';
 
   @settings('broadcaster', true)
-  @ui({ type: 'checklist', current: 'broadcasterCurrentScopes' })
   public broadcasterExpectedScopes: string[] = [
     'channel_editor',
     'chat:read',
@@ -77,32 +75,18 @@ class OAuth extends Core {
   ];
 
   @settings('broadcaster')
-  @ui({ ignore: true })
   public broadcasterCurrentScopes: string[] = [];
 
-  @ui({
-    type:   'link',
-    href:   'https://twitchtokengenerator.com/quick/XH6B7JteDO',
-    class:  'btn btn-primary btn-block',
-    text:   'commons.generate',
-    target: '_blank',
-  }, 'broadcaster')
-  public broadcasterGenerateLink = null;
-
   @settings('bot')
-  @ui({ type: 'text-input', secret: true })
   public botAccessToken = '';
 
   @settings('bot')
-  @ui({ type: 'text-input', secret: true })
   public botRefreshToken = '';
 
   @settings('bot')
-  @ui({ readOnly: true, type: 'text-input' })
   public botUsername = '';
 
   @settings('bot', true)
-  @ui({ type: 'checklist', current: 'botCurrentScopes' })
   public botExpectedScopes: string[] = [
     'clips:edit',
     'user:edit:broadcast',
@@ -116,23 +100,10 @@ class OAuth extends Core {
   ];
 
   @settings('bot')
-  @ui({ ignore: true })
   public botCurrentScopes: string[] = [];
-
-  @ui({
-    type:   'link',
-    href:   'https://twitchtokengenerator.com/quick/jLbq7v1pzF',
-    class:  'btn btn-primary btn-block',
-    text:   'commons.generate',
-    target: '_blank',
-  }, 'bot')
-  public botGenerateLink = null;
 
   @onStartup()
   onStartup() {
-    this.addMenu({
-      category: 'settings', name: 'core', id: 'settings/core', this: null,
-    });
     this.validateOAuth('bot');
     this.validateOAuth('broadcaster');
     this.getChannelId();
@@ -151,7 +122,7 @@ class OAuth extends Core {
   }
 
   public async getChannelId() {
-    if (global.mocha) {
+    if ((global as any).mocha) {
       return;
     }
     if (!areDecoratorsLoaded) {
@@ -266,7 +237,7 @@ class OAuth extends Core {
       }
     */
   public async validateOAuth(type: 'bot' | 'broadcaster', retry = 0): Promise<boolean> {
-    if (global.mocha) {
+    if ((global as any).mocha) {
       return true;
     }
 
@@ -316,6 +287,10 @@ class OAuth extends Core {
         this.botUsername = request.data.login;
         this.botCurrentScopes = request.data.scopes;
         botTokenErrorSent = false;
+
+        // load profile image of a bot
+        const userFromTwitch = await getUserFromTwitch(request.data.login);
+        botProfileUrl.value = userFromTwitch.profile_image_url;
       } else {
         this.broadcasterUsername = request.data.login;
         this.broadcasterCurrentScopes = request.data.scopes;

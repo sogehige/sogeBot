@@ -16,7 +16,7 @@ export interface PermissionFiltersInterface {
   id?: string;
   permission: PermissionsInterface;
   comparator: '<' | '>' | '==' | '<=' | '>=';
-  type: 'level' | 'ranks' | 'points' | 'watched' | 'tips' | 'bits' | 'messages' | 'subtier' | 'subcumulativemonths' | 'substreakmonths' | 'followtime';
+  type: 'level' | 'ranks' | 'points' | 'watched' | 'tips' | 'bits' | 'messages' | 'subtier' | 'subcumulativemonths' | 'substreakmonths' | 'followtime';
   value: string;
 }
 
@@ -30,7 +30,7 @@ export const Permissions = new EntitySchema<Readonly<Required<PermissionsInterfa
   name:    'permissions',
   columns: {
     id: {
-      type: 'uuid', primary: true, generated: 'uuid', 
+      type: 'uuid', primary: true, generated: 'uuid',
     },
     name:               { type: String },
     order:              { type: Number },
@@ -54,7 +54,7 @@ export const PermissionFilters = new EntitySchema<Readonly<Required<PermissionFi
   name:    'permission_filters',
   columns: {
     id: {
-      type: 'uuid', primary: true, generated: 'uuid', 
+      type: 'uuid', primary: true, generated: 'uuid',
     },
     comparator: { type: 'varchar', length: 3 },
     type:       { type: 'varchar' },
@@ -75,11 +75,11 @@ export const PermissionCommands = new EntitySchema<Readonly<Required<PermissionC
   name:    'permission_commands',
   columns: {
     id: {
-      type: 'uuid', primary: true, generated: 'uuid', 
+      type: 'uuid', primary: true, generated: 'uuid',
     },
     name:       { type: String },
     permission: {
-      type: 'varchar', nullable: true, length: 36, 
+      type: 'varchar', nullable: true, length: 36,
     },
   },
   indices: [

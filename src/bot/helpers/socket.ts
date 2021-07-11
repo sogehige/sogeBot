@@ -4,7 +4,6 @@ import { Socket } from 'socket.io';
 import type { AlertInterface, AlertMediaInterface } from '../database/entity/alert';
 import type { CommandsBoardInterface } from '../database/entity/commands';
 import type { CooldownInterface } from '../database/entity/cooldown';
-import type { DashboardInterface } from '../database/entity/dashboard';
 import type { EventInterface } from '../database/entity/event';
 import type { GoalGroupInterface } from '../database/entity/goal';
 import type { HowLongToBeatGameInterface, HowLongToBeatGameItemInterface } from '../database/entity/howLongToBeatGame';
@@ -18,7 +17,7 @@ import type { SongPlaylistInterface } from '../database/entity/song';
 import type { TextInterface } from '../database/entity/text';
 import type { TimerInterface } from '../database/entity/timer';
 import type {
-  UserBitInterface, UserInterface, UserTipInterface, 
+  UserBitInterface, UserInterface, UserTipInterface,
 } from '../database/entity/user';
 import type { VariableInterface, VariableWatchInterface } from '../database/entity/variable';
 import type PUBG from '../integrations/pubg';
@@ -51,7 +50,7 @@ function adminEndpoint (
   nsp: string,
   on: 'generic::getOne' | 'generic::deleteById' | 'customvariables::runScript' | 'customvariables::delete'
   | 'test.event' | 'alerts::deleteMedia' | 'alerts::getOneMedia' | 'randomizer::showById'
-  | 'eventlist::resend' | 'viewers::followedAt',
+  | 'eventlist::resend' | 'viewers::followedAt' | 'quickactions::getAll',
   callback: (id: string, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 
 // string + cb
@@ -59,7 +58,7 @@ function adminEndpoint (
   nsp: string,
   on: 'chat.message.send' | 'import.ban' | 'songs::removeRequest' | 'delete.playlist' | 'delete.ban'
   | 'raffle::getWinner' | 'raffle::open' | 'parseCron' | 'debug::set' | 'getNameById'
-  | 'commands::resetCountByCommand' | 'bets::close' | 'spotify::code',
+  | 'commands::resetCountByCommand' | 'bets::close' | 'spotify::code',
   callback: (string: string, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 
 // number + cb
@@ -75,7 +74,6 @@ function adminEndpoint (
   callback: (opts: any, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 
 // non generic
-function adminEndpoint (nsp: string, on: 'panel::dashboards::save', callback: (dashboards: Readonly<Required<DashboardInterface>>[]) => void): void;
 function adminEndpoint (nsp: string, on: 'eventlist::getUserEvents', callback: (username: string, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'eventlist::get', callback: (count: number, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'customvariables::list', callback: (cb: (error: Error | string | null, ...response: any) => void) => void): void;
@@ -106,15 +104,13 @@ function adminEndpoint (nsp: string, on: 'ranks::save', callback: (item: Readonl
 function adminEndpoint (nsp: string, on: 'timers::save', callback: (item: Readonly<Required<TimerInterface>> & Readonly<Required<RandomizerInterface>>[], cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'cmdboard::save' | 'cmdboard::remove', callback: (items: Readonly<Required<CommandsBoardInterface>> & Readonly<Required<CommandsBoardInterface>>[], cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'eventlist::removeById', callback: (id: string | string[], cb: (error: Error | string | null, ...response: any) => void) => void): void;
-function adminEndpoint (nsp: string, on: 'viewers::save' | 'viewers::remove', callback: (item: Required<UserInterface> & { tips: UserTipInterface[], bits: UserBitInterface[] }, cb: (error: Error | string | null, ...response: any) => void) => void): void;
-function adminEndpoint (nsp: string, on: 'find.viewers', callback: (opts:  { exactUsernameFromTwitch?: boolean, state?: any; search?: string; filter?: { subscribers: null | boolean; followers: null | boolean; active: null | boolean; vips: null | boolean }; page: number; order?: { orderBy: string; sortOrder: 'ASC' | 'DESC' } }, cb: (error: Error | string | null, ...response: any) => void) => void): void;
+function adminEndpoint (nsp: string, on: 'viewers::remove', callback: (item: Readonly<Required<UserInterface>> & Readonly<Required<RandomizerInterface>>[], cb: (error: Error | string | null, ...response: any) => void) => void): void;
+function adminEndpoint (nsp: string, on: 'viewers::update', callback: (data: [userId: string, update: Partial<UserInterface & { tips: UserTipInterface[], bits: UserBitInterface[] }>], cb: (error: Error | string | null, ...response: any) => void) => void): void;
+function adminEndpoint (nsp: string, on: 'find.viewers', callback: (opts:  { exactUsernameFromTwitch?: boolean, state?: any; search?: string; filter?: { subscribers: null | boolean; followers: null | boolean; active: null | boolean; vips: null | boolean }; perPage: number; page: number; order?: { orderBy: string; sortOrder: 'ASC' | 'DESC' } }, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'watched::save', callback: (item: Readonly<Required<VariableWatchInterface>> & Readonly<Required<VariableWatchInterface>>[], cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'songs::save', callback: (item: Readonly<Required<SongPlaylistInterface>> & Readonly<Required<SongPlaylistInterface>>[], cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'raffle::setEligibility', callback: (opts: {id: string, isEligible: boolean}, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'price::save', callback: (item: Readonly<Required<PriceInterface>> & Readonly<Required<PriceInterface>>[], cb: (error: Error | string | null, ...response: any) => void) => void): void;
-function adminEndpoint (nsp: string, on: 'panel::availableWidgets' | 'panel::dashboards', callback: (opts: { userId: string; type: DashboardInterface['type'] }, cb: (error: Error | string | null, ...response: any) => void) => void): void;
-function adminEndpoint (nsp: string, on: 'panel::dashboards::remove', callback: (opts: { userId: string; type: DashboardInterface['type'], id: string }, cb: (error: Error | string | null, ...response: any) => void) => void): void;
-function adminEndpoint (nsp: string, on: 'panel::dashboards::create', callback: (opts: { userId: string, name: string }, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'panel::alerts', callback: (cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'lists.set', callback: (opts: { blacklist: string[]; whitelist: string[] }, cb: (error: Error | string | null, ...response: any) => void) => void): void;
 function adminEndpoint (nsp: string, on: 'purgeAllConnections', callback: (cb: (error: Error | string | null) => void, socket: Socket) => void): void;
@@ -132,6 +128,7 @@ function adminEndpoint (nsp: string, on: 'set.playlist.tag', callback: (tag:stri
 function adminEndpoint (nsp: string, on: 'integration::obswebsocket::listScene', callback: (cb: (error: Error | string | null, data: ObsWebSocket.Scene[]) => void, socket: Socket) => void): void;
 function adminEndpoint (nsp: string, on: 'integration::obswebsocket::listSources', callback: (cb: (error: Error | string | null, scenes: any, types: any) => void, socket: Socket) => void): void;
 function adminEndpoint (nsp: string, on: 'integration::obswebsocket::test', callback: (item: OBSWebsocketInterface['simpleModeTasks'] | string, cb: (error: Error | string | null) => void, socket: Socket) => void): void;
+function adminEndpoint (nsp: string, on: 'generic::setCoreCommand', callback: (commands: any, cb: (error: Error | string | null) => void, socket: Socket) => void): void;
 
 // generic functions
 function adminEndpoint (nsp: string, on: string, callback: (opts: { [x: string]: any }, cb?: (error: Error | string | null, ...response: any) => void) => void, socket?: Socket): void;

@@ -19,7 +19,7 @@ export const Carousel = new EntitySchema<Readonly<Required<CarouselInterface>>>(
   name:    'carousel',
   columns: {
     id: {
-      type: String, primary: true, generated: 'uuid', 
+      type: String, primary: true, generated: 'uuid',
     },
     order:                 { type: Number },
     type:                  { type: String },

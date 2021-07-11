@@ -2,7 +2,6 @@ import { error } from 'console';
 
 import axios from 'axios';
 import { isNull, map } from 'lodash';
-import { Socket } from 'socket.io';
 
 import {
   calls, getClientId, getToken, setRateLimit,
@@ -10,7 +9,7 @@ import {
 import { ioServer } from '../helpers/panel';
 import oauth from '../oauth';
 
-async function sendGameFromTwitch (socket: Socket | null, game: string) {
+async function sendGameFromTwitch (game: string) {
   const url = `https://api.twitch.tv/helix/search/categories?query=${encodeURIComponent(game)}`;
 
   const token = oauth.botAccessToken;
@@ -35,7 +34,7 @@ async function sendGameFromTwitch (socket: Socket | null, game: string) {
     });
   } catch (e) {
     if (e.isAxiosError) {
-      error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
+      error(`API: ${e.config.method.toUpperCase()} ${e.config.url} - ${e.response?.status ?? 0}\n${JSON.stringify(e.response?.data ?? '--nodata--', null, 4)}\n\n${e.stack}`);
       ioServer?.emit('api.stats', {
         method: e.config.method.toUpperCase(), timestamp: Date.now(), call: 'sendGameFromTwitch', api: 'helix', endpoint: e.config.url, code: e.response.status, data: e.response?.data ?? 'n/a', remaining: calls.bot,
       });
@@ -49,14 +48,8 @@ async function sendGameFromTwitch (socket: Socket | null, game: string) {
   }
 
   if (isNull(request.data.data)) {
-    if (socket) {
-      socket.emit('sendGameFromTwitch', []);
-    }
     return false;
   } else {
-    if (socket) {
-      socket.emit('sendGameFromTwitch', map(request.data.data, 'name'));
-    }
     return map(request.data.data, 'name');
   }
 }

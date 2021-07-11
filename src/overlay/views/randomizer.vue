@@ -241,12 +241,12 @@ export default class RandomizerOverlay extends Vue {
                 'soundTrigger':     'pin',        // Specify pins are to trigger the sound.
                 'yoyo':             true,
               },
-              'pins': // Turn pins on.
-                {
-                  'number':      12,
-                  'fillStyle':   'silver',
-                  'outerRadius': 4,
-                },
+              'pins': // Turn pins on.
+                {
+                  'number':      12,
+                  'fillStyle':   'silver',
+                  'outerRadius': 4,
+                },
             });
             theWheel = this.theWheel;
             this.drawTriangle();

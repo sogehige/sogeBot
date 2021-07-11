@@ -1,17 +1,17 @@
 import { EntitySchema } from 'typeorm';
 
-export interface RankInterface {
+export interface RankInterface<T = 'viewer' | 'follower' | 'subscriber'> {
   id?: string;
   value: number;
   rank: string;
-  type: 'viewer' | 'follower' | 'subscriber';
+  type: T;
 }
 
 export const Rank = new EntitySchema<Readonly<Required<RankInterface>>>({
   name:    'rank',
   columns: {
     id: {
-      type: String, primary: true, generated: 'uuid', 
+      type: String, primary: true, generated: 'uuid',
     },
     value: { type: Number },
     rank:  { type: String },
@@ -19,7 +19,7 @@ export const Rank = new EntitySchema<Readonly<Required<RankInterface>>>({
   },
   indices: [
     {
-      name: 'IDX_93c78c94804a13befdace81904', unique: true, columns: [ 'type', 'value' ], 
+      name: 'IDX_93c78c94804a13befdace81904', unique: true, columns: [ 'type', 'value' ],
     },
   ],
 });

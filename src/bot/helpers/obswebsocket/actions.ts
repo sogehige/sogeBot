@@ -15,7 +15,7 @@ const availableActions = {
   'StopReplayBuffer':  stopReplayBuffer,
   'SaveReplayBuffer':  saveReplayBuffer,
   'WaitMs':            (obs: ObsWebSocket, miliseconds: number) => new Promise(resolve => setTimeout(resolve, miliseconds)),
-  'Log':               (obs: ObsWebSocket, logMessage: number) => {
+  'Log':               (obs: ObsWebSocket, logMessage: string) => {
     (process.env.BUILD === 'web') ? console.error(logMessage) : require('../log').info(logMessage);
   },
   'StartRecording':  startRecording,

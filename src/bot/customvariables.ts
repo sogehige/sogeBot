@@ -21,14 +21,14 @@ class CustomVariables extends Core {
   @onStartup()
   onStartup() {
     this.addMenu({
-      category: 'registry', name: 'custom-variables', id: 'registry.customVariables/list', this: null,
+      category: 'registry', name: 'customvariables', id: 'registry.customvariables', this: null,
     });
     this.checkIfCacheOrRefresh();
   }
 
   sockets () {
     adminEndpoint(this.nsp, 'customvariables::list', async (cb) => {
-      const variables = await getRepository(Variable).find();
+      const variables = await getRepository(Variable).find({ relations: ['history', 'urls'] });
       cb(null, variables);
     });
     adminEndpoint(this.nsp, 'customvariables::runScript', async (id, cb) => {
@@ -74,12 +74,6 @@ class CustomVariables extends Core {
       if (cb) {
         cb(null);
       }
-    });
-    adminEndpoint(this.nsp, 'generic::getOne', async (id, cb) => {
-      cb(null, await getRepository(Variable).findOne({
-        relations: ['history', 'urls'],
-        where:     { id },
-      }));
     });
     adminEndpoint(this.nsp, 'customvariables::save', async (item, cb) => {
       try {
@@ -135,7 +129,9 @@ class CustomVariables extends Core {
           await getRepository(Variable).save(item);
           await updateWidgetAndTitle(item.variableName);
         }
-      } catch (e) {} // silence errors
+      } catch (e) {
+        continue;
+      } // silence errors
     }
     this.timeouts[`${this.constructor.name}.checkIfCacheOrRefresh`] = setTimeout(() => this.checkIfCacheOrRefresh(), 1000);
   }

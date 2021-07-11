@@ -1,5 +1,49 @@
 import { EntitySchema } from 'typeorm';
 
+export declare namespace Events {
+  export type Event = {
+    id: string,
+    key: string,
+    name: string,
+    enabled: boolean,
+    triggered: any,
+    definitions: Events.OperationDefinitions,
+  };
+
+  export type SupportedOperation = {
+    id: string,
+    definitions: { [x: string]: string | boolean | number | string[] | boolean[] | number[] },
+    fire: () => void,
+  };
+
+  export type SupportedEvent = {
+    id: string,
+    definitions: Events.OperationDefinitions,
+    variables: string[],
+  };
+
+  export type Filter = {
+    eventId: string,
+    filters: string,
+  };
+
+  export type Operation = {
+    key: string,
+    eventId: string,
+    definitions: OperationDefinitions,
+  };
+
+  type OperationDefinitions = {
+    [x: string]: string | boolean | number;
+  };
+
+  type Attributes = {
+    userId?: string,
+    username?: string,
+    reset?: boolean,
+    [x: string]: any,
+  };
+}
 export interface EventInterface {
   id?: string;
   operations: Omit<EventOperationInterface, 'event'>[];
@@ -21,7 +65,7 @@ export const Event = new EntitySchema<Readonly<Required<EventInterface>>>({
   name:    'event',
   columns: {
     id: {
-      type: 'uuid', primary: true, generated: 'uuid', 
+      type: 'uuid', primary: true, generated: 'uuid',
     },
     name:        { type: String },
     isEnabled:   { type: Boolean },
@@ -46,7 +90,7 @@ export const EventOperation = new EntitySchema<Readonly<Required<EventOperationI
   name:    'event_operation',
   columns: {
     id: {
-      type: 'uuid', primary: true, generated: 'uuid', 
+      type: 'uuid', primary: true, generated: 'uuid',
     },
     name:        { type: String },
     definitions: { type: 'simple-json' },

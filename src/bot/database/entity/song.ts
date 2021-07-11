@@ -2,6 +2,10 @@ import { EntitySchema } from 'typeorm';
 
 import { ColumnNumericTransformer } from './_transformer';
 
+export type currentSongType = {
+  videoId: null | string, title: string, type: string, username: string, volume: number; loudness: number; forceVolume: boolean; startTime: number; endTime: number;
+};
+
 export interface SongPlaylistInterface {
   videoId: string;
   lastPlayedAt?: number;
@@ -35,7 +39,7 @@ export const SongPlaylist = new EntitySchema<Readonly<Required<SongPlaylistInter
   columns: {
     videoId:      { type: String, primary: true },
     lastPlayedAt: {
-      type: 'bigint', transformer: new ColumnNumericTransformer(), default: 0, 
+      type: 'bigint', transformer: new ColumnNumericTransformer(), default: 0,
     },
     seed:        { type: 'float', precision: (process.env.TYPEORM_CONNECTION ?? 'better-sqlite3') === 'mysql' ? 12 : undefined  },
     title:       { type: String },
@@ -53,11 +57,11 @@ export const SongRequest = new EntitySchema<Readonly<Required<SongRequestInterfa
   name:    'song_request',
   columns: {
     id: {
-      type: String, primary: true, generated: 'uuid', 
+      type: String, primary: true, generated: 'uuid',
     },
     videoId: { type: String },
     addedAt: {
-      type: 'bigint', transformer: new ColumnNumericTransformer(), default: 0, 
+      type: 'bigint', transformer: new ColumnNumericTransformer(), default: 0,
     },
     title:    { type: String },
     loudness: { type: 'float', precision: (process.env.TYPEORM_CONNECTION ?? 'better-sqlite3') === 'mysql' ? 12 : undefined  },

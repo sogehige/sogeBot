@@ -1,14 +1,14 @@
 import crypto from 'crypto';
 
+import { HOUR, SECOND } from '@sogebot/ui-helpers/constants';
 import chalk from 'chalk';
 import _ from 'lodash';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { getRepository } from 'typeorm';
 
-import { HOUR, SECOND } from '../constants';
 import { SpotifySongBan } from '../database/entity/spotify';
 import {
-  command, default_permission, persistent, settings, ui,
+  command, default_permission, persistent, settings,
 } from '../decorators';
 import {
   onChange, onLoad, onStartup,
@@ -45,7 +45,6 @@ class Spotify extends Integration {
   @persistent()
   lastActiveDeviceId = '';
   @settings('connection')
-  @ui({ type: 'spotify-device-input' })
   manualDeviceId = '';
 
   @persistent()
@@ -71,15 +70,12 @@ class Spotify extends Integration {
   format = '$song - $artist';
 
   @settings('connection')
-  @ui({ type: 'text-input', secret: true })
   clientId = '';
   @settings('connection')
-  @ui({ type: 'text-input', secret: true })
   clientSecret = '';
   @settings('connection')
-  redirectURI = 'http://localhost:20000/oauth/spotify';
+  redirectURI = 'http://localhost:20000/credentials/oauth/spotify';
   @settings('connection')
-  @ui({ type: 'text-input', readOnly: true })
   username = '';
 
   scopes: string[] = [
@@ -95,25 +91,8 @@ class Spotify extends Integration {
     'user-modify-playback-state',
   ];
 
-  @ui({
-    type:  'btn-emit',
-    class: 'btn btn-primary btn-block mt-1 mb-1',
-    if:    () => _spotify.username.length === 0,
-    emit:  'spotify::authorize',
-  }, 'connection')
-  authorizeBtn = null;
-
-  @ui({
-    type:  'btn-emit',
-    class: 'btn btn-primary btn-block mt-1 mb-1',
-    if:    () => _spotify.username.length > 0,
-    emit:  'spotify::revoke',
-  }, 'connection')
-  revokeBtn = null;
-
   @onStartup()
   onStartup() {
-    this.addWidget('spotify', 'widget-title-spotify', 'fab fa-spotify');
     this.addMenu({
       category: 'manage', name: 'spotifybannedsongs', id: 'manage/spotify/bannedsongs', this: this,
     });
@@ -411,7 +390,7 @@ class Spotify extends Integration {
         const response = await this.client.getTrack(id);
 
         ioServer?.emit('api.stats', {
-          method: 'GET', data: response.body, timestamp: Date.now(), call: 'spotify::addBan', api: 'other', endpoint: response.headers.url, code: response.statusCode,
+          method: 'GET', data: response.body, timestamp: Date.now(), call: 'spotify::addBan', api: 'other', endpoint: 'n/a', code: 200,
         });
 
         const track = response.body;
@@ -420,11 +399,17 @@ class Spotify extends Integration {
         });
       } catch (e) {
         if (e.message !== 'client') {
+          if (cb) {
+            cb(e, null);
+          }
           addUIError({ name: 'Spotify Ban Import', message: 'Something went wrong with banning song. Check your spotifyURI.' });
         }
         ioServer?.emit('api.stats', {
-          method: 'GET', data: e.response, timestamp: Date.now(), call: 'spotify::addBan', api: 'other', endpoint: e.response.headers.url, code: e.response?.status ?? 'n/a',
+          method: 'GET', data: e.response, timestamp: Date.now(), call: 'spotify::addBan', api: 'other', endpoint: 'n/a', code: 'n/a',
         });
+        if (cb) {
+          cb(e, null);
+        }
       }
       if (cb) {
         cb(null, null);
@@ -499,7 +484,7 @@ class Spotify extends Integration {
         this.clientId === ''
         || this.clientSecret === ''
       ) {
-        cb('Cannot authorize! Missing clientId or clientSecret.', null);
+        cb('Cannot authorize! Missing clientId or clientSecret. Please save before authorizing.', null);
       } else {
         try {
           const authorizeURI = this.authorizeURI();

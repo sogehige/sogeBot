@@ -1,13 +1,13 @@
 import { setTimeout } from 'timers';
 
+import { HOUR } from '@sogebot/ui-helpers/constants';
 import axios from 'axios';
 import {
-  Brackets, FindOneOptions, getConnection, getManager, getRepository,
+  Brackets, FindOneOptions, getConnection, getRepository, IsNull,
 } from 'typeorm';
 
 import Core from './_interface';
 import api from './api';
-import { HOUR } from './constants';
 import currency from './currency';
 import { Permissions } from './database/entity/permissions';
 import {
@@ -30,7 +30,7 @@ class Users extends Core {
   constructor () {
     super();
     this.addMenu({
-      category: 'manage', name: 'viewers', id: 'manage/viewers/list', this: null,
+      category: 'manage', name: 'viewers', id: 'manage/viewers', this: null,
     });
   }
 
@@ -240,31 +240,6 @@ class Users extends Core {
   }
 
   sockets () {
-    viewerEndpoint(this.nsp, 'theme::set', async (data) => {
-      try {
-        const user = await getRepository(User).findOneOrFail({ userId: data.userId });
-        const payload = {
-          extra: {
-            ...user.extra,
-            theme: data.theme,
-          },
-        };
-        await getRepository(User).update({ userId: data.userId }, payload);
-      } catch (e) {
-        if (e.name !== 'EntityNotFound') {
-          error(e.stack);
-        }
-      }
-    });
-    viewerEndpoint(this.nsp, 'theme::get', async (data, cb) => {
-      try {
-        const user = await getRepository(User).findOneOrFail({ userId: data.userId });
-        cb(null, user.extra?.theme ?? null);
-      } catch (e) {
-        cb(e.stack, null);
-      }
-    });
-
     adminEndpoint(this.nsp, 'viewers::resetPointsAll', async (cb) => {
       await getRepository(User).update({}, { points: 0 });
       if (cb) {
@@ -301,38 +276,46 @@ class Users extends Core {
         cb(null);
       }
     });
-    adminEndpoint(this.nsp, 'viewers::save', async (viewer, cb) => {
+
+    adminEndpoint(this.nsp, 'viewers::update', async ([userId, update], cb) => {
       try {
-        // recount sortAmount and add exchangeRates if needed
-        for (const tip of viewer.tips) {
-          if (typeof tip.exchangeRates === 'undefined') {
-            tip.exchangeRates = currency.rates;
+        if (typeof update.tips !== 'undefined') {
+          for (const tip of update.tips) {
+            if (typeof tip.exchangeRates === 'undefined') {
+              tip.exchangeRates = currency.rates;
+            }
+            tip.sortAmount = currency.exchange(Number(tip.amount), tip.currency, 'EUR');
+            if (typeof tip.id === 'string') {
+              delete tip.id; // remove tip id as it is string (we are expecting number -> autoincrement)
+            }
+            await getRepository(UserTip).save({ ...tip, userId });
           }
-          tip.sortAmount = currency.exchange(Number(tip.amount), tip.currency, 'EUR');
-          tip.userId = viewer.userId;
-        }
-        for (const bit of viewer.bits) {
-          bit.userId = viewer.userId;
+          cb(null);
+          return;
         }
 
-        if (viewer.messages < viewer.pointsByMessageGivenAt) {
-          viewer.pointsByMessageGivenAt = viewer.messages;
+        if (typeof update.bits !== 'undefined') {
+          for (const bit of update.bits) {
+            if (typeof bit.id === 'string') {
+              delete bit.id; // remove bit id as it is string (we are expecting number -> autoincrement)
+            }
+            await getRepository(UserBit).save({ ...bit, userId });
+          }
+          cb(null);
+          return;
         }
 
-        await getManager().transaction(async transactionalEntityManager => {
-          await transactionalEntityManager.getRepository(UserTip).delete({ userId: viewer.userId });
-          await transactionalEntityManager.getRepository(UserBit).delete({ userId: viewer.userId });
-          await transactionalEntityManager.getRepository(UserTip).save(viewer.tips);
-          await transactionalEntityManager.getRepository(UserBit).save(viewer.bits);
-        });
+        if (typeof update.messages !== 'undefined') {
+          update.pointsByMessageGivenAt = update.messages;
+        }
 
-        const result = await getRepository(User).save(viewer);
-        cb(null, {
-          ...result, tips: viewer.tips ?? [], bits: viewer.bits ?? [],
-        });
+        await getRepository(User).update({ userId }, update);
+        // as cascade remove set ID as null, we need to get rid of tips/bits
+        await getRepository(UserTip).delete({ userId: IsNull() });
+        await getRepository(UserBit).delete({ userId: IsNull() });
+        cb(null);
       } catch (e) {
-        error(e);
-        cb(e.stack, viewer);
+        cb(e.stack);
       }
     });
     adminEndpoint(this.nsp, 'viewers::remove', async (viewer: Required<UserInterface>, cb) => {
@@ -354,6 +337,10 @@ class Users extends Core {
       try {
         const connection = await getConnection();
         opts.page = opts.page ?? 0;
+        opts.perPage = opts.perPage ?? 25;
+        if (opts.perPage === -1) {
+          opts.perPage = Number.MAX_SAFE_INTEGER;
+        }
 
         /*
           SQL query:
@@ -369,21 +356,12 @@ class Users extends Core {
             .select('COALESCE("sumTips", 0)', 'sumTips')
             .addSelect('COALESCE("sumBits", 0)', 'sumBits')
             .addSelect('"user".*')
-            .offset(opts.page * 25)
-            .limit(25)
+            .offset(opts.page * opts.perPage)
+            .limit(opts.perPage)
             .leftJoin('(select "userId", sum("amount") as "sumBits" from "user_bit" group by "userId")', 'user_bit', '"user_bit"."userId" = "user"."userId"')
-            .leftJoin('(select "userId", sum("sortAmount") as "sumTips" from "user_tip" group by "userId")', 'user_tip', '"user_tip"."userId" = "user"."userId"');
-        } else if (connection.options.type === 'better-sqlite3') {
-          query = getRepository(User).createQueryBuilder('user')
-            .orderBy(opts.order?.orderBy ?? 'user.username' , opts.order?.sortOrder ?? 'ASC')
-            .select('JSON_EXTRACT("user"."extra", \'$.levels.xp\')', 'levelXP')
-            .addSelect('COALESCE(sumTips, 0)', 'sumTips')
-            .addSelect('COALESCE(sumBits, 0)', 'sumBits')
-            .addSelect('user.*')
-            .offset(opts.page * 25)
-            .limit(25)
-            .leftJoin('(select userId, sum(amount) as sumBits from user_bit group by userId)', 'user_bit', 'user_bit.userId = user.userId')
-            .leftJoin('(select userId, sum(sortAmount) as sumTips from user_tip group by userId)', 'user_tip', 'user_tip.userId = user.userId');
+            .leftJoin('(select "userId", sum("sortAmount") as "sumTips" from "user_tip" group by "userId")', 'user_tip', '"user_tip"."userId" = "user"."userId"')
+            .leftJoinAndSelect('user.tips', 'tips')
+            .leftJoinAndSelect('user.bits', 'bits');
         } else {
           query = getRepository(User).createQueryBuilder('user')
             .orderBy(opts.order?.orderBy ?? 'user.username' , opts.order?.sortOrder ?? 'ASC')
@@ -391,14 +369,14 @@ class Users extends Core {
             .addSelect('COALESCE(sumTips, 0)', 'sumTips')
             .addSelect('COALESCE(sumBits, 0)', 'sumBits')
             .addSelect('user.*')
-            .offset(opts.page * 25)
-            .limit(25)
+            .offset(opts.page * opts.perPage)
+            .limit(opts.perPage)
             .leftJoin('(select userId, sum(amount) as sumBits from user_bit group by userId)', 'user_bit', 'user_bit.userId = user.userId')
             .leftJoin('(select userId, sum(sortAmount) as sumTips from user_tip group by userId)', 'user_tip', 'user_tip.userId = user.userId');
         }
 
         if (typeof opts.order !== 'undefined') {
-          if (opts.order.orderBy === 'user.level') {
+          if (opts.order.orderBy === 'level') {
             if (connection.options.type === 'better-sqlite3') {
               query.orderBy('LENGTH("levelXP")', opts.order.sortOrder);
               query.addOrderBy('"levelXP"', opts.order.sortOrder);
@@ -463,7 +441,6 @@ class Users extends Core {
             } catch (e) {
               // we don't care if user is not found
             }
-
           }
         }
 

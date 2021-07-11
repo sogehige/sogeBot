@@ -10,6 +10,7 @@ import ytpl from 'ytpl';
 import ytsr from 'ytsr';
 
 import {
+  currentSongType,
   SongBan, SongPlaylist, SongPlaylistInterface, SongRequest,
 } from '../database/entity/song';
 import { User } from '../database/entity/user';
@@ -33,10 +34,6 @@ const cachedTags = new Set<string>();
 let isCachedTagsValid = false;
 const emptyCurrentSong = {
   videoId: null, title: '', type: '', username: '', volume: 0, loudness: 0, forceVolume: false, startTime: 0, endTime: Number.MAX_SAFE_INTEGER,
-};
-
-export type currentSongType = {
-  videoId: null | string, title: string, type: string, username: string, volume: number; loudness: number; forceVolume: boolean; startTime: number; endTime: number;
 };
 
 class Songs extends System {
@@ -82,7 +79,6 @@ class Songs extends System {
     });
     this.addMenuPublic({ id: 'songrequests', name: 'songs' });
     this.addMenuPublic({ id: 'playlist', name: 'playlist' });
-    this.addWidget('ytplayer', 'widget-title-ytplayer', 'fas fa-headphones');
   }
 
   async getTags() {
@@ -110,7 +106,7 @@ class Songs extends System {
     });
     adminEndpoint(this.nsp, 'set.playlist.tag', async (tag) => {
       if (this.currentTag !== tag) {
-        info(`SONGS: Playlist changed to ${tag}`);
+        info(`SONGS: Playlist changed to ${tag}`);
       }
       this.currentTag = tag;
     });
@@ -124,12 +120,17 @@ class Songs extends System {
         cb(e, []);
       }
     });
-    publicEndpoint(this.nsp, 'find.playlist', async (opts: { page?: number; search?: string, tag?: string }, cb) => {
+    publicEndpoint(this.nsp, 'find.playlist', async (opts: { perPage?: number, page?: number; search?: string, tag?: string }, cb) => {
       const connection = await getConnection();
       opts.page = opts.page ?? 0;
+      opts.perPage = opts.perPage ?? 25;
+
+      if (opts.perPage === -1) {
+        opts.perPage = Number.MAX_SAFE_INTEGER;
+      }
       const query = getRepository(SongPlaylist).createQueryBuilder('playlist')
-        .offset(opts.page * 25)
-        .limit(25);
+        .offset(opts.page * opts.perPage)
+        .limit(opts.perPage);
 
       if (typeof opts.search !== 'undefined') {
         query.andWhere(new Brackets(w => {
@@ -293,7 +294,7 @@ class Songs extends System {
   @command('!bansong')
   @default_permission(defaultPermissions.CASTERS)
   async banSong (opts: CommandOptions): Promise<CommandResponse[]> {
-    const videoID: string | null = opts.parameters.trim().length === 0 ? JSON.parse(this.currentSong).videoId : opts.parameters.trim();
+    const videoID: string | null = opts.parameters.trim().length === 0 ? JSON.parse(this.currentSong).videoId : opts.parameters.trim();
     if (!videoID) {
       throw new Error('Unknown videoId to ban song.');
     }
@@ -484,7 +485,7 @@ class Songs extends System {
       }
 
       return this.addSongToPlaylist({
-        sender: getBotSender(), parameters: currentSong.videoId, attr: {}, createdAt: Date.now(), command: '',
+        sender: getBotSender(), parameters: currentSong.videoId, attr: {}, createdAt: Date.now(), command: '',
       });
     } catch (err) {
       return [{ response: translate('songs.no-song-is-currently-playing'), ...opts }];
@@ -565,48 +566,48 @@ class Songs extends System {
       return [{ response: translate('songs.song-is-banned'), ...opts }];
     }
 
-    return new Promise(async (resolve) => {
-      try {
-        const videoInfo = await ytdl.getInfo('https://www.youtube.com/watch?v=' + videoID);
-        if (Number(videoInfo.videoDetails.lengthSeconds) / 60 > this.duration) {
-          resolve([{ response: translate('songs.song-is-too-long'), ...opts }]);
-        } else if (videoInfo.videoDetails.category !== 'Music' && this.onlyMusicCategory) {
-          if (Number(retry ?? 0) < 5) {
-            // try once more to be sure
-            setTimeout(() => {
-              resolve(this.addSongToQueue(opts, (retry ?? 0) + 1 ));
-            }, 500);
-          }
-          if (global.mocha) {
-            error('-- TEST ONLY ERROR --');
-            error({ category: videoInfo.videoDetails.category });
-          }
-          resolve([{ response: translate('songs.incorrect-category'), ...opts }]);
-        } else {
-          await getRepository(SongRequest).save({
-            videoId:  videoID,
-            title:    videoInfo.videoDetails.title,
-            addedAt:  Date.now(),
-            loudness: Number(videoInfo.loudness ?? -15),
-            length:   Number(videoInfo.videoDetails.lengthSeconds),
-            username: opts.sender.username,
-          });
-          this.getMeanLoudness();
-          const response = prepare('songs.song-was-added-to-queue', { name: videoInfo.videoDetails.title });
-          resolve([{ response, ...opts }]);
-        }
-      } catch (e) {
+    try {
+      const videoInfo = await ytdl.getInfo('https://www.youtube.com/watch?v=' + videoID);
+      if (Number(videoInfo.videoDetails.lengthSeconds) / 60 > this.duration) {
+        return [{ response: translate('songs.song-is-too-long'), ...opts }];
+      } else if (videoInfo.videoDetails.category !== 'Music' && this.onlyMusicCategory) {
         if (Number(retry ?? 0) < 5) {
           // try once more to be sure
-          setTimeout(() => {
-            resolve(this.addSongToQueue(opts, (retry ?? 0) + 1 ));
-          }, 500);
-        } else {
-          error(e);
-          resolve([{ response: translate('songs.song-was-not-found'), ...opts }]);
+          await new Promise((resolve) => {
+            setTimeout(() => resolve(true), 500);
+          });
+          return this.addSongToQueue(opts, (retry ?? 0) + 1 );
         }
+        if ((global as any).mocha) {
+          error('-- TEST ONLY ERROR --');
+          error({ category: videoInfo.videoDetails.category });
+        }
+        return [{ response: translate('songs.incorrect-category'), ...opts }];
+      } else {
+        await getRepository(SongRequest).save({
+          videoId:  videoID,
+          title:    videoInfo.videoDetails.title,
+          addedAt:  Date.now(),
+          loudness: Number(videoInfo.loudness ?? -15),
+          length:   Number(videoInfo.videoDetails.lengthSeconds),
+          username: opts.sender.username,
+        });
+        this.getMeanLoudness();
+        const response = prepare('songs.song-was-added-to-queue', { name: videoInfo.videoDetails.title });
+        return [{ response, ...opts }];
       }
-    });
+    } catch (e) {
+      if (Number(retry ?? 0) < 5) {
+        // try once more to be sure
+        await new Promise((resolve) => {
+          setTimeout(() => resolve(true), 500);
+        });
+        return this.addSongToQueue(opts, (retry ?? 0) + 1 );
+      } else {
+        error(e);
+        return [{ response: translate('songs.song-was-not-found'), ...opts }];
+      }
+    }
   }
 
   @command('!wrongsong')
@@ -706,7 +707,7 @@ class Songs extends System {
     }
     const ids = await this.getSongsIdsFromPlaylist(opts.parameters);
 
-    if (!ids || ids.length === 0) {
+    if (!ids || ids.length === 0) {
       return [{
         response: prepare('songs.playlist-is-empty'), ...opts, imported: 0, skipped: 0,
       }];

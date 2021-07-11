@@ -14,7 +14,7 @@ import { csEmitter } from './emitter';
 import { getValueOf } from './getValueOf';
 import { updateWidgetAndTitle } from './updateWidgetAndTitle';
 
-async function setValueOf (variable: string | Readonly<VariableInterface>, currentValue: any, opts: any): Promise<{ updated: Readonly<VariableInterface>; isOk: boolean; setValue: string; isEval: boolean }> {
+async function setValueOf (variable: string | Readonly<VariableInterface>, currentValue: any, opts: any): Promise<{ updated: Readonly<VariableInterface>; isOk: boolean; setValue: string; isEval: boolean }> {
   const item = typeof variable === 'string'
     ? await getRepository(Variable).findOne({ variableName: variable })
     : { ...variable };

@@ -4,7 +4,6 @@ import { getRepository } from 'typeorm';
 import currency from '../currency';
 import { UserTip, UserTipInterface } from '../database/entity/user';
 import { settings } from '../decorators';
-import { ui } from '../decorators.js';
 import { onChange, onStartup } from '../decorators/on.js';
 import { isStreamOnline, stats } from '../helpers/api/index.js';
 import { mainCurrency } from '../helpers/currency';
@@ -20,7 +19,6 @@ class Qiwi extends Integration {
   interval: any = null;
 
   @settings()
-  @ui({ type: 'text-input', secret: true })
   secretToken = '';
 
   @onStartup()
@@ -69,6 +67,7 @@ class Qiwi extends Integration {
       const amount = Number(DONATION_AMOUNT);
 
       let id: string | null = null;
+      const timestamp = Date.now();
       if (username) {
         const user = await users.getUserByUsername(username);
         id = user.userId;
@@ -77,7 +76,7 @@ class Qiwi extends Integration {
           currency:      DONATION_CURRENCY,
           sortAmount:    currency.exchange(Number(amount), DONATION_CURRENCY, mainCurrency.value),
           message:       message,
-          tippedAt:      Date.now(),
+          tippedAt:      timestamp,
           exchangeRates: currency.rates,
           userId:        user.userId,
         };
@@ -89,12 +88,12 @@ class Qiwi extends Integration {
       }
 
       eventlist.add({
-        event:     'tip',
+        event:    'tip',
         amount,
-        currency:  DONATION_CURRENCY,
-        userId:    String(username ? await users.getIdByName(username.toLowerCase()) ?? '0' : '0'),
+        currency: DONATION_CURRENCY,
+        userId:   String(username ? await users.getIdByName(username.toLowerCase()) ?? '0' : '0'),
         message,
-        timestamp: Date.now(),
+        timestamp,
       });
 
       tip(`${username ? username : 'Anonymous'}${id ? '#' + id : ''}, amount: ${Number(amount).toFixed(2)}${DONATION_CURRENCY}, ${message ? 'message: ' + message : ''}`);
@@ -120,11 +119,11 @@ class Qiwi extends Integration {
       });
 
       triggerInterfaceOnTip({
-        username:  username || 'Anonymous',
+        username: username || 'Anonymous',
         amount,
         message,
-        currency:  DONATION_CURRENCY,
-        timestamp: Date.now(),
+        currency: DONATION_CURRENCY,
+        timestamp,
       });
 
     }
