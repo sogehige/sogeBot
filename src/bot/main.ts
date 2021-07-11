@@ -104,6 +104,7 @@ async function main () {
         require('./currency');
         require('./stats');
         require('./users');
+        require('./emotes');
         require('./events');
         require('./customvariables');
         require('./twitch');

@@ -1,30 +1,25 @@
 import { setImmediate } from 'timers';
 
+import * as constants from '@sogebot/ui-helpers/constants';
 import axios, { AxiosResponse } from 'axios';
 import { shuffle } from 'lodash';
 import { getManager, getRepository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import XRegExp from 'xregexp';
 
-import { parserReply } from '../commons';
-import * as constants from '@sogebot/ui-helpers/constants';
-import { CacheEmotes, CacheEmotesInterface } from '../database/entity/cacheEmotes';
-import {
-  parser, settings, ui,
-} from '../decorators';
-import { onStartup } from '../decorators/on';
-import { prepare } from '../helpers/commons';
+import Core from './_interface';
+import { CacheEmotes, CacheEmotesInterface } from './database/entity/cacheEmotes';
+import { parser } from './decorators';
+import { onStartup } from './decorators/on';
 import {
   debug,
   error, info, warning,
-} from '../helpers/log';
-import { channelId } from '../helpers/oauth';
-import { ioServer } from '../helpers/panel';
-import { setImmediateAwait } from '../helpers/setImmediateAwait';
-import { adminEndpoint, publicEndpoint } from '../helpers/socket';
-import oauth from '../oauth';
-import { translate } from '../translate';
-import Overlay from './_interface';
+} from './helpers/log';
+import { channelId } from './helpers/oauth';
+import { ioServer } from './helpers/panel';
+import { setImmediateAwait } from './helpers/setImmediateAwait';
+import { adminEndpoint } from './helpers/socket';
+import oauth from './oauth';
 
 interface EmotesCommons {
   id: string,
@@ -44,7 +39,7 @@ interface ChannelEmotesEndpoint { data: (EmotesCommons & {
   emote_set_id: string,
 })[]}
 
-class Emotes extends Overlay {
+class Emotes extends Core {
   fetch = {
     global:  false,
     channel: false,
@@ -57,74 +52,6 @@ class Emotes extends Overlay {
   lastChannelChk: string | null = null;
   lastFFZEmoteChk = 0;
   lastBTTVEmoteChk = 0;
-
-  @settings('customization')
-  @ui({ type: 'selector', values: ['1', '2', '3'] })
-  cEmotesSize: 1 | 2 | 3 = 1;
-  @settings('customization')
-  cEmotesMaxEmotesPerMessage = 5;
-  @settings('customization')
-  @ui({ type: 'selector', values: ['fadeup', 'fadezoom', 'facebook'] })
-  cEmotesAnimation: 'fadeup' | 'fadezoom' | 'facebook' = 'fadeup';
-  @settings('customization')
-  cEmotesAnimationTime = 1000;
-
-  @settings('explosion')
-  @ui({
-    type: 'number-input', step: '1', min: '1',
-  })
-  cExplosionNumOfEmotes = 20;
-
-  @settings('fireworks')
-  @ui({
-    type: 'number-input', step: '1', min: '1',
-  })
-  cExplosionNumOfEmotesPerExplosion = 10;
-  @settings('fireworks')
-  @ui({
-    type: 'number-input', step: '1', min: '1',
-  })
-  cExplosionNumOfExplosions = 5;
-
-  @ui({
-    type: 'btn-emit', class: 'btn btn-secondary btn-block mt-1 mb-1', emit: 'testExplosion',
-  }, 'test')
-  btnTestExplosion = null;
-  @ui({
-    type: 'btn-emit', class: 'btn btn-secondary btn-block mt-1 mb-1', emit: 'test',
-  }, 'test')
-  btnTestEmote = null;
-  @ui({
-    type: 'btn-emit', class: 'btn btn-secondary btn-block mt-1 mb-1', emit: 'testFireworks',
-  }, 'test')
-  btnTestFirework = null;
-  @ui({
-    type: 'btn-emit', class: 'btn btn-danger btn-block mt-1 mb-1', emit: 'removeCache',
-  }, 'emotes')
-  btnRemoveCache = null;
-
-  @settings('emotes_combo')
-  enableEmotesCombo = false;
-  @settings('emotes_combo')
-  showEmoteInOverlayThreshold = 3;
-  @settings('emotes_combo')
-  hideEmoteInOverlayAfter = 30;
-  @settings('emotes_combo')
-  comboCooldown = 0;
-  @settings('emotes_combo')
-  comboMessageMinThreshold = 3;
-  @settings('emotes_combo')
-  @ui({ type: 'emote-combo' }, 'emotes_combo')
-  comboMessages = [
-    { messagesCount: 3, message: translate('ui.overlays.emotes.message.3') },
-    { messagesCount: 5, message: translate('ui.overlays.emotes.message.5') },
-    { messagesCount: 10, message: translate('ui.overlays.emotes.message.10') },
-    { messagesCount: 15, message: translate('ui.overlays.emotes.message.15') },
-    { messagesCount: 20, message: translate('ui.overlays.emotes.message.20') },
-  ];
-  comboEmote = '';
-  comboEmoteCount = 0;
-  comboLastBreak = 0;
 
   @onStartup()
   onStartup() {
@@ -145,17 +72,6 @@ class Emotes extends Overlay {
   }
 
   sockets () {
-    publicEndpoint(this.nsp, 'getCache', async (cb) => {
-      try {
-        cb(null, await getRepository(CacheEmotes).find());
-      } catch (e) {
-        cb(e.stack, []);
-      }
-    });
-    adminEndpoint(this.nsp, 'removeCache', (cb) => {
-      this.removeCache();
-      cb(null, null);
-    });
     adminEndpoint(this.nsp, 'testExplosion', (cb) => {
       this._testExplosion();
       cb(null, null);
@@ -389,40 +305,24 @@ class Emotes extends Overlay {
   }
 
   async _test () {
-    ioServer?.of('/overlays/emotes').emit('emote', {
-      url:      'https://static-cdn.jtvnw.net/emoticons/v1/9/' + this.cEmotesSize + '.0',
-      settings: {
-        emotes: {
-          animation:     this.cEmotesAnimation,
-          animationTime: this.cEmotesAnimationTime,
-        },
+    ioServer?.of('/core/emotes').emit('emote', {
+      id:  uuid(),
+      url: {
+        1: 'https://static-cdn.jtvnw.net/emoticons/v1/9/1.0',
+        2: 'https://static-cdn.jtvnw.net/emoticons/v1/9/2.0',
+        3: 'https://static-cdn.jtvnw.net/emoticons/v1/9/3.0',
       },
     });
   }
 
   async firework (data: string[]) {
     const emotes = await this.parseEmotes(data);
-    ioServer?.of('/overlays/emotes').emit('emote.firework', {
-      emotes,
-      settings: {
-        emotes:    { animationTime: this.cEmotesAnimationTime },
-        fireworks: {
-          numOfEmotesPerExplosion: this.cExplosionNumOfEmotesPerExplosion,
-          numOfExplosions:         this.cExplosionNumOfExplosions,
-        },
-      },
-    });
+    ioServer?.of('/core/emotes').emit('emote.firework', { emotes });
   }
 
   async explode (data: string[]) {
     const emotes = await this.parseEmotes(data);
-    ioServer?.of('/overlays/emotes').emit('emote.explode', {
-      emotes,
-      settings: {
-        emotes:    { animationTime: this.cEmotesAnimationTime },
-        explosion: { numOfEmotes: this.cExplosionNumOfEmotes },
-      },
-    });
+    ioServer?.of('/core/emotes').emit('emote.explode', { emotes });
   }
 
   @parser({ priority: constants.LOW, fireAndForget: true })
@@ -472,66 +372,21 @@ class Emotes extends Overlay {
     }
 
     const emotes = shuffle(parsed);
-    for (let i = 0; i < this.cEmotesMaxEmotesPerMessage && i < emotes.length; i++) {
-      ioServer?.of('/overlays/emotes').emit('emote', {
-        url:      usedEmotes[emotes[i]].urls[this.cEmotesSize],
-        settings: {
-          emotes: {
-            animation:     this.cEmotesAnimation,
-            animationTime: this.cEmotesAnimationTime,
-          },
-        },
-      });
-    }
-
-    if (this.enableEmotesCombo && Date.now() - this.comboLastBreak > this.comboCooldown * constants.SECOND) {
-      const uniqueEmotes = [...new Set(parsed)];
-      // we want to count only messages with emotes (skip text only)
-      if (uniqueEmotes.length !== 0) {
-        if (uniqueEmotes.length > 1 || (uniqueEmotes[0] !== this.comboEmote && this.comboEmote !== '')) {
-          // combo breaker
-          if (this.comboMessageMinThreshold <= this.comboEmoteCount) {
-            this.comboLastBreak = Date.now();
-            const message = this.comboMessages
-              .sort((a, b) => a.messagesCount - b.messagesCount)
-              .filter(o => o.messagesCount <= this.comboEmoteCount)
-              .pop();
-            if (message) {
-            // send message about combo break
-              parserReply(
-                prepare(message.message, {
-                  emote:  this.comboEmote,
-                  amount: this.comboEmoteCount,
-                }, false),
-                opts,
-              );
-            }
-          }
-          this.comboEmoteCount = 0;
-          this.comboEmote = '';
-          ioServer?.of('/overlays/emotes').emit('combo', {
-            count: this.comboEmoteCount, url: null, threshold: this.showEmoteInOverlayThreshold, inactivity: this.hideEmoteInOverlayAfter,
-          });
-        } else {
-          this.comboEmoteCount++;
-          this.comboEmote = uniqueEmotes[0];
-          ioServer?.of('/overlays/emotes').emit('combo', {
-            count: this.comboEmoteCount, url: usedEmotes[this.comboEmote].urls['3'], threshold: this.showEmoteInOverlayThreshold, inactivity: this.hideEmoteInOverlayAfter,
-          });
-        }
-      }
+    const id = uuid();
+    for (let i = 0; i < emotes.length; i++) {
+      ioServer?.of('/core/emotes').emit('emote', { id, url: usedEmotes[emotes[i]].urls });
     }
     return true;
   }
 
   async parseEmotes (emotes: string[]) {
-    const emotesArray: string[] = [];
+    const emotesArray: {1: string, 2: string, 3:string }[] = [];
 
     for (let i = 0, length = emotes.length; i < length; i++) {
       try {
         const items = await getRepository(CacheEmotes).find({ code: emotes[i] });
         if (items.length > 0) {
-          emotesArray.push(items[0].urls[this.cEmotesSize]);
+          emotesArray.push(items[0].urls);
         }
       } catch (e) {
         continue;

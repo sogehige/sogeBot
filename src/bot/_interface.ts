@@ -460,7 +460,7 @@ class Module {
   public addMenuPublic(opts: typeof menuPublic[number]) {
     addMenuPublic(opts);
   }
-  
+
   public async getAllSettings(withoutDefaults = false) {
     const promisedSettings: {
       [x: string]: any;
