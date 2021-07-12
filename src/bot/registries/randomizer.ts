@@ -5,7 +5,7 @@ import { Randomizer as RandomizerEntity } from '../database/entity/randomizer';
 import { parser } from '../decorators';
 import { addToViewersCache, getFromViewersCache } from '../helpers/permissions';
 import { check } from '../helpers/permissions/';
-import { adminEndpoint } from '../helpers/socket';
+import { adminEndpoint, publicEndpoint } from '../helpers/socket';
 import Registry from './_interface';
 
 class Randomizer extends Registry {
@@ -17,6 +17,9 @@ class Randomizer extends Registry {
   }
 
   sockets () {
+    publicEndpoint(this.nsp, 'randomizer::getVisible', async (cb) => {
+      cb(null, await getRepository(RandomizerEntity).findOne({ where: { isShown: true }, relations: [ 'items'] }));
+    });
     adminEndpoint(this.nsp, 'randomizer::startSpin', async () => {
       this.socket?.emit('spin');
     });

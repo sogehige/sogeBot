@@ -145,10 +145,10 @@ export const init = () => {
     if (!nuxtCache.get(req.url)) {
       // search through node_modules to find correct nuxt file
       const paths = [
-        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'static', '_static'),
-        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'static', '_static'),
-        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'static', '_static'),
-        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'static', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-oauth', 'dist', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-public', 'dist', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-admin', 'dist', '_static'),
+        path.join(__dirname, '..', 'node_modules', '@sogebot', 'ui-overlay', 'dist', '_static'),
       ];
       for (const dir of paths) {
         const pathToFile = path.join(dir, req.url.replace('_static', ''));
