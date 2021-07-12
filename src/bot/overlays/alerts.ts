@@ -3,9 +3,7 @@ import { getRepository } from 'typeorm';
 
 import api from '../api';
 import { Gallery } from '../database/entity/gallery';
-import {
-  command, default_permission, settings, ui, 
-} from '../decorators';
+import { command, default_permission } from '../decorators';
 import { debug } from '../helpers/log';
 import { defaultPermissions } from '../helpers/permissions/';
 import { publicEndpoint } from '../helpers/socket';
@@ -13,25 +11,13 @@ import Message from '../message';
 import Overlay from './_interface';
 
 class Alerts extends Overlay {
-  @settings()
-  galleryCache = false;
-  @settings()
-  @ui({
-    type: 'number-input', step: '0.5', min: '0.5', 
-  })
-  galleryCacheLimitInMb = 50;
-
   sockets() {
-    publicEndpoint(this.nsp, 'cache', async (cb: (err: string | null, ids: string[]) => void) => {
-      if (this.galleryCache) {
-        const items = await getRepository(Gallery).find();
-        cb(null, items
-          .filter(o => Buffer.from(o.data.split(',')[1], 'base64').length <= this.galleryCacheLimitInMb * 1024 * 1024)
-          .map(o => o.id),
-        );
-      } else {
-        cb('Gallery cache disabled.', []);
-      }
+    publicEndpoint(this.nsp, 'cache', async (galleryCacheLimitInMb: number, cb: (err: string | null, ids: string[]) => void) => {
+      const items = await getRepository(Gallery).find();
+      cb(null, items
+        .filter(o => Buffer.from(o.data.split(',')[1], 'base64').length <= galleryCacheLimitInMb * 1024 * 1024)
+        .map(o => o.id),
+      );
     });
   }
 
