@@ -1,20 +1,8 @@
 import api from '../api';
-import { settings, ui } from '../decorators';
 import { ioServer } from '../helpers/panel';
 import Overlay from './_interface';
 
 class Clips extends Overlay {
-  @settings('customization')
-  @ui({
-    type: 'number-input', step: '1', min: '0', max: '100', 
-  })
-  cClipsVolume = 0;
-  @settings('customization')
-  @ui({ type: 'selector', values: ['none', 'grayscale', 'sepia', 'tint', 'washed'] })
-  cClipsFilter: 'none' | 'grayscale' | 'sepia' | 'tint' | 'washed' = 'none';
-  @settings('customization')
-  cClipsLabel = true;
-
   async showClip (clipId: string) {
     const clips = (await api.getClipById(clipId)).data || [];
     for (const c of clips) {
@@ -22,14 +10,7 @@ class Clips extends Overlay {
     }
 
     ioServer?.of('/' + this._name + '/' + this.__moduleName__.toLowerCase())
-      .emit('clips', {
-        clips,
-        settings: {
-          volume: this.cClipsVolume,
-          filter: this.cClipsFilter,
-          label:  this.cClipsLabel,
-        },
-      });
+      .emit('clips', { clips });
   }
 }
 

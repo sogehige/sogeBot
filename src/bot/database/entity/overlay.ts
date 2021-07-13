@@ -6,6 +6,16 @@ export interface OverlayMapperInterface {
   opts: null
 }
 
+export interface OverlayMapperClips {
+  id: string;
+  value: 'clips';
+  opts: null | {
+    volume: number,
+    filter: 'none' | 'grayscale' | 'sepia' | 'tint' | 'washed',
+    showLabel: boolean,
+  },
+}
+
 export interface OverlayMapperAlerts {
   id: string;
   value: 'alerts';
@@ -87,7 +97,7 @@ export interface OverlayMapperOBSWebsocket {
   },
 }
 
-export type OverlayMappers = OverlayMapperAlerts | OverlayMapperEmotes | OverlayMapperEmotesExplode | OverlayMapperEmotesFireworks | OverlayMapperPolls | OverlayMapperTTS | OverlayMapperInterface | OverlayMapperOBSWebsocket | OverlayMapperClipsCarousel;
+export type OverlayMappers = OverlayMapperClips | OverlayMapperAlerts | OverlayMapperEmotes | OverlayMapperEmotesExplode | OverlayMapperEmotesFireworks | OverlayMapperPolls | OverlayMapperTTS | OverlayMapperInterface | OverlayMapperOBSWebsocket | OverlayMapperClipsCarousel;
 
 export const OverlayMapper = new EntitySchema<Readonly<Required<OverlayMappers>>>({
   name:    'overlay_mapper',
